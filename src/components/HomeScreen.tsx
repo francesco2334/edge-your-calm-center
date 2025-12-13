@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import { MIRRORS } from '@/lib/edge-data';
+import { TokenCounter } from './TokenCounter';
 
 interface HomeScreenProps {
   selectedMirrors: string[];
   onSelectMirror: (mirrorId: string) => void;
+  tokenBalance: number;
+  onOpenExchange: () => void;
+  onOpenInsights: () => void;
 }
 
 const PULL_OPTIONS = [
@@ -18,7 +21,13 @@ const PULL_OPTIONS = [
   { id: 'none', label: 'No strong pull today', isPositive: true },
 ];
 
-export function HomeScreen({ selectedMirrors, onSelectMirror }: HomeScreenProps) {
+export function HomeScreen({ 
+  selectedMirrors, 
+  onSelectMirror, 
+  tokenBalance,
+  onOpenExchange,
+  onOpenInsights,
+}: HomeScreenProps) {
   const [todaysPull, setTodaysPull] = useState<string | null>(null);
   const [showTools, setShowTools] = useState(false);
 
@@ -45,10 +54,32 @@ export function HomeScreen({ selectedMirrors, onSelectMirror }: HomeScreenProps)
               <p className="text-xs text-muted-foreground">Mojo is here</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-primary dopa-pulse" />
-            <span className="text-xs text-muted-foreground">Online</span>
-          </div>
+          <button onClick={onOpenExchange}>
+            <TokenCounter balance={tokenBalance} size="sm" />
+          </button>
+        </motion.div>
+
+        {/* Quick actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="flex gap-3 mb-6"
+        >
+          <button
+            onClick={onOpenExchange}
+            className="flex-1 p-4 rounded-xl bg-gradient-glow border border-primary/30 text-center hover:border-primary/50 transition-all"
+          >
+            <span className="text-lg">⚡</span>
+            <p className="text-xs text-muted-foreground mt-1">Exchange</p>
+          </button>
+          <button
+            onClick={onOpenInsights}
+            className="flex-1 p-4 rounded-xl bg-dopa-surface border border-border/30 text-center hover:border-primary/30 transition-all"
+          >
+            <span className="text-lg">📊</span>
+            <p className="text-xs text-muted-foreground mt-1">Insights</p>
+          </button>
         </motion.div>
 
         {/* Daily prompt */}
