@@ -8,11 +8,12 @@ import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
 import { HomeScreen } from '@/components/HomeScreen';
 import { AllocateScreen } from '@/components/AllocateScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
+import { EducationSwiper } from '@/components/EducationSwiper';
 import { useCharge } from '@/hooks/useCharge';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
-type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'paywall' | 'atlas' | 'home' | 'exchange' | 'insights';
+type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'paywall' | 'atlas' | 'home' | 'exchange' | 'insights' | 'learn';
 
 const Index = () => {
   const { toast } = useToast();
@@ -20,7 +21,19 @@ const Index = () => {
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [selectedMirrors, setSelectedMirrors] = useState<string[]>([]);
   
-  const { balance, activeSession, earnCharge, allocateCharge, completeSession, stats } = useCharge(5);
+  const { 
+    balance, 
+    activeSession, 
+    earnCharge, 
+    allocateCharge, 
+    completeSession, 
+    stats,
+    streak,
+    streakClaimedToday,
+    reactionLeaderboard,
+    claimDailyStreak,
+    recordReactionTime,
+  } = useCharge(5);
 
   const handleAssessmentComplete = (answers: AssessmentAnswer[]) => {
     setAssessmentAnswers(answers);
@@ -41,6 +54,17 @@ const Index = () => {
       description: "Full access unlocked. Let's meet Mojo.",
     });
     setCurrentScreen('atlas');
+  };
+
+  const handleClaimStreak = () => {
+    const success = claimDailyStreak();
+    if (success) {
+      toast({
+        title: `🔥 Day ${streak + 1} streak!`,
+        description: "+20 Charge earned for daily check-in",
+      });
+    }
+    return success;
   };
 
   return (
@@ -75,9 +99,15 @@ const Index = () => {
           onSelectMirror={handleMirrorSelect}
           chargeBalance={balance}
           stats={stats}
+          streak={streak}
+          streakClaimedToday={streakClaimedToday}
+          reactionLeaderboard={reactionLeaderboard}
           onOpenExchange={() => setCurrentScreen('exchange')}
           onOpenInsights={() => setCurrentScreen('insights')}
+          onOpenLearn={() => setCurrentScreen('learn')}
           onEarnCharge={earnCharge}
+          onClaimStreak={handleClaimStreak}
+          onRecordReaction={recordReactionTime}
         />
       )}
       {currentScreen === 'exchange' && (
@@ -96,6 +126,12 @@ const Index = () => {
           chargeBalance={balance}
           stats={stats}
           onBack={() => setCurrentScreen('home')}
+        />
+      )}
+      {currentScreen === 'learn' && (
+        <EducationSwiper
+          onClose={() => setCurrentScreen('home')}
+          onEarnCharge={earnCharge}
         />
       )}
     </div>

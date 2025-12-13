@@ -5,15 +5,22 @@ import { ChargeCounter } from './ChargeCounter';
 import { MojoOrb } from './MojoOrb';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker } from './tools';
 import type { PersonalStats } from '@/lib/charge-data';
+import type { ReactionLeaderboard } from '@/lib/reaction-data';
 
 interface HomeScreenProps {
   selectedMirrors: string[];
   onSelectMirror: (mirrorId: string) => void;
   chargeBalance: number;
   stats: PersonalStats;
+  streak: number;
+  streakClaimedToday: boolean;
+  reactionLeaderboard: ReactionLeaderboard;
   onOpenExchange: () => void;
   onOpenInsights: () => void;
+  onOpenLearn: () => void;
   onEarnCharge: (amount: number, reason: string) => void;
+  onClaimStreak: () => boolean;
+  onRecordReaction: (ms: number) => void;
 }
 
 type ActiveTool = 'pause' | 'name' | 'prediction' | 'breathing' | 'reaction' | null;
@@ -41,9 +48,15 @@ export function HomeScreen({
   onSelectMirror, 
   chargeBalance,
   stats,
+  streak,
+  streakClaimedToday,
+  reactionLeaderboard,
   onOpenExchange,
   onOpenInsights,
+  onOpenLearn,
   onEarnCharge,
+  onClaimStreak,
+  onRecordReaction,
 }: HomeScreenProps) {
   const [activeTool, setActiveTool] = useState<ActiveTool>(null);
   const [todaysPull, setTodaysPull] = useState<string | null>(null);
@@ -89,6 +102,12 @@ export function HomeScreen({
     setActiveTool(null);
   };
 
+  const handleReactionComplete = (ms: number) => {
+    onRecordReaction(ms);
+    onEarnCharge(1, `Reaction time: ${ms}ms`);
+    setActiveTool(null);
+  };
+
   // Render active tool
   if (activeTool === 'pause') {
     return (
@@ -129,8 +148,9 @@ export function HomeScreen({
   if (activeTool === 'reaction') {
     return (
       <ReactionTracker 
-        onComplete={(ms) => handleToolComplete(1, `Reaction time: ${ms}ms`)}
+        onComplete={handleReactionComplete}
         onCancel={() => setActiveTool(null)}
+        leaderboard={reactionLeaderboard}
       />
     );
   }
@@ -164,18 +184,59 @@ export function HomeScreen({
           </button>
         </motion.div>
 
+        {/* Daily Streak - Claim button */}
+        {!streakClaimedToday && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            onClick={onClaimStreak}
+            className="w-full mb-4 p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 hover:border-amber-500/50 transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🔥</span>
+                <div className="text-left">
+                  <p className="text-sm font-medium text-foreground">Daily Check-in</p>
+                  <p className="text-xs text-muted-foreground">
+                    {streak > 0 ? `${streak} day streak` : 'Start your streak'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-sm font-medium text-amber-400">+20 Charge</span>
+            </div>
+          </motion.button>
+        )}
+
+        {/* Active Streak indicator */}
+        {streakClaimedToday && streak > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-amber-400">Daily Streak</span>
+              <span className="text-sm font-medium text-amber-400">
+                🔥 {streak} day{streak !== 1 ? 's' : ''}
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Stability Run indicator */}
         {stats.currentStabilityRun > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
+            transition={{ delay: 0.08 }}
             className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
           >
             <div className="flex items-center justify-between">
               <span className="text-sm text-emerald-400">Stability Run</span>
               <span className="text-sm font-medium text-emerald-400">
-                🔥 {stats.currentStabilityRun} day{stats.currentStabilityRun !== 1 ? 's' : ''}
+                ✨ {stats.currentStabilityRun} session{stats.currentStabilityRun !== 1 ? 's' : ''}
               </span>
             </div>
           </motion.div>
@@ -201,11 +262,25 @@ export function HomeScreen({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="flex gap-3 mb-6"
+          className="grid grid-cols-3 gap-3 mb-6"
         >
           <button
             onClick={onOpenExchange}
-            className="flex-1 p-4 rounded-xl bg-gradient-glow border border-primary/30 text-center hover:border-primary/50 transition-all"
+            className="p-4 rounded-xl bg-gradient-glow border border-primary/30 text-center hover:border-primary/50 transition-all"
+          >
+            <span className="text-lg">⚡</span>
+            <p className="text-xs text-muted-foreground mt-1">Exchange</p>
+          </button>
+          <button
+            onClick={onOpenLearn}
+            className="p-4 rounded-xl bg-dopa-surface border border-border/30 text-center hover:border-primary/30 transition-all"
+          >
+            <span className="text-lg">📚</span>
+            <p className="text-xs text-muted-foreground mt-1">Learn</p>
+          </button>
+          <button
+            onClick={onOpenInsights}
+            className="p-4 rounded-xl bg-dopa-surface border border-border/30 text-center hover:border-primary/30 transition-all"
           >
             <span className="text-lg">⚡</span>
             <p className="text-xs text-muted-foreground mt-1">Exchange</p>
