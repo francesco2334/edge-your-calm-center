@@ -34,7 +34,7 @@ export function NameThePull({ onComplete, onCancel }: NameThePullProps) {
 
   if (phase === 'select') {
     return (
-      <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden">
+      <div className="min-h-screen flex flex-col px-6 py-8 pb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-calm" />
         
         <div className="relative z-10">
@@ -102,7 +102,7 @@ export function NameThePull({ onComplete, onCancel }: NameThePullProps) {
     const selectedFeeling = FEELINGS.find((f) => f.id === selected);
 
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-calm" />
         
         <div className="relative z-10 text-center max-w-sm">
@@ -159,7 +159,7 @@ export function NameThePull({ onComplete, onCancel }: NameThePullProps) {
 
   // Complete phase
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-calm" />
       
       <div className="relative z-10 text-center">

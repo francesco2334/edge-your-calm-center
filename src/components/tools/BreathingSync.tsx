@@ -61,7 +61,7 @@ export function BreathingSync({ onComplete, onCancel }: BreathingSyncProps) {
 
   if (phase === 'intro') {
     return (
-      <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden">
+      <div className="min-h-screen flex flex-col px-6 py-8 pb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-calm" />
         
         <div className="relative z-10">
@@ -146,7 +146,7 @@ export function BreathingSync({ onComplete, onCancel }: BreathingSyncProps) {
     const seconds = timeRemaining % 60;
 
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-calm" />
         
         <div className="relative z-10 text-center">
@@ -203,7 +203,7 @@ export function BreathingSync({ onComplete, onCancel }: BreathingSyncProps) {
 
   // Complete phase
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-calm" />
       
       <div className="relative z-10 text-center">
