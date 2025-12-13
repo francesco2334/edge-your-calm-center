@@ -6,9 +6,9 @@ import { ResultsScreen } from '@/components/ResultsScreen';
 import { PaywallScreen } from '@/components/PaywallScreen';
 import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
 import { HomeScreen } from '@/components/HomeScreen';
-import { ExchangeScreen } from '@/components/ExchangeScreen';
+import { AllocateScreen } from '@/components/AllocateScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
-import { useTokens } from '@/hooks/useTokens';
+import { useCharge } from '@/hooks/useCharge';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
@@ -20,7 +20,7 @@ const Index = () => {
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [selectedMirrors, setSelectedMirrors] = useState<string[]>([]);
   
-  const { balance, earnTokens, spendTokens } = useTokens(5);
+  const { balance, activeSession, earnCharge, allocateCharge, completeSession, stats } = useCharge(5);
 
   const handleAssessmentComplete = (answers: AssessmentAnswer[]) => {
     setAssessmentAnswers(answers);
@@ -73,23 +73,27 @@ const Index = () => {
         <HomeScreen 
           selectedMirrors={selectedMirrors}
           onSelectMirror={handleMirrorSelect}
-          tokenBalance={balance}
+          chargeBalance={balance}
+          stats={stats}
           onOpenExchange={() => setCurrentScreen('exchange')}
           onOpenInsights={() => setCurrentScreen('insights')}
         />
       )}
       {currentScreen === 'exchange' && (
-        <ExchangeScreen
+        <AllocateScreen
           balance={balance}
-          onEarn={earnTokens}
-          onSpend={spendTokens}
+          activeSession={activeSession}
+          onEarn={earnCharge}
+          onAllocate={allocateCharge}
+          onCompleteSession={completeSession}
           onBack={() => setCurrentScreen('home')}
         />
       )}
       {currentScreen === 'insights' && (
         <InsightsScreen
           answers={assessmentAnswers}
-          tokenBalance={balance}
+          chargeBalance={balance}
+          stats={stats}
           onBack={() => setCurrentScreen('home')}
         />
       )}
