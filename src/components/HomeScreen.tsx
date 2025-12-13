@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { User } from 'lucide-react';
 import { MojoOrb } from './MojoOrb';
 import { ChargeCounter } from './ChargeCounter';
 import { StreakRing } from './StreakRing';
@@ -7,6 +9,7 @@ import { PullSheet } from './PullSheet';
 import { FeedCard } from './FeedCard';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker } from './tools';
 import { generateFeedCards } from '@/lib/feed-data';
+import { useAuth } from '@/hooks/useAuth';
 import type { FeedCardData } from '@/lib/feed-data';
 import type { PersonalStats } from '@/lib/charge-data';
 import type { ReactionLeaderboard } from '@/lib/reaction-data';
@@ -39,6 +42,8 @@ export function HomeScreen({
   onRecordReaction,
   onOpenMojoChat,
 }: HomeScreenProps) {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [activeTool, setActiveTool] = useState<ActiveTool>(null);
   const [showPullSheet, setShowPullSheet] = useState(false);
   const [todaysPull, setTodaysPull] = useState<string | null>(null);
@@ -149,9 +154,24 @@ export function HomeScreen({
             DopaMINE
           </span>
           
-          <button onClick={onOpenExchange}>
-            <ChargeCounter balance={chargeBalance} size="sm" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={onOpenExchange}>
+              <ChargeCounter balance={chargeBalance} size="sm" />
+            </button>
+            <button 
+              onClick={() => navigate('/auth')}
+              className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
+              aria-label={isAuthenticated ? 'Profile' : 'Sign in'}
+            >
+              {isAuthenticated && user?.email ? (
+                <span className="text-xs font-medium text-foreground">
+                  {user.email.charAt(0).toUpperCase()}
+                </span>
+              ) : (
+                <User className="w-4 h-4 text-muted-foreground" />
+              )}
+            </button>
+          </div>
         </motion.header>
 
         {/* Hero: Big Mojo Orb + Streak Ring - THE MAIN CHARACTER */}
