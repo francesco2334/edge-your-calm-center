@@ -6,69 +6,76 @@
 
 @layer base {
   :root {
-    /* DopaMINE Dark Theme - Bold, Fun, Bespoke */
-    --background: 270 25% 6%;
-    --foreground: 280 15% 95%;
+    /* DopaMINE Dark Theme - Luxury, Premium, iOS Native */
+    --background: 270 25% 4%;
+    --foreground: 280 10% 96%;
 
-    --card: 270 22% 10%;
-    --card-foreground: 280 15% 95%;
+    --card: 270 22% 8%;
+    --card-foreground: 280 10% 96%;
 
-    --popover: 270 22% 10%;
-    --popover-foreground: 280 15% 95%;
+    --popover: 270 22% 8%;
+    --popover-foreground: 280 10% 96%;
 
-    /* Neon purple accent */
-    --primary: 280 80% 65%;
-    --primary-foreground: 270 25% 6%;
+    /* Refined neon purple - less garish */
+    --primary: 280 70% 58%;
+    --primary-foreground: 270 25% 4%;
 
     /* Deep purple secondary */
-    --secondary: 280 25% 18%;
-    --secondary-foreground: 280 15% 90%;
+    --secondary: 280 25% 14%;
+    --secondary-foreground: 280 12% 88%;
 
-    --muted: 270 20% 15%;
-    --muted-foreground: 270 15% 55%;
+    --muted: 270 20% 12%;
+    --muted-foreground: 270 12% 50%;
 
-    /* Electric accent */
-    --accent: 320 75% 55%;
-    --accent-foreground: 280 15% 95%;
+    /* Electric accent - refined */
+    --accent: 320 65% 52%;
+    --accent-foreground: 280 10% 96%;
 
     --destructive: 0 65% 50%;
-    --destructive-foreground: 280 15% 95%;
+    --destructive-foreground: 280 10% 96%;
 
-    --border: 270 20% 18%;
-    --input: 270 20% 15%;
-    --ring: 280 80% 65%;
+    --border: 270 18% 14%;
+    --input: 270 18% 12%;
+    --ring: 280 70% 58%;
 
-    --radius: 1rem;
+    --radius: 1.125rem;
 
     /* DopaMINE Custom Colors */
-    --dopa-glow: 280 85% 70%;
-    --dopa-neon: 320 85% 60%;
-    --dopa-deep: 270 30% 8%;
-    --dopa-surface: 270 22% 12%;
-    --dopa-warm: 35 70% 60%;
+    --dopa-glow: 280 75% 65%;
+    --dopa-neon: 320 75% 55%;
+    --dopa-deep: 270 30% 5%;
+    --dopa-surface: 270 22% 9%;
+    --dopa-warm: 35 65% 55%;
     
-    /* Gradients */
-    --gradient-calm: linear-gradient(135deg, hsl(270 25% 6%) 0%, hsl(280 30% 12%) 100%);
-    --gradient-glow: linear-gradient(135deg, hsl(280 80% 65% / 0.2) 0%, hsl(320 75% 55% / 0.15) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(270 22% 12%) 0%, hsl(270 22% 10%) 100%);
-    --gradient-pulse: radial-gradient(ellipse at center, hsl(280 80% 65% / 0.25) 0%, transparent 70%);
-    --gradient-neon: linear-gradient(135deg, hsl(280 80% 65%) 0%, hsl(320 75% 55%) 100%);
+    /* Luxury Gradients - Subtle, not neon */
+    --gradient-calm: linear-gradient(180deg, hsl(270 25% 4%) 0%, hsl(280 28% 8%) 100%);
+    --gradient-glow: linear-gradient(135deg, hsl(280 70% 58% / 0.12) 0%, hsl(320 65% 52% / 0.08) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(270 22% 10%) 0%, hsl(270 22% 8%) 100%);
+    --gradient-pulse: radial-gradient(ellipse at center, hsl(280 70% 58% / 0.15) 0%, transparent 70%);
+    --gradient-neon: linear-gradient(135deg, hsl(280 70% 58%) 0%, hsl(320 65% 52%) 100%);
+    --gradient-hero: radial-gradient(ellipse at 50% 30%, hsl(280 70% 58% / 0.08) 0%, transparent 50%);
 
-    /* Shadows */
-    --shadow-soft: 0 4px 24px -4px hsl(270 30% 4% / 0.6);
-    --shadow-glow: 0 0 40px hsl(280 80% 65% / 0.2);
-    --shadow-card: 0 8px 32px -8px hsl(270 30% 4% / 0.7);
-    --shadow-neon: 0 0 30px hsl(280 80% 65% / 0.4), 0 0 60px hsl(320 75% 55% / 0.2);
+    /* Refined Shadows */
+    --shadow-soft: 0 4px 24px -4px hsl(270 30% 2% / 0.7);
+    --shadow-glow: 0 0 48px hsl(280 70% 58% / 0.15);
+    --shadow-card: 0 8px 40px -12px hsl(270 30% 2% / 0.8);
+    --shadow-neon: 0 0 24px hsl(280 70% 58% / 0.25), 0 0 48px hsl(320 65% 52% / 0.12);
 
     /* Sidebar */
-    --sidebar-background: 270 22% 8%;
-    --sidebar-foreground: 280 15% 90%;
-    --sidebar-primary: 280 80% 65%;
-    --sidebar-primary-foreground: 270 25% 6%;
-    --sidebar-accent: 270 20% 15%;
-    --sidebar-accent-foreground: 280 15% 90%;
-    --sidebar-border: 270 20% 15%;
-    --sidebar-ring: 280 80% 65%;
+    --sidebar-background: 270 22% 6%;
+    --sidebar-foreground: 280 12% 88%;
+    --sidebar-primary: 280 70% 58%;
+    --sidebar-primary-foreground: 270 25% 4%;
+    --sidebar-accent: 270 20% 12%;
+    --sidebar-accent-foreground: 280 12% 88%;
+    --sidebar-border: 270 18% 12%;
+    --sidebar-ring: 280 70% 58%;
+
+    /* iOS-specific sizing tokens */
+    --spacing-screen: 20px;
+    --radius-button: 18px;
+    --radius-card: 22px;
+    --radius-pill: 999px;
   }
 }
 
