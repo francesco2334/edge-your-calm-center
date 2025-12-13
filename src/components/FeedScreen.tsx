@@ -17,6 +17,7 @@ interface FeedScreenProps {
   reactionLeaderboard: ReactionLeaderboard;
   onOpenExchange: () => void;
   onOpenInsights: () => void;
+  onBack: () => void;
   onEarnCharge: (amount: number, reason: string) => void;
   onClaimStreak: () => boolean;
   onRecordReaction: (ms: number) => void;
@@ -36,6 +37,7 @@ export function FeedScreen({
   reactionLeaderboard,
   onOpenExchange,
   onOpenInsights,
+  onBack,
   onEarnCharge,
   onClaimStreak,
   onRecordReaction,
@@ -182,9 +184,12 @@ export function FeedScreen({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
+          <button onClick={onBack} className="text-muted-foreground hover:text-foreground transition-colors mr-2">
+            ← Back
+          </button>
           <MojoOrb state={mojoState} size="sm" />
           <div>
-            <p className="text-sm font-medium text-foreground">DopaMINE</p>
+            <p className="text-sm font-medium text-foreground">Learn</p>
             <p className="text-xs text-muted-foreground">
               {streak > 0 && `🔥 ${streak} day streak`}
             </p>
