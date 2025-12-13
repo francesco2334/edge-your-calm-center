@@ -9,12 +9,15 @@ interface Message {
   content: string;
 }
 
+export type MojoTool = 'breathing' | 'standoff' | 'pause' | 'name';
+
 interface MojoChatProps {
   isOpen: boolean;
   onClose: () => void;
+  onTriggerTool?: (tool: MojoTool) => void;
 }
 
-export function MojoChat({ isOpen, onClose }: MojoChatProps) {
+export function MojoChat({ isOpen, onClose, onTriggerTool }: MojoChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +34,43 @@ export function MojoChat({ isOpen, onClose }: MojoChatProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Parse tool triggers from message content
+  const parseToolTrigger = (content: string): { cleanContent: string; tool: MojoTool | null } => {
+    const toolMatch = content.match(/\[TOOL:(breathing|standoff|pause|name)\]/i);
+    if (toolMatch) {
+      const tool = toolMatch[1].toLowerCase() as MojoTool;
+      const cleanContent = content.replace(/\[TOOL:(breathing|standoff|pause|name)\]/gi, '').trim();
+      return { cleanContent, tool };
+    }
+    return { cleanContent: content, tool: null };
+  };
+
+  // Render message content without tool tags, and show tool button if present
+  const renderMessageContent = (content: string, isLast: boolean) => {
+    const { cleanContent, tool } = parseToolTrigger(content);
+    
+    return (
+      <>
+        <p className="text-sm whitespace-pre-wrap">{cleanContent}</p>
+        {tool && isLast && onTriggerTool && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            onClick={() => {
+              onTriggerTool(tool);
+              onClose();
+            }}
+            className="mt-3 w-full py-2.5 px-4 bg-primary/20 hover:bg-primary/30 text-primary rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+            Start {tool === 'breathing' ? 'Sync' : tool === 'standoff' ? 'Standoff' : tool === 'pause' ? 'Pause' : 'Name It'}
+          </motion.button>
+        )}
+      </>
+    );
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -177,7 +217,7 @@ export function MojoChat({ isOpen, onClose }: MojoChatProps) {
                         : 'bg-muted/50 text-foreground rounded-bl-sm'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    {renderMessageContent(msg.content, i === messages.length - 1 && msg.role === 'assistant')}
                   </div>
                 </motion.div>
               ))}

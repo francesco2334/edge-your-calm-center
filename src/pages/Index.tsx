@@ -11,7 +11,7 @@ import { AllocateScreen } from '@/components/AllocateScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
 import { BottomNav } from '@/components/BottomNav';
 import { QuickStopModal } from '@/components/QuickStopModal';
-import { MojoChat } from '@/components/MojoChat';
+import { MojoChat, type MojoTool } from '@/components/MojoChat';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync } from '@/components/tools';
 import { useCharge } from '@/hooks/useCharge';
 import { useToast } from '@/hooks/use-toast';
@@ -75,6 +75,18 @@ const Index = () => {
       title: "Well done",
       description: `+${charge} Charge earned`,
     });
+  };
+
+  const handleMojoTool = (tool: MojoTool) => {
+    setShowMojoChat(false);
+    // Map Mojo tool names to quick tool names
+    const toolMap: Record<MojoTool, QuickTool> = {
+      breathing: 'breathing',
+      standoff: 'pause',
+      pause: 'pause',
+      name: 'name',
+    };
+    setActiveQuickTool(toolMap[tool]);
   };
 
   const handleTabChange = (tab: MainTab) => {
@@ -218,6 +230,7 @@ const Index = () => {
       <MojoChat
         isOpen={showMojoChat}
         onClose={() => setShowMojoChat(false)}
+        onTriggerTool={handleMojoTool}
       />
     </div>
   );
