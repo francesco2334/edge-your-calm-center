@@ -5,6 +5,7 @@ import { AssessmentScreen } from '@/components/AssessmentScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
 import { PaywallScreen } from '@/components/PaywallScreen';
 import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
+import { HomeScreen } from '@/components/HomeScreen';
 import { FeedScreen } from '@/components/FeedScreen';
 import { AllocateScreen } from '@/components/AllocateScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
@@ -12,7 +13,7 @@ import { useCharge } from '@/hooks/useCharge';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
-type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'paywall' | 'atlas' | 'home' | 'exchange' | 'insights';
+type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'paywall' | 'atlas' | 'home' | 'feed' | 'exchange' | 'insights';
 
 const Index = () => {
   const { toast } = useToast();
@@ -93,6 +94,23 @@ const Index = () => {
         <AtlasIntroScreen onContinue={() => setCurrentScreen('home')} />
       )}
       {currentScreen === 'home' && (
+        <HomeScreen 
+          selectedMirrors={selectedMirrors}
+          onSelectMirror={handleMirrorSelect}
+          chargeBalance={balance}
+          stats={stats}
+          streak={streak}
+          streakClaimedToday={streakClaimedToday}
+          reactionLeaderboard={reactionLeaderboard}
+          onOpenExchange={() => setCurrentScreen('exchange')}
+          onOpenInsights={() => setCurrentScreen('insights')}
+          onOpenFeed={() => setCurrentScreen('feed')}
+          onEarnCharge={earnCharge}
+          onClaimStreak={handleClaimStreak}
+          onRecordReaction={recordReactionTime}
+        />
+      )}
+      {currentScreen === 'feed' && (
         <FeedScreen 
           chargeBalance={balance}
           stats={stats}
@@ -101,6 +119,7 @@ const Index = () => {
           reactionLeaderboard={reactionLeaderboard}
           onOpenExchange={() => setCurrentScreen('exchange')}
           onOpenInsights={() => setCurrentScreen('insights')}
+          onBack={() => setCurrentScreen('home')}
           onEarnCharge={earnCharge}
           onClaimStreak={handleClaimStreak}
           onRecordReaction={recordReactionTime}

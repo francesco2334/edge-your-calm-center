@@ -17,7 +17,7 @@ interface HomeScreenProps {
   reactionLeaderboard: ReactionLeaderboard;
   onOpenExchange: () => void;
   onOpenInsights: () => void;
-  onOpenLearn: () => void;
+  onOpenFeed: () => void;
   onEarnCharge: (amount: number, reason: string) => void;
   onClaimStreak: () => boolean;
   onRecordReaction: (ms: number) => void;
@@ -53,7 +53,7 @@ export function HomeScreen({
   reactionLeaderboard,
   onOpenExchange,
   onOpenInsights,
-  onOpenLearn,
+  onOpenFeed,
   onEarnCharge,
   onClaimStreak,
   onRecordReaction,
@@ -272,7 +272,7 @@ export function HomeScreen({
             <p className="text-xs text-muted-foreground mt-1">Exchange</p>
           </button>
           <button
-            onClick={onOpenLearn}
+            onClick={onOpenFeed}
             className="p-4 rounded-xl bg-dopa-surface border border-border/30 text-center hover:border-primary/30 transition-all"
           >
             <span className="text-lg">📚</span>
