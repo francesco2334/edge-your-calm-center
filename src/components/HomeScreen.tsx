@@ -7,6 +7,7 @@ import { ChargeCounter } from './ChargeCounter';
 import { StreakRing } from './StreakRing';
 import { PullSheet } from './PullSheet';
 import { FeedCard } from './FeedCard';
+import { NeuroFacts } from './NeuroFacts';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker } from './tools';
 import { generateFeedCards } from '@/lib/feed-data';
 import { useAuth } from '@/hooks/useAuth';
@@ -233,6 +234,16 @@ export function HomeScreen({
               Start Focus Exchange
             </button>
           )}
+        </motion.div>
+
+        {/* Neuroplasticity Facts */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="px-6 mb-8"
+        >
+          <NeuroFacts />
         </motion.div>
 
         {/* Feed Section - Taller cards, 1.2 visible */}
