@@ -5,15 +5,14 @@ import { AssessmentScreen } from '@/components/AssessmentScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
 import { PaywallScreen } from '@/components/PaywallScreen';
 import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
-import { HomeScreen } from '@/components/HomeScreen';
+import { FeedScreen } from '@/components/FeedScreen';
 import { AllocateScreen } from '@/components/AllocateScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
-import { EducationSwiper } from '@/components/EducationSwiper';
 import { useCharge } from '@/hooks/useCharge';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
-type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'paywall' | 'atlas' | 'home' | 'exchange' | 'insights' | 'learn';
+type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'paywall' | 'atlas' | 'home' | 'exchange' | 'insights';
 
 const Index = () => {
   const { toast } = useToast();
@@ -94,9 +93,7 @@ const Index = () => {
         <AtlasIntroScreen onContinue={() => setCurrentScreen('home')} />
       )}
       {currentScreen === 'home' && (
-        <HomeScreen 
-          selectedMirrors={selectedMirrors}
-          onSelectMirror={handleMirrorSelect}
+        <FeedScreen 
           chargeBalance={balance}
           stats={stats}
           streak={streak}
@@ -104,7 +101,6 @@ const Index = () => {
           reactionLeaderboard={reactionLeaderboard}
           onOpenExchange={() => setCurrentScreen('exchange')}
           onOpenInsights={() => setCurrentScreen('insights')}
-          onOpenLearn={() => setCurrentScreen('learn')}
           onEarnCharge={earnCharge}
           onClaimStreak={handleClaimStreak}
           onRecordReaction={recordReactionTime}
@@ -126,12 +122,6 @@ const Index = () => {
           chargeBalance={balance}
           stats={stats}
           onBack={() => setCurrentScreen('home')}
-        />
-      )}
-      {currentScreen === 'learn' && (
-        <EducationSwiper
-          onClose={() => setCurrentScreen('home')}
-          onEarnCharge={earnCharge}
         />
       )}
     </div>
