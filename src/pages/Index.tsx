@@ -77,6 +77,7 @@ const Index = () => {
           stats={stats}
           onOpenExchange={() => setCurrentScreen('exchange')}
           onOpenInsights={() => setCurrentScreen('insights')}
+          onEarnCharge={earnCharge}
         />
       )}
       {currentScreen === 'exchange' && (
