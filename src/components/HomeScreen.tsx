@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { User } from 'lucide-react';
 import { MojoOrb } from './MojoOrb';
 import { ChargeCounter } from './ChargeCounter';
 import { StreakRing } from './StreakRing';
 import { PullSheet } from './PullSheet';
-import { FeedCard } from './FeedCard';
+import { SwipeFeed } from './SwipeFeed';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker } from './tools';
 import { generateFeedCards } from '@/lib/feed-data';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,7 +47,6 @@ export function HomeScreen({
   const [activeTool, setActiveTool] = useState<ActiveTool>(null);
   const [showPullSheet, setShowPullSheet] = useState(false);
   const [todaysPull, setTodaysPull] = useState<string | null>(null);
-  const [feedIndex, setFeedIndex] = useState(0);
 
   // Generate feed cards
   const feedCards = useMemo(() => 
@@ -134,33 +133,42 @@ export function HomeScreen({
 
   return (
     <div className="min-h-screen pb-28 relative overflow-hidden">
-      {/* Ambient background */}
+      {/* Ambient background - luxury feel */}
       <div className="absolute inset-0 bg-gradient-calm" />
-      <div className="absolute inset-0 bg-gradient-pulse opacity-20" />
+      <div className="absolute inset-0 bg-gradient-hero" />
 
       <div className="relative z-10">
-        {/* Header - Subtle, disappears mentally */}
+        {/* Minimal Top Bar - Utility Level */}
         <motion.header
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-5 py-3"
+          className="flex items-center justify-between px-5 py-4"
         >
-          <div className="flex items-center gap-1.5 opacity-60">
+          {/* Left: Mojo state indicator */}
+          <div className="flex items-center gap-2 opacity-50">
             <MojoOrb state={mojoState} size="sm" />
-            <span className="text-[11px] text-muted-foreground capitalize">{mojoState}</span>
+            <span className="text-[11px] text-muted-foreground capitalize tracking-wide">
+              {mojoState}
+            </span>
           </div>
           
-          <span className="text-xs font-medium text-muted-foreground/70 tracking-wide">
+          {/* Center: App name */}
+          <span className="text-[13px] font-medium text-muted-foreground/60 tracking-widest uppercase">
             DopaMINE
           </span>
           
-          <div className="flex items-center gap-3">
-            <button onClick={onOpenExchange}>
-              <ChargeCounter balance={chargeBalance} size="sm" />
+          {/* Right: Charge pill + Settings */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={onOpenExchange}
+              className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 flex items-center gap-1.5 hover:bg-primary/20 transition-colors"
+            >
+              <span className="text-sm">⚡</span>
+              <span className="text-xs font-semibold text-primary">{chargeBalance}</span>
             </button>
             <button 
               onClick={() => navigate('/settings')}
-              className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
+              className="w-8 h-8 rounded-full bg-muted/40 flex items-center justify-center hover:bg-muted/60 transition-colors"
               aria-label={isAuthenticated ? 'Settings' : 'Sign in'}
             >
               {isAuthenticated && user?.email ? (
@@ -174,111 +182,91 @@ export function HomeScreen({
           </div>
         </motion.header>
 
-        {/* Hero: Big Mojo Orb + Streak Ring - THE MAIN CHARACTER */}
+        {/* Hero Block - 38% of screen height, THE main character */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1, duration: 0.6 }}
-          className="flex flex-col items-center justify-center pt-6 pb-10"
+          transition={{ delay: 0.1, duration: 0.7, ease: 'easeOut' }}
+          className="flex flex-col items-center justify-center pt-4 pb-6"
+          style={{ minHeight: '38vh' }}
         >
+          {/* Tappable Mojo + Streak Ring */}
           <button 
             onClick={onOpenMojoChat}
-            className="focus:outline-none"
+            className="focus:outline-none active:scale-[0.98] transition-transform"
             aria-label="Chat with Mojo"
           >
-            <StreakRing streak={streak} claimed={streakClaimedToday} size={220}>
-              <MojoOrb state={mojoState} size="lg" />
+            <StreakRing streak={streak} claimed={streakClaimedToday} size={196}>
+              <MojoOrb state={mojoState} selectedPull={todaysPull} size="lg" />
             </StreakRing>
           </button>
-          <p className="text-xs text-muted-foreground/60 mt-2">Tap Mojo to chat</p>
           
-          {/* Streak text - integrated with hero */}
+          {/* Day count - Large, bold, centered inside hero */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-8 text-center"
+            className="mt-6 text-center"
           >
-            <p className="text-4xl font-bold text-foreground tracking-tight">
+            <p className="text-[38px] font-bold text-foreground tracking-tight leading-none">
               {streak > 0 ? `Day ${streak}` : 'Day 0'}
             </p>
-            <p className="text-sm text-muted-foreground/80 mt-2">
+            <p className="text-[15px] text-muted-foreground/70 mt-2">
               {todaysPull 
                 ? `Today's pull: ${todaysPull === 'none' ? 'Clear' : todaysPull}`
-                : 'Log your pull to continue'
+                : "Today's pull: not logged"
               }
             </p>
           </motion.div>
         </motion.div>
 
-        {/* Primary CTA - Smaller, closer to hero */}
+        {/* Primary CTA - Level 2, full width */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="px-8 mb-10"
+          className="px-5 mb-4"
         >
           {!todaysPull ? (
             <button
               onClick={() => setShowPullSheet(true)}
-              className="w-full py-3 rounded-xl bg-gradient-neon text-primary-foreground font-medium text-base shadow-lg shadow-primary/20"
+              className="w-full py-[14px] rounded-[18px] bg-gradient-neon text-primary-foreground font-semibold text-[16px] shadow-lg shadow-primary/15 active:scale-[0.98] transition-transform"
             >
               Log today's pull
             </button>
           ) : (
             <button
               onClick={onOpenExchange}
-              className="w-full py-3 rounded-xl bg-gradient-neon text-primary-foreground font-medium text-base shadow-lg shadow-primary/20"
+              className="w-full py-[14px] rounded-[18px] bg-gradient-neon text-primary-foreground font-semibold text-[16px] shadow-lg shadow-primary/15 active:scale-[0.98] transition-transform"
             >
-              Start Focus Exchange
+              Start an Exchange
             </button>
           )}
+          
+          {/* Secondary link */}
+          <button
+            onClick={onOpenMojoChat}
+            className="w-full mt-3 text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+          >
+            Quick Stop (20s) →
+          </button>
         </motion.div>
 
-        {/* Feed Section - Taller cards, 1.2 visible */}
+        {/* Swipe Feed - TikTok style vertical cards */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="overflow-x-auto scrollbar-hide"
+          className="mt-4"
         >
-          <div className="flex gap-5 px-6 pb-6">
-            {feedCards.map((card, i) => (
-              <motion.div
-                key={card.id}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.08 }}
-                className="flex-shrink-0 w-[85vw] max-w-[320px] h-[420px] rounded-3xl overflow-hidden relative"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-t ${card.gradient}`} />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-                <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                  <span className="text-3xl mb-3">{card.icon}</span>
-                  <h3 className="text-xl font-semibold text-foreground mb-2 leading-snug">
-                    {card.title}
-                  </h3>
-                  {card.content && (
-                    <p className="text-sm text-foreground/70 mb-5 line-clamp-3 leading-relaxed">
-                      {card.content}
-                    </p>
-                  )}
-                  {card.action && (
-                    <button
-                      onClick={() => handleCardAction(card)}
-                      className="py-3 px-5 rounded-xl bg-foreground/10 backdrop-blur-sm border border-foreground/10 text-foreground text-sm font-medium hover:bg-foreground/20 transition-colors"
-                    >
-                      {card.action.label}
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          <SwipeFeed 
+            cards={feedCards} 
+            onCardAction={handleCardAction}
+          />
         </motion.div>
       </div>
 
-      {/* Pull Sheet */}
+      {/* Pull Sheet - iOS bottom sheet */}
       <PullSheet
         isOpen={showPullSheet}
         onClose={() => setShowPullSheet(false)}

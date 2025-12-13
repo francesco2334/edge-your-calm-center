@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker } from './tools';
+import { GameStartScreen } from './GameStartScreen';
 import type { ReactionLeaderboard } from '@/lib/reaction-data';
 
 interface GamesScreenProps {
@@ -8,57 +10,76 @@ interface GamesScreenProps {
   onRecordReaction: (ms: number) => void;
 }
 
-type ActiveGame = 'pause' | 'name' | 'prediction' | 'breathing' | 'reaction' | null;
+type GameId = 'pause' | 'name' | 'prediction' | 'breathing' | 'reaction';
+type ActiveGame = { id: GameId; started: boolean } | null;
 
-const GAMES = [
+const GAMES: {
+  id: GameId;
+  name: string;
+  tagline: string;
+  instruction: string;
+  whyItWorks: string;
+  icon: string;
+  gradient: string;
+  charge: string;
+  duration: string;
+}[] = [
   {
-    id: 'pause' as const,
+    id: 'pause',
     name: 'The Standoff',
-    desc: 'Hold the urge. Don\'t act.',
-    detail: 'Practice delay tolerance from 10-60 seconds',
+    tagline: 'Hold the urge. Don\'t act.',
+    instruction: 'A timer will count up. Your only job is to not give in. See how long you can hold.',
+    whyItWorks: 'Delay trains your prefrontal cortex to override impulse signals.',
     icon: '⏸️',
-    gradient: 'from-violet-500/20 to-purple-600/20',
+    gradient: 'from-violet-500/30 via-purple-600/20 to-background',
     charge: '1-2',
+    duration: '10-60s',
   },
   {
-    id: 'prediction' as const,
+    id: 'prediction',
     name: 'The Bluff',
-    desc: 'Catch your brain lying.',
-    detail: 'Predict how good something will feel, then check reality',
+    tagline: 'Catch your brain lying.',
+    instruction: 'Rate how good you think something will feel, then rate how it actually felt.',
+    whyItWorks: 'Dopamine exaggerates predictions. Seeing the gap weakens cravings.',
     icon: '🎯',
-    gradient: 'from-amber-500/20 to-orange-600/20',
+    gradient: 'from-amber-500/30 via-orange-600/20 to-background',
     charge: '1',
+    duration: '30s',
   },
   {
-    id: 'reaction' as const,
+    id: 'reaction',
     name: 'Catch the Flicker',
-    desc: 'Test your awareness.',
-    detail: 'How fast can you notice an urge appearing?',
+    tagline: 'Test your awareness.',
+    instruction: 'When you see the flash, tap as fast as you can. Train noticing urges early.',
+    whyItWorks: 'Faster awareness = more time to choose a different action.',
     icon: '⚡',
-    gradient: 'from-cyan-500/20 to-blue-600/20',
+    gradient: 'from-cyan-500/30 via-blue-600/20 to-background',
     charge: '1',
+    duration: '20s',
   },
   {
-    id: 'breathing' as const,
-    name: 'Sync Reset',
-    desc: '90 seconds to calm.',
-    detail: 'Match your breath to Mojo. Your nervous system will follow.',
+    id: 'breathing',
+    name: 'Sync',
+    tagline: '90 seconds to calm.',
+    instruction: 'Match your breath to the rhythm. Your nervous system will follow.',
+    whyItWorks: 'Slow breathing activates your parasympathetic system, reducing urge intensity.',
     icon: '🫁',
-    gradient: 'from-teal-500/20 to-emerald-600/20',
+    gradient: 'from-teal-500/30 via-emerald-600/20 to-background',
     charge: '2',
+    duration: '90s',
   },
   {
-    id: 'name' as const,
+    id: 'name',
     name: 'Name It',
-    desc: 'Label the feeling.',
-    detail: 'What\'s really pulling you? Name it to tame it.',
+    tagline: 'Label the feeling.',
+    instruction: 'Identify what emotion is underneath the urge. Naming reduces its power.',
+    whyItWorks: 'Affect labeling reduces amygdala activation by up to 50%.',
     icon: '📍',
-    gradient: 'from-rose-500/20 to-pink-600/20',
+    gradient: 'from-rose-500/30 via-pink-600/20 to-background',
     charge: '1',
+    duration: '15s',
   },
 ];
-
-import { useState } from 'react';
 
 export function GamesScreen({ reactionLeaderboard, onEarnCharge, onRecordReaction }: GamesScreenProps) {
   const [activeGame, setActiveGame] = useState<ActiveGame>(null);
@@ -74,89 +95,123 @@ export function GamesScreen({ reactionLeaderboard, onEarnCharge, onRecordReactio
     setActiveGame(null);
   };
 
+  const handleStartGame = (gameId: GameId) => {
+    setActiveGame({ id: gameId, started: false });
+  };
+
+  const handleConfirmStart = () => {
+    if (activeGame) {
+      setActiveGame({ ...activeGame, started: true });
+    }
+  };
+
+  // Show start screen first
+  if (activeGame && !activeGame.started) {
+    const game = GAMES.find(g => g.id === activeGame.id)!;
+    return (
+      <GameStartScreen
+        name={game.name}
+        instruction={game.instruction}
+        whyItWorks={game.whyItWorks}
+        icon={game.icon}
+        onStart={handleConfirmStart}
+        onCancel={() => setActiveGame(null)}
+      />
+    );
+  }
+
   // Render active game
-  if (activeGame === 'pause') {
-    return (
-      <PauseLadder 
-        onComplete={(seconds) => handleGameComplete(seconds >= 40 ? 2 : 1, `The Standoff: ${seconds}s`)}
-        onCancel={() => setActiveGame(null)}
-      />
-    );
-  }
-
-  if (activeGame === 'name') {
-    return (
-      <NameThePull 
-        onComplete={(feeling) => handleGameComplete(1, `Named the pull: ${feeling}`)}
-        onCancel={() => setActiveGame(null)}
-      />
-    );
-  }
-
-  if (activeGame === 'prediction') {
-    return (
-      <PredictionReality 
-        onComplete={(pred, real) => handleGameComplete(1, `The Bluff: ${pred} → ${real}`)}
-        onCancel={() => setActiveGame(null)}
-      />
-    );
-  }
-
-  if (activeGame === 'breathing') {
-    return (
-      <BreathingSync 
-        onComplete={() => handleGameComplete(2, 'Sync Reset completed')}
-        onCancel={() => setActiveGame(null)}
-      />
-    );
-  }
-
-  if (activeGame === 'reaction') {
-    return (
-      <ReactionTracker 
-        onComplete={handleReactionComplete}
-        onCancel={() => setActiveGame(null)}
-        leaderboard={reactionLeaderboard}
-      />
-    );
+  if (activeGame?.started) {
+    switch (activeGame.id) {
+      case 'pause':
+        return (
+          <PauseLadder 
+            onComplete={(seconds) => handleGameComplete(seconds >= 40 ? 2 : 1, `The Standoff: ${seconds}s`)}
+            onCancel={() => setActiveGame(null)}
+          />
+        );
+      case 'name':
+        return (
+          <NameThePull 
+            onComplete={(feeling) => handleGameComplete(1, `Named the pull: ${feeling}`)}
+            onCancel={() => setActiveGame(null)}
+          />
+        );
+      case 'prediction':
+        return (
+          <PredictionReality 
+            onComplete={(pred, real) => handleGameComplete(1, `The Bluff: ${pred} → ${real}`)}
+            onCancel={() => setActiveGame(null)}
+          />
+        );
+      case 'breathing':
+        return (
+          <BreathingSync 
+            onComplete={() => handleGameComplete(2, 'Sync completed')}
+            onCancel={() => setActiveGame(null)}
+          />
+        );
+      case 'reaction':
+        return (
+          <ReactionTracker 
+            onComplete={handleReactionComplete}
+            onCancel={() => setActiveGame(null)}
+            leaderboard={reactionLeaderboard}
+          />
+        );
+    }
   }
 
   return (
-    <div className="min-h-screen pb-32 px-6 pt-6">
+    <div className="min-h-screen pb-32 px-5 pt-6">
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-6"
       >
-        <h1 className="text-2xl font-bold text-foreground mb-1">Games</h1>
-        <p className="text-sm text-muted-foreground">
-          Train your brain. Earn Charge.
+        <h1 className="text-[28px] font-bold text-foreground tracking-tight">Arcade</h1>
+        <p className="text-[15px] text-muted-foreground mt-1">
+          Short wins. Real control.
         </p>
       </motion.div>
 
+      {/* Game tiles - Large mode tiles */}
       <div className="space-y-4">
         {GAMES.map((game, i) => (
           <motion.button
             key={game.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            onClick={() => setActiveGame(game.id)}
-            className={`w-full p-5 rounded-2xl bg-gradient-to-br ${game.gradient} border border-border/30 hover:border-primary/40 transition-all text-left group`}
+            transition={{ delay: i * 0.08 }}
+            onClick={() => handleStartGame(game.id)}
+            className={`w-full h-[170px] rounded-[22px] overflow-hidden relative bg-gradient-to-br ${game.gradient} border border-border/20 hover:border-primary/30 active:scale-[0.98] transition-all`}
           >
-            <div className="flex items-start gap-4">
-              <span className="text-4xl">{game.icon}</span>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {game.name}
-                  </h3>
-                  <span className="text-xs text-primary font-medium">
-                    +{game.charge} ⚡
+            {/* Overlay for depth */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+            
+            {/* Content */}
+            <div className="absolute inset-0 p-5 flex flex-col justify-between text-left">
+              {/* Top: Icon + Charge */}
+              <div className="flex items-start justify-between">
+                <span className="text-4xl">{game.icon}</span>
+                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-background/40 backdrop-blur-sm">
+                  <span className="text-[11px] font-medium text-primary">+{game.charge} ⚡</span>
+                </div>
+              </div>
+              
+              {/* Bottom: Title, tagline, button */}
+              <div>
+                <h3 className="text-[20px] font-bold text-foreground mb-0.5">
+                  {game.name}
+                </h3>
+                <p className="text-[14px] text-muted-foreground mb-3">{game.tagline}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] text-muted-foreground/60">{game.duration}</span>
+                  <span className="px-4 py-1.5 rounded-full bg-foreground/10 backdrop-blur-sm text-[13px] font-medium text-foreground">
+                    Start
                   </span>
                 </div>
-                <p className="text-sm text-foreground/80 mb-1">{game.desc}</p>
-                <p className="text-xs text-muted-foreground">{game.detail}</p>
               </div>
             </div>
           </motion.button>

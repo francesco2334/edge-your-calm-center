@@ -7,8 +7,9 @@ interface StreakRingProps {
   children?: React.ReactNode;
 }
 
-export function StreakRing({ streak, claimed, size = 220, children }: StreakRingProps) {
-  const strokeWidth = 6; // +50% thicker ring
+export function StreakRing({ streak, claimed, size = 196, children }: StreakRingProps) {
+  // Ring thickness per spec: 8-12pt, target 10pt
+  const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   
@@ -18,7 +19,7 @@ export function StreakRing({ streak, claimed, size = 220, children }: StreakRing
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      {/* Background ring */}
+      {/* Background ring - subtle */}
       <svg
         className="absolute inset-0"
         width={size}
@@ -32,11 +33,11 @@ export function StreakRing({ streak, claimed, size = 220, children }: StreakRing
           fill="none"
           stroke="hsl(var(--border))"
           strokeWidth={strokeWidth}
-          opacity={0.3}
+          opacity={0.2}
         />
       </svg>
       
-      {/* Progress ring */}
+      {/* Progress ring - refined glow */}
       <svg
         className="absolute inset-0 -rotate-90"
         width={size}
@@ -54,7 +55,7 @@ export function StreakRing({ streak, claimed, size = 220, children }: StreakRing
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset }}
-          transition={{ duration: 1.5, ease: 'easeOut' }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
           className="dopa-ring"
         />
         <defs>
@@ -65,33 +66,34 @@ export function StreakRing({ streak, claimed, size = 220, children }: StreakRing
         </defs>
       </svg>
       
-      {/* Center content */}
+      {/* Center content (Mojo orb) */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {children}
       </div>
       
-      {/* Streak badge */}
+      {/* Streak badge - top right */}
       {streak > 0 && (
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.5, type: 'spring' }}
-          className="absolute -top-1 -right-1 bg-gradient-neon rounded-full px-2.5 py-1 shadow-neon"
+          transition={{ delay: 0.6, type: 'spring', stiffness: 300 }}
+          className="absolute -top-1 -right-1 bg-gradient-neon rounded-full px-2.5 py-1 shadow-lg shadow-primary/20"
         >
-          <span className="text-xs font-bold text-primary-foreground">
+          <span className="text-[11px] font-bold text-primary-foreground">
             🔥 {streak}
           </span>
         </motion.div>
       )}
       
-      {/* Completion indicator */}
+      {/* Completion indicator - bottom */}
       {claimed && (
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-emerald-500 rounded-full px-2 py-0.5"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.8, type: 'spring' }}
+          className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-emerald-500/90 rounded-full px-3 py-1"
         >
-          <span className="text-[10px] font-medium text-white">Today ✓</span>
+          <span className="text-[10px] font-semibold text-white tracking-wide">Today ✓</span>
         </motion.div>
       )}
     </div>
