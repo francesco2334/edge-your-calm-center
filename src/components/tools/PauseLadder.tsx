@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Zap, Target, Timer, TrendingUp, Sparkles, Star } from 'lucide-react';
 import { MojoOrb } from '../MojoOrb';
+import { haptics } from '@/hooks/useHaptics';
 
 const NEURO_FACTS = [
   { icon: Brain, fact: "Urges peak quickly, then drop.", detail: "Most cravings fade naturally if you wait. You're training delay tolerance right now." },
@@ -84,6 +85,7 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
             setAntiCheatTap((current) => {
               if (current && current.id === newTap.id) {
                 setPhase('failed');
+                haptics.notifyError();
                 return null;
               }
               return current;
@@ -100,7 +102,7 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
       if (antiCheatTap) {
         setAntiCheatTap(null);
         setTapCount((prev) => prev + 1);
-        // Light haptic feedback would go here
+        haptics.tapLight();
       }
     }, [antiCheatTap]);
 
@@ -110,6 +112,7 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
         localStorage.setItem('standoff_pb', timeHeld.toString());
         setPersonalBest(timeHeld);
       }
+      haptics.notifySuccess();
       onComplete(timeHeld);
     }, [timeHeld, personalBest, onComplete]);
 
