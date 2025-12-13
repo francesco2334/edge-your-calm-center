@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MIRRORS } from '@/lib/edge-data';
 import { ChargeCounter } from './ChargeCounter';
 import { MojoOrb } from './MojoOrb';
+import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker } from './tools';
 import type { PersonalStats } from '@/lib/charge-data';
 
 interface HomeScreenProps {
@@ -12,7 +13,10 @@ interface HomeScreenProps {
   stats: PersonalStats;
   onOpenExchange: () => void;
   onOpenInsights: () => void;
+  onEarnCharge: (amount: number, reason: string) => void;
 }
+
+type ActiveTool = 'pause' | 'name' | 'prediction' | 'breathing' | 'reaction' | null;
 
 const PULL_OPTIONS = [
   { id: 'scrolling', label: 'Scrolling', weight: 5 },
@@ -39,7 +43,9 @@ export function HomeScreen({
   stats,
   onOpenExchange,
   onOpenInsights,
+  onEarnCharge,
 }: HomeScreenProps) {
+  const [activeTool, setActiveTool] = useState<ActiveTool>(null);
   const [todaysPull, setTodaysPull] = useState<string | null>(null);
   const [showTools, setShowTools] = useState(false);
   const [pullHistory] = useState<Record<string, number>>({
@@ -76,6 +82,58 @@ export function HomeScreen({
       setShowTools(false);
     }
   };
+
+  // Tool handlers
+  const handleToolComplete = (chargeAmount: number, reason: string) => {
+    onEarnCharge(chargeAmount, reason);
+    setActiveTool(null);
+  };
+
+  // Render active tool
+  if (activeTool === 'pause') {
+    return (
+      <PauseLadder 
+        onComplete={(seconds) => handleToolComplete(seconds >= 40 ? 2 : 1, `Pause Ladder: ${seconds}s`)}
+        onCancel={() => setActiveTool(null)}
+      />
+    );
+  }
+
+  if (activeTool === 'name') {
+    return (
+      <NameThePull 
+        onComplete={(feeling) => handleToolComplete(1, `Named the pull: ${feeling}`)}
+        onCancel={() => setActiveTool(null)}
+      />
+    );
+  }
+
+  if (activeTool === 'prediction') {
+    return (
+      <PredictionReality 
+        onComplete={(pred, real) => handleToolComplete(1, `Prediction vs Reality: ${pred} → ${real}`)}
+        onCancel={() => setActiveTool(null)}
+      />
+    );
+  }
+
+  if (activeTool === 'breathing') {
+    return (
+      <BreathingSync 
+        onComplete={() => handleToolComplete(2, 'Breathing Sync completed')}
+        onCancel={() => setActiveTool(null)}
+      />
+    );
+  }
+
+  if (activeTool === 'reaction') {
+    return (
+      <ReactionTracker 
+        onComplete={(ms) => handleToolComplete(1, `Reaction time: ${ms}ms`)}
+        onCancel={() => setActiveTool(null)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden">
@@ -239,22 +297,24 @@ export function HomeScreen({
               <p className="text-sm text-muted-foreground mb-4">Slow the Pull</p>
               <div className="grid grid-cols-2 gap-3 mb-8">
                 {[
-                  { icon: '⏸️', label: 'Pause Tool', desc: '10-60 sec delay' },
-                  { icon: '📍', label: 'Name the Pull', desc: 'Identify it' },
-                  { icon: '🫁', label: 'Body Reset', desc: 'Breathing' },
-                  { icon: '↘️', label: 'Intensity Drop', desc: 'Lower the load' },
+                  { id: 'pause', icon: '⏸️', label: 'Pause Ladder', desc: '10-60 sec delay' },
+                  { id: 'name', icon: '📍', label: 'Name the Pull', desc: 'Identify it' },
+                  { id: 'breathing', icon: '🫁', label: 'Breathing Sync', desc: '90 sec reset' },
+                  { id: 'prediction', icon: '🎯', label: 'Predict vs Real', desc: 'Calibrate reward' },
+                  { id: 'reaction', icon: '⚡', label: 'Reaction Time', desc: 'Track awareness' },
                 ].map((tool, i) => (
-                  <motion.div
-                    key={tool.label}
+                  <motion.button
+                    key={tool.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + i * 0.1 }}
-                    className="dopa-card cursor-pointer hover:border-primary/30 transition-all"
+                    onClick={() => setActiveTool(tool.id as ActiveTool)}
+                    className="dopa-card cursor-pointer hover:border-primary/30 transition-all text-left"
                   >
                     <span className="text-2xl mb-2 block">{tool.icon}</span>
                     <p className="text-sm font-medium text-foreground">{tool.label}</p>
                     <p className="text-xs text-muted-foreground">{tool.desc}</p>
-                  </motion.div>
+                  </motion.button>
                 ))}
               </div>
             </motion.div>
