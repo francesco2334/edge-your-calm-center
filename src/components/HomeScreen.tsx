@@ -129,23 +129,21 @@ export function HomeScreen({
     <div className="min-h-screen pb-28 relative overflow-hidden">
       {/* Ambient background */}
       <div className="absolute inset-0 bg-gradient-calm" />
-      <div className="absolute inset-0 bg-gradient-pulse opacity-30" />
+      <div className="absolute inset-0 bg-gradient-pulse opacity-20" />
 
       <div className="relative z-10">
-        {/* Header - Small, Clean, Premium */}
+        {/* Header - Subtle, disappears mentally */}
         <motion.header
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-5 py-4"
+          className="flex items-center justify-between px-5 py-3"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 opacity-60">
             <MojoOrb state={mojoState} size="sm" />
-            <span className="text-xs text-muted-foreground">
-              Mojo: <span className="text-foreground capitalize">{mojoState}</span>
-            </span>
+            <span className="text-[11px] text-muted-foreground capitalize">{mojoState}</span>
           </div>
           
-          <span className="text-sm font-semibold text-foreground tracking-tight">
+          <span className="text-xs font-medium text-muted-foreground/70 tracking-wide">
             DopaMINE
           </span>
           
@@ -154,28 +152,28 @@ export function HomeScreen({
           </button>
         </motion.header>
 
-        {/* Hero: Big Mojo Orb + Streak Ring */}
+        {/* Hero: Big Mojo Orb + Streak Ring - THE MAIN CHARACTER */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="flex flex-col items-center justify-center py-8"
+          transition={{ delay: 0.1, duration: 0.6 }}
+          className="flex flex-col items-center justify-center pt-6 pb-10"
         >
-          <StreakRing streak={streak} claimed={streakClaimedToday} size={180}>
+          <StreakRing streak={streak} claimed={streakClaimedToday} size={220}>
             <MojoOrb state={mojoState} size="lg" />
           </StreakRing>
           
-          {/* Streak text */}
+          {/* Streak text - integrated with hero */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-6 text-center"
+            className="mt-8 text-center"
           >
-            <p className="text-3xl font-bold text-foreground">
+            <p className="text-4xl font-bold text-foreground tracking-tight">
               {streak > 0 ? `Day ${streak}` : 'Day 0'}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground/80 mt-2">
               {todaysPull 
                 ? `Today's pull: ${todaysPull === 'none' ? 'Clear' : todaysPull}`
                 : 'Log your pull to continue'
@@ -184,73 +182,62 @@ export function HomeScreen({
           </motion.div>
         </motion.div>
 
-        {/* Primary CTA */}
+        {/* Primary CTA - Smaller, closer to hero */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="px-6 mb-8"
+          className="px-8 mb-10"
         >
           {!todaysPull ? (
             <button
               onClick={() => setShowPullSheet(true)}
-              className="w-full py-4 rounded-2xl bg-gradient-neon text-primary-foreground font-semibold text-lg shadow-neon dopa-glow-button"
+              className="w-full py-3 rounded-xl bg-gradient-neon text-primary-foreground font-medium text-base shadow-lg shadow-primary/20"
             >
-              Log the Pull
+              Log today's pull
             </button>
           ) : (
             <button
               onClick={onOpenExchange}
-              className="w-full py-4 rounded-2xl bg-gradient-neon text-primary-foreground font-semibold text-lg shadow-neon dopa-glow-button"
+              className="w-full py-3 rounded-xl bg-gradient-neon text-primary-foreground font-medium text-base shadow-lg shadow-primary/20"
             >
               Start Focus Exchange
             </button>
           )}
         </motion.div>
 
-        {/* Feed Section Header */}
+        {/* Feed Section - Taller cards, 1.2 visible */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="px-6 mb-4"
-        >
-          <p className="text-sm text-muted-foreground uppercase tracking-wider">
-            Today's Feed
-          </p>
-        </motion.div>
-
-        {/* Horizontal Feed Cards (swipeable) */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
           className="overflow-x-auto scrollbar-hide"
         >
-          <div className="flex gap-4 px-6 pb-4">
+          <div className="flex gap-5 px-6 pb-6">
             {feedCards.map((card, i) => (
               <motion.div
                 key={card.id}
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 + i * 0.1 }}
-                className="flex-shrink-0 w-72 h-80 rounded-2xl overflow-hidden relative"
+                transition={{ delay: 0.5 + i * 0.08 }}
+                className="flex-shrink-0 w-[85vw] max-w-[320px] h-[420px] rounded-3xl overflow-hidden relative"
               >
                 <div className={`absolute inset-0 bg-gradient-to-t ${card.gradient}`} />
-                <div className="absolute inset-0 p-5 flex flex-col justify-end">
-                  <span className="text-2xl mb-2">{card.icon}</span>
-                  <h3 className="text-lg font-semibold text-foreground mb-1 leading-tight">
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                  <span className="text-3xl mb-3">{card.icon}</span>
+                  <h3 className="text-xl font-semibold text-foreground mb-2 leading-snug">
                     {card.title}
                   </h3>
                   {card.content && (
-                    <p className="text-sm text-foreground/70 mb-4 line-clamp-2">
+                    <p className="text-sm text-foreground/70 mb-5 line-clamp-3 leading-relaxed">
                       {card.content}
                     </p>
                   )}
                   {card.action && (
                     <button
                       onClick={() => handleCardAction(card)}
-                      className="py-2.5 px-4 rounded-xl bg-primary/90 text-primary-foreground text-sm font-medium hover:bg-primary transition-colors"
+                      className="py-3 px-5 rounded-xl bg-foreground/10 backdrop-blur-sm border border-foreground/10 text-foreground text-sm font-medium hover:bg-foreground/20 transition-colors"
                     >
                       {card.action.label}
                     </button>
