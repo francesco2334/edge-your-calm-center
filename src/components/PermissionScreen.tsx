@@ -23,7 +23,7 @@ export function PermissionScreen({ onStartScan }: PermissionScreenProps) {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mb-10"
         >
-          <div className="w-16 h-16 mx-auto rounded-full bg-edge-surface border border-border/50 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto rounded-full bg-dopa-surface border border-border/50 flex items-center justify-center">
             <svg
               className="w-8 h-8 text-primary"
               fill="none"

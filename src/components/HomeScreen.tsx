@@ -39,16 +39,14 @@ export function HomeScreen({ selectedMirrors, onSelectMirror }: HomeScreenProps)
           className="flex items-center justify-between mb-8"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-              <span className="text-sm font-semibold text-primary">A</span>
-            </div>
+            <div className="w-10 h-10 dopa-orb" />
             <div>
               <p className="text-sm font-medium text-foreground">Good evening</p>
-              <p className="text-xs text-muted-foreground">Atlas is here</p>
+              <p className="text-xs text-muted-foreground">Mojo is here</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-primary edge-pulse" />
+            <div className="w-3 h-3 rounded-full bg-primary dopa-pulse" />
             <span className="text-xs text-muted-foreground">Online</span>
           </div>
         </motion.div>
@@ -58,7 +56,7 @@ export function HomeScreen({ selectedMirrors, onSelectMirror }: HomeScreenProps)
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="edge-card mb-6"
+          className="dopa-card mb-6"
         >
           <p className="text-sm text-muted-foreground mb-2">Daily Check-in</p>
           <h2 className="text-2xl font-semibold text-foreground">
@@ -82,8 +80,8 @@ export function HomeScreen({ selectedMirrors, onSelectMirror }: HomeScreenProps)
               onClick={() => handlePullSelect(option.id)}
               className={`p-4 rounded-xl text-center transition-all duration-200 border ${
                 todaysPull === option.id
-                  ? 'bg-primary/10 border-primary/50'
-                  : 'bg-edge-surface border-border/30 hover:bg-muted'
+                  ? 'bg-primary/15 border-primary/50'
+                  : 'bg-dopa-surface border-border/30 hover:bg-muted'
               } ${option.isPositive ? 'col-span-3' : ''}`}
             >
               <span className={`text-sm font-medium ${
@@ -115,7 +113,7 @@ export function HomeScreen({ selectedMirrors, onSelectMirror }: HomeScreenProps)
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 + i * 0.1 }}
-                  className="edge-card cursor-pointer hover:border-primary/30 transition-all"
+                  className="dopa-card cursor-pointer hover:border-primary/30 transition-all"
                 >
                   <span className="text-2xl mb-2 block">{tool.icon}</span>
                   <p className="text-sm font-medium text-foreground">{tool.label}</p>
@@ -140,8 +138,8 @@ export function HomeScreen({ selectedMirrors, onSelectMirror }: HomeScreenProps)
                 onClick={() => onSelectMirror(mirror.id)}
                 className={`px-4 py-2 rounded-full text-sm transition-all border ${
                   selectedMirrors.includes(mirror.id)
-                    ? 'bg-primary/10 border-primary/50 text-foreground'
-                    : 'bg-edge-surface border-border/30 text-muted-foreground hover:text-foreground'
+                    ? 'bg-primary/15 border-primary/50 text-foreground'
+                    : 'bg-dopa-surface border-border/30 text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {mirror.icon} {mirror.label}

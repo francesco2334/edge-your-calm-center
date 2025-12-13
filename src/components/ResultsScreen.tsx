@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { type EdgeState, EDGE_STATES, type AssessmentAnswer, calculateEdgeState } from '@/lib/edge-data';
+import { type DopaState, DOPA_STATES, type AssessmentAnswer, calculateDopaState } from '@/lib/edge-data';
 
 interface ResultsScreenProps {
   answers: AssessmentAnswer[];
@@ -8,8 +8,8 @@ interface ResultsScreenProps {
 }
 
 export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
-  const edgeState = calculateEdgeState(answers);
-  const stateInfo = EDGE_STATES[edgeState];
+  const dopaState = calculateDopaState(answers);
+  const stateInfo = DOPA_STATES[dopaState];
 
   // Calculate score percentage for ring
   const totalScore = answers.reduce((sum, a) => sum + a.value, 0);
@@ -19,7 +19,7 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-calm" />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-pulse opacity-20" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-pulse opacity-30" />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -34,7 +34,7 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
           transition={{ delay: 0.2 }}
           className="text-sm uppercase tracking-widest text-muted-foreground mb-8"
         >
-          Your EDGE State
+          Your <span className="text-primary">DopaMINE</span> State
         </motion.p>
 
         {/* Progress Ring */}
@@ -68,7 +68,7 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
               animate={{ strokeDashoffset: 2 * Math.PI * 42 * (1 - percentage / 100) }}
               transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
               style={{
-                filter: `drop-shadow(0 0 8px ${stateInfo.color})`,
+                filter: `drop-shadow(0 0 12px ${stateInfo.color})`,
               }}
             />
           </svg>
@@ -91,7 +91,7 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="edge-card mb-6"
+          className="dopa-card mb-6"
         >
           <p className="text-foreground leading-relaxed">
             {stateInfo.description}
@@ -122,7 +122,7 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
             onClick={onContinue}
             className="w-full"
           >
-            Meet Your Guide
+            Meet Mojo
           </Button>
         </motion.div>
       </motion.div>

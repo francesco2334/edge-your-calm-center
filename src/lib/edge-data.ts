@@ -1,4 +1,4 @@
-export type EdgeState = 'stable' | 'pulled' | 'overloaded' | 'hijacked';
+export type DopaState = 'stable' | 'pulled' | 'overloaded' | 'hijacked';
 
 export interface AssessmentQuestion {
   id: number;
@@ -37,7 +37,7 @@ export const ANSWER_OPTIONS = [
   { value: 4, label: 'Almost Always' },
 ];
 
-export const EDGE_STATES: Record<EdgeState, { title: string; description: string; color: string }> = {
+export const DOPA_STATES: Record<DopaState, { title: string; description: string; color: string }> = {
   stable: {
     title: 'Stable',
     description: 'Your system is regulated. You have good control over impulses and can choose your responses.',
@@ -46,21 +46,21 @@ export const EDGE_STATES: Record<EdgeState, { title: string; description: string
   pulled: {
     title: 'Pulled',
     description: 'You experience frequent impulse pressure. The pull is noticeable but manageable with awareness.',
-    color: 'hsl(var(--edge-warm))',
+    color: 'hsl(var(--dopa-warm))',
   },
   overloaded: {
     title: 'Overloaded',
     description: 'Your system is under significant load. Control is reduced and stimulation feels constant.',
-    color: 'hsl(25, 80%, 55%)',
+    color: 'hsl(35, 80%, 55%)',
   },
   hijacked: {
     title: 'Hijacked',
     description: 'Impulse loops are dominating behavior. Your automatic responses are running the show.',
-    color: 'hsl(0, 65%, 50%)',
+    color: 'hsl(0, 65%, 55%)',
   },
 };
 
-export function calculateEdgeState(answers: AssessmentAnswer[]): EdgeState {
+export function calculateDopaState(answers: AssessmentAnswer[]): DopaState {
   const totalScore = answers.reduce((sum, a) => sum + a.value, 0);
   const maxScore = answers.length * 4;
   const percentage = (totalScore / maxScore) * 100;
