@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 
 type MojoState = 'calm' | 'regulating' | 'under-load' | 'steady';
@@ -47,80 +48,83 @@ const stateStyles: Record<MojoState, {
   },
 };
 
-export function MojoOrb({ state, selectedPull, size = 'md' }: MojoOrbProps) {
-  const styles = stateStyles[state];
-  
-  // Calculate lean direction based on selected pull
-  const leanX = selectedPull && selectedPull !== 'none' ? 2 : 0;
+export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
+  function MojoOrb({ state, selectedPull, size = 'md' }, ref) {
+    const styles = stateStyles[state];
+    
+    // Calculate lean direction based on selected pull
+    const leanX = selectedPull && selectedPull !== 'none' ? 2 : 0;
 
-  return (
-    <motion.div
-      className={`${sizeClasses[size]} relative`}
-      animate={{
-        scale: styles.scale,
-        x: leanX,
-      }}
-      transition={{
-        type: 'spring',
-        stiffness: 200,
-        damping: 20,
-      }}
-    >
-      {/* Base orb */}
+    return (
       <motion.div
-        className={`absolute inset-0 rounded-full bg-gradient-to-br ${styles.gradient}`}
-        style={{ boxShadow: styles.glow }}
-        animate={
-          state === 'calm' ? {
-            y: [0, -4, 0],
-            scale: [1, 1.02, 1],
-          } : state === 'regulating' ? {
-            scale: [1, 1.06, 1],
-            opacity: [0.9, 1, 0.9],
-          } : state === 'under-load' ? {
-            x: [-1, 1, -1],
-            scale: [1.03, 1.08, 1.03],
-          } : {
-            scale: [1, 1.04, 1],
-            opacity: [0.88, 1, 0.88],
-          }
-        }
-        transition={{
-          duration: state === 'calm' ? 3.5 : state === 'regulating' ? 1.8 : 2.2,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
-
-      {/* Inner highlight - gives depth */}
-      <motion.div
-        className="absolute inset-[15%] rounded-full bg-gradient-to-br from-white/25 via-white/10 to-transparent"
+        ref={ref}
+        className={`${sizeClasses[size]} relative`}
         animate={{
-          opacity: state === 'steady' ? [0.25, 0.45, 0.25] : [0.2, 0.35, 0.2],
+          scale: styles.scale,
+          x: leanX,
         }}
         transition={{
-          duration: 2.5,
-          repeat: Infinity,
-          ease: 'easeInOut',
+          type: 'spring',
+          stiffness: 200,
+          damping: 20,
         }}
-      />
-
-      {/* Outer pulse ring for steady state */}
-      {state === 'steady' && (
+      >
+        {/* Base orb */}
         <motion.div
-          className="absolute -inset-2 rounded-full border border-emerald-400/25"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ 
-            scale: [1, 1.15, 1],
-            opacity: [0.4, 0, 0.4],
+          className={`absolute inset-0 rounded-full bg-gradient-to-br ${styles.gradient}`}
+          style={{ boxShadow: styles.glow }}
+          animate={
+            state === 'calm' ? {
+              y: [0, -4, 0],
+              scale: [1, 1.02, 1],
+            } : state === 'regulating' ? {
+              scale: [1, 1.06, 1],
+              opacity: [0.9, 1, 0.9],
+            } : state === 'under-load' ? {
+              x: [-1, 1, -1],
+              scale: [1.03, 1.08, 1.03],
+            } : {
+              scale: [1, 1.04, 1],
+              opacity: [0.88, 1, 0.88],
+            }
+          }
+          transition={{
+            duration: state === 'calm' ? 3.5 : state === 'regulating' ? 1.8 : 2.2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+
+        {/* Inner highlight - gives depth */}
+        <motion.div
+          className="absolute inset-[15%] rounded-full bg-gradient-to-br from-white/25 via-white/10 to-transparent"
+          animate={{
+            opacity: state === 'steady' ? [0.25, 0.45, 0.25] : [0.2, 0.35, 0.2],
           }}
           transition={{
             duration: 2.5,
             repeat: Infinity,
-            ease: 'easeOut',
+            ease: 'easeInOut',
           }}
         />
-      )}
-    </motion.div>
-  );
-}
+
+        {/* Outer pulse ring for steady state */}
+        {state === 'steady' && (
+          <motion.div
+            className="absolute -inset-2 rounded-full border border-emerald-400/25"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ 
+              scale: [1, 1.15, 1],
+              opacity: [0.4, 0, 0.4],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: 'easeOut',
+            }}
+          />
+        )}
+      </motion.div>
+    );
+  }
+);
