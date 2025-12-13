@@ -1,13 +1,15 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MIRRORS } from '@/lib/edge-data';
-import { TokenCounter } from './TokenCounter';
+import { ChargeCounter } from './ChargeCounter';
 import { MojoOrb } from './MojoOrb';
+import type { PersonalStats } from '@/lib/charge-data';
 
 interface HomeScreenProps {
   selectedMirrors: string[];
   onSelectMirror: (mirrorId: string) => void;
-  tokenBalance: number;
+  chargeBalance: number;
+  stats: PersonalStats;
   onOpenExchange: () => void;
   onOpenInsights: () => void;
 }
@@ -33,7 +35,8 @@ const MOJO_STATE_LABELS: Record<MojoState, { label: string; color: string }> = {
 export function HomeScreen({ 
   selectedMirrors, 
   onSelectMirror, 
-  tokenBalance,
+  chargeBalance,
+  stats,
   onOpenExchange,
   onOpenInsights,
 }: HomeScreenProps) {
@@ -74,8 +77,6 @@ export function HomeScreen({
     }
   };
 
-  const focusMinutes = tokenBalance * 10;
-
   return (
     <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-calm" />
@@ -101,21 +102,38 @@ export function HomeScreen({
             </div>
           </div>
           <button onClick={onOpenExchange}>
-            <TokenCounter balance={tokenBalance} size="sm" />
+            <ChargeCounter balance={chargeBalance} size="sm" />
           </button>
         </motion.div>
+
+        {/* Stability Run indicator */}
+        {stats.currentStabilityRun > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-emerald-400">Stability Run</span>
+              <span className="text-sm font-medium text-emerald-400">
+                🔥 {stats.currentStabilityRun} day{stats.currentStabilityRun !== 1 ? 's' : ''}
+              </span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Balance indicator */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
+          transition={{ delay: 0.1 }}
           className="mb-6 p-3 rounded-xl bg-gradient-glow border border-primary/20"
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Today's balance</span>
+            <span className="text-sm text-muted-foreground">Available Charge</span>
             <span className="text-sm font-medium text-primary">
-              ⚡ {focusMinutes} Focus Minutes
+              ⚡ {chargeBalance} Charge
             </span>
           </div>
         </motion.div>
@@ -124,7 +142,7 @@ export function HomeScreen({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.15 }}
           className="flex gap-3 mb-6"
         >
           <button
@@ -147,7 +165,7 @@ export function HomeScreen({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+          transition={{ delay: 0.2 }}
           className="dopa-card mb-6"
         >
           <p className="text-sm text-muted-foreground mb-2">Daily Check-in</p>
@@ -160,7 +178,7 @@ export function HomeScreen({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.25 }}
           className="grid grid-cols-3 gap-3 mb-4"
         >
           {sortedPullOptions.map((option, i) => {
@@ -172,7 +190,7 @@ export function HomeScreen({
                 key={option.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: isFrequent ? 1 : 0.7, scale: 1 }}
-                transition={{ delay: 0.2 + i * 0.05 }}
+                transition={{ delay: 0.25 + i * 0.05 }}
                 onClick={() => handlePullSelect(option.id)}
                 className={`p-4 rounded-xl text-center transition-all duration-200 border ${
                   todaysPull === option.id
@@ -194,7 +212,7 @@ export function HomeScreen({
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.45 }}
           onClick={() => handlePullSelect('none')}
           className={`w-full p-4 rounded-xl text-center transition-all duration-200 border mb-8 ${
             todaysPull === 'none'
@@ -209,7 +227,7 @@ export function HomeScreen({
           </span>
         </motion.button>
 
-        {/* Tools section - renamed to "Slow the Pull" */}
+        {/* Tools section - "Slow the Pull" */}
         <AnimatePresence>
           {showTools && (
             <motion.div
