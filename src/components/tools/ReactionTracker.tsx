@@ -419,9 +419,9 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
             className="mb-4"
           >
             <p className="text-5xl font-bold text-foreground mb-1">
-              {tapsInRound}/{FLICKERS_PER_ROUND}
+              {tapsInRound}
             </p>
-            <p className="text-muted-foreground text-sm">flickers caught</p>
+            <p className="text-muted-foreground text-sm">targets tapped</p>
           </motion.div>
 
           {/* Points earned */}
