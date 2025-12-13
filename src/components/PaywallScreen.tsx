@@ -1,14 +1,29 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { RotateCcw } from 'lucide-react';
 
 interface PaywallScreenProps {
   onSubscribe: () => void;
   onSkip: () => void;
+  onRestore?: () => void;
 }
 
-export function PaywallScreen({ onSubscribe, onSkip }: PaywallScreenProps) {
+export function PaywallScreen({ onSubscribe, onSkip, onRestore }: PaywallScreenProps) {
   const [showPricing, setShowPricing] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+
+  const handleRestore = async () => {
+    setIsRestoring(true);
+    // This will be replaced with actual Apple IAP restore logic
+    if (onRestore) {
+      onRestore();
+    }
+    // Simulate restore check
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsRestoring(false);
+  };
 
   return (
     <div className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden">
@@ -107,7 +122,7 @@ export function PaywallScreen({ onSubscribe, onSkip }: PaywallScreenProps) {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="mb-8"
+                className="mb-6"
               >
                 <p className="text-muted-foreground text-sm uppercase tracking-widest mb-2">
                   Full Access
@@ -118,12 +133,23 @@ export function PaywallScreen({ onSubscribe, onSkip }: PaywallScreenProps) {
                 </p>
               </motion.div>
 
+              {/* Subscription terms */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.15 }}
+                className="text-xs text-muted-foreground mb-6 space-y-1"
+              >
+                <p>Auto-renews monthly until cancelled</p>
+                <p>Payment will be charged to your Apple ID account</p>
+              </motion.div>
+
               {/* What's included */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="dopa-card mb-8 text-left"
+                className="dopa-card mb-6 text-left"
               >
                 <p className="text-sm text-muted-foreground mb-4">Everything unlocked:</p>
                 <div className="space-y-3">
@@ -156,7 +182,7 @@ export function PaywallScreen({ onSubscribe, onSkip }: PaywallScreenProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="text-sm text-muted-foreground italic mb-8"
+                className="text-sm text-muted-foreground italic mb-6"
               >
                 This is where people usually close the app.
               </motion.p>
@@ -166,7 +192,7 @@ export function PaywallScreen({ onSubscribe, onSkip }: PaywallScreenProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="text-foreground font-medium mb-8"
+                className="text-foreground font-medium mb-6"
               >
                 If you're in, you're in.
                 <br />
@@ -186,30 +212,61 @@ export function PaywallScreen({ onSubscribe, onSkip }: PaywallScreenProps) {
                   onClick={onSubscribe}
                   className="w-full"
                 >
-                  I'm in
+                  Subscribe — £9.99/month
                 </Button>
+                
+                {/* Restore Purchases */}
+                <button
+                  onClick={handleRestore}
+                  disabled={isRestoring}
+                  className="w-full py-3 text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2"
+                >
+                  <RotateCcw className={`w-4 h-4 ${isRestoring ? 'animate-spin' : ''}`} />
+                  {isRestoring ? 'Restoring...' : 'Restore Purchases'}
+                </button>
                 
                 <button
                   onClick={onSkip}
-                  className="w-full py-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="w-full py-2 text-sm text-muted-foreground/60 hover:text-muted-foreground transition-colors"
                 >
                   Not today
                 </button>
               </motion.div>
 
-              {/* No tricks */}
-              <motion.p
+              {/* Legal links & terms */}
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.9 }}
-                className="text-xs text-muted-foreground mt-6"
+                className="mt-6 space-y-3"
               >
-                Cancel anytime. No questions. No tricks.
-              </motion.p>
+                <p className="text-xs text-muted-foreground">
+                  Cancel anytime in Settings → Subscriptions. No questions.
+                </p>
+                <div className="flex items-center justify-center gap-4 text-xs">
+                  <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors underline">
+                    Terms of Service
+                  </Link>
+                  <span className="text-muted-foreground/30">•</span>
+                  <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors underline">
+                    Privacy Policy
+                  </Link>
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      {/* Bottom disclaimer */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="text-center text-xs text-muted-foreground/50 mt-4 relative z-10"
+      >
+        DopaMINE is a self-regulation tool, not medical or therapeutic advice.
+      </motion.p>
     </div>
   );
 }

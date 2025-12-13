@@ -187,17 +187,27 @@ export function MojoChat({ isOpen, onClose, onTriggerTool }: MojoChatProps) {
             </button>
           </div>
 
+          {/* AI Disclaimer Banner */}
+          <div className="px-5 py-2.5 bg-muted/30 border-b border-border/20">
+            <p className="text-xs text-muted-foreground text-center">
+              Mojo is a support tool, not a therapist. For mental health concerns, please seek professional help.
+            </p>
+          </div>
+
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 h-[calc(100vh-140px)]">
+          <div className="flex-1 overflow-y-auto px-5 py-4 h-[calc(100vh-180px)]">
             {messages.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center pt-12"
+                className="text-center pt-8"
               >
                 <MojoOrb state="calm" size="lg" />
                 <p className="text-muted-foreground mt-6 text-sm">
                   Hey, I'm Mojo. What's pulling at you today?
+                </p>
+                <p className="text-muted-foreground/60 mt-2 text-xs max-w-xs mx-auto">
+                  I help with everyday attention habits — not medical or mental health advice.
                 </p>
               </motion.div>
             )}
