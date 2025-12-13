@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -20,6 +20,14 @@ export const GameStartScreen = forwardRef<HTMLDivElement, GameStartScreenProps>(
     onStart,
     onCancel,
   }, ref) {
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        onStart();
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }, [onStart]);
+
     return (
       <motion.div
         ref={ref}
