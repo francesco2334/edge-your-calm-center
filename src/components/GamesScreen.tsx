@@ -122,7 +122,7 @@ export function GamesScreen({ reactionLeaderboard, onEarnCharge, onRecordReactio
   }
 
   return (
-    <div className="min-h-screen pb-24 px-6 pt-6">
+    <div className="min-h-screen pb-32 px-6 pt-6">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
