@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-type NavTab = 'home' | 'exchange' | 'quickstop' | 'games' | 'insights';
+type NavTab = 'home' | 'learn' | 'quickstop' | 'games' | 'insights';
 
 interface BottomNavProps {
   activeTab: NavTab;
@@ -9,8 +9,8 @@ interface BottomNavProps {
 }
 
 const tabs: { id: NavTab; label: string; icon: string }[] = [
-  { id: 'home', label: 'Feed', icon: '🏠' },
-  { id: 'exchange', label: 'Exchange', icon: '⚡' },
+  { id: 'home', label: 'Home', icon: '🏠' },
+  { id: 'learn', label: 'Learn', icon: '🧠' },
   { id: 'quickstop', label: '', icon: '' }, // Center button placeholder
   { id: 'games', label: 'Arcade', icon: '🎮' },
   { id: 'insights', label: 'Insights', icon: '📊' },
