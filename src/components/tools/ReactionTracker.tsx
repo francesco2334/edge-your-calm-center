@@ -18,44 +18,53 @@ interface Particle {
   velocity: number;
 }
 
+interface FlickerTarget {
+  id: number;
+  x: number;
+  y: number;
+}
+
 export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
   function ReactionTracker({ onComplete, onCancel, leaderboard }, ref) {
     const [phase, setPhase] = useState<'intro' | 'waiting' | 'react' | 'result'>('intro');
     const [reactionTime, setReactionTime] = useState<number | null>(null);
     const [tapsInRound, setTapsInRound] = useState(0);
     const [roundPoints, setRoundPoints] = useState(0);
-    const [showFlicker, setShowFlicker] = useState(false);
+    const [flickerTargets, setFlickerTargets] = useState<FlickerTarget[]>([]);
     const [particles, setParticles] = useState<Particle[]>([]);
     const [flickerCount, setFlickerCount] = useState(0);
     const [totalReactionTime, setTotalReactionTime] = useState(0);
+    const [tapsThisFlicker, setTapsThisFlicker] = useState(0);
     const startTimeRef = useRef<number>(0);
     const flickerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const roundTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const FLICKERS_PER_ROUND = 5;
+    const FLICKER_SIZE = 80; // Size of tappable target
 
-    const spawnExplosion = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-      const rect = (e.target as HTMLElement).getBoundingClientRect();
-      let clientX: number, clientY: number;
-      
-      if ('touches' in e) {
-        clientX = e.touches[0]?.clientX || rect.left + rect.width / 2;
-        clientY = e.touches[0]?.clientY || rect.top + rect.height / 2;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-
+    const spawnExplosion = useCallback((x: number, y: number) => {
       const newParticles: Particle[] = Array.from({ length: 12 }, (_, i) => ({
-        id: Date.now() + i,
-        x: clientX,
-        y: clientY,
+        id: Date.now() + i + Math.random() * 1000,
+        x,
+        y,
         angle: (i / 12) * 360,
         velocity: 80 + Math.random() * 60,
       }));
       
-      setParticles(newParticles);
-      setTimeout(() => setParticles([]), 600);
+      setParticles(prev => [...prev, ...newParticles]);
+      setTimeout(() => setParticles(prev => prev.filter(p => !newParticles.includes(p))), 600);
+    }, []);
+
+    const getRandomPosition = useCallback(() => {
+      const padding = 60;
+      const maxX = window.innerWidth - FLICKER_SIZE - padding;
+      const maxY = window.innerHeight - FLICKER_SIZE - padding - 100; // Account for bottom nav
+      
+      return {
+        x: padding + Math.random() * maxX,
+        y: padding + Math.random() * maxY,
+      };
     }, []);
 
     const startRound = useCallback(() => {
@@ -68,17 +77,25 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
     }, []);
 
     const scheduleNextFlicker = useCallback(() => {
-      const delay = 1500 + Math.random() * 2500; // 1.5-4 seconds
+      const delay = 800 + Math.random() * 1500; // 0.8-2.3 seconds
       flickerTimeoutRef.current = setTimeout(() => {
         startTimeRef.current = Date.now();
-        setShowFlicker(true);
+        setTapsThisFlicker(0);
+        
+        // Spawn 1-3 flickers at random positions
+        const numFlickers = 1 + Math.floor(Math.random() * 2);
+        const newTargets: FlickerTarget[] = Array.from({ length: numFlickers }, (_, i) => ({
+          id: Date.now() + i,
+          ...getRandomPosition(),
+        }));
+        
+        setFlickerTargets(newTargets);
         setPhase('react');
         
-        // Flicker visible for 300-700ms (randomized)
-        const flickerDuration = 300 + Math.random() * 400;
+        // Flickers visible for 800-1500ms (longer to allow multiple taps)
+        const flickerDuration = 800 + Math.random() * 700;
         roundTimeoutRef.current = setTimeout(() => {
-          setShowFlicker(false);
-          // If still in react phase, user missed it
+          setFlickerTargets([]);
           setFlickerCount((prev) => {
             const next = prev + 1;
             if (next >= FLICKERS_PER_ROUND) {
@@ -91,40 +108,26 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
           });
         }, flickerDuration);
       }, delay);
-    }, []);
+    }, [getRandomPosition]);
 
-    const handleReaction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-      if (phase !== 'react' || !showFlicker) return;
+    const handleFlickerTap = useCallback((targetId: number, x: number, y: number) => {
+      if (phase !== 'react') return;
       
       const time = Date.now() - startTimeRef.current;
       
-      // Clear the flicker timeout since user tapped
-      if (roundTimeoutRef.current) {
-        clearTimeout(roundTimeoutRef.current);
-      }
-      
       // Explosion effect + haptic
-      spawnExplosion(e);
+      spawnExplosion(x + FLICKER_SIZE / 2, y + FLICKER_SIZE / 2);
       haptics.tapMedium();
       
       // Update stats
       setReactionTime(time);
       setTotalReactionTime((prev) => prev + time);
       setTapsInRound((prev) => prev + 1);
-      setShowFlicker(false);
+      setTapsThisFlicker((prev) => prev + 1);
       
-      // Check if round complete
-      setFlickerCount((prev) => {
-        const next = prev + 1;
-        if (next >= FLICKERS_PER_ROUND) {
-          endRound();
-        } else {
-          setPhase('waiting');
-          scheduleNextFlicker();
-        }
-        return next;
-      });
-    }, [phase, showFlicker, spawnExplosion]);
+      // Remove the tapped target
+      setFlickerTargets(prev => prev.filter(t => t.id !== targetId));
+    }, [phase, spawnExplosion]);
 
     const endRound = useCallback(() => {
       if (flickerTimeoutRef.current) clearTimeout(flickerTimeoutRef.current);
@@ -275,37 +278,52 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
       );
     }
 
+    const hasFlickers = flickerTargets.length > 0;
+
     if (phase === 'waiting' || phase === 'react') {
       return (
         <div
           ref={ref}
-          onClick={handleReaction}
-          className="min-h-screen w-full flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden cursor-pointer"
+          className="min-h-screen w-full flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden"
         >
-          <div className={`absolute inset-0 transition-colors duration-100 ${showFlicker ? 'bg-primary/20' : 'bg-background'}`} />
+          <div className={`absolute inset-0 transition-colors duration-100 ${hasFlickers ? 'bg-primary/10' : 'bg-background'}`} />
+          
+          {/* Random position flicker targets */}
+          <AnimatePresence>
+            {flickerTargets.map((target) => (
+              <motion.button
+                key={target.id}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                onClick={() => handleFlickerTap(target.id, target.x, target.y)}
+                className="fixed z-30 rounded-full bg-primary flex items-center justify-center"
+                style={{
+                  left: target.x,
+                  top: target.y,
+                  width: FLICKER_SIZE,
+                  height: FLICKER_SIZE,
+                  boxShadow: '0 0 40px hsl(var(--primary) / 0.8), 0 0 80px hsl(var(--primary) / 0.4)',
+                }}
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ repeat: Infinity, duration: 0.5 }}
+                  className="w-4 h-4 rounded-full bg-primary-foreground"
+                />
+              </motion.button>
+            ))}
+          </AnimatePresence>
           
           <div className="relative z-10 text-center">
-            {/* Flicker ring around Mojo */}
+            {/* Mojo stays in center as reference */}
             <div className="relative mb-8">
-              <AnimatePresence>
-                {showFlicker && (
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 1.3, opacity: 0 }}
-                    className="absolute -inset-6 rounded-full border-4 border-primary"
-                    style={{
-                      boxShadow: '0 0 30px hsl(var(--primary) / 0.6), inset 0 0 20px hsl(var(--primary) / 0.3)',
-                    }}
-                  />
-                )}
-              </AnimatePresence>
-              
               <motion.div
-                animate={{ scale: showFlicker ? 1.1 : 1 }}
-                transition={{ duration: 0.1 }}
+                animate={{ scale: hasFlickers ? 0.9 : 1, opacity: hasFlickers ? 0.5 : 1 }}
+                transition={{ duration: 0.2 }}
               >
-                <MojoOrb state={showFlicker ? 'under-load' : 'calm'} size="lg" />
+                <MojoOrb state={hasFlickers ? 'under-load' : 'calm'} size="lg" />
               </motion.div>
             </div>
 
@@ -313,9 +331,9 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className={`text-lg font-medium transition-colors ${showFlicker ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`text-lg font-medium transition-colors ${hasFlickers ? 'text-primary' : 'text-muted-foreground'}`}
             >
-              {showFlicker ? 'TAP NOW!' : 'Wait for it...'}
+              {hasFlickers ? 'TAP THE ORBS!' : 'Wait for it...'}
             </motion.p>
 
             {/* Progress indicator */}
@@ -365,7 +383,7 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
               cleanup();
               onCancel();
             }}
-            className="absolute bottom-24 text-muted-foreground/60 text-xs underline"
+            className="absolute bottom-24 text-muted-foreground/60 text-xs underline z-20"
           >
             Exit
           </button>
