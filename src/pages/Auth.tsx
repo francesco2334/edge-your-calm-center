@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -227,6 +227,22 @@ export default function Auth() {
             {isSignUp ? 'Sign in' : 'Sign up'}
           </button>
         </motion.p>
+
+        {/* Legal links */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="flex items-center justify-center gap-4 mt-6 text-xs text-muted-foreground"
+        >
+          <Link to="/privacy" className="hover:text-foreground transition-colors">
+            Privacy Policy
+          </Link>
+          <span>·</span>
+          <Link to="/terms" className="hover:text-foreground transition-colors">
+            Terms of Service
+          </Link>
+        </motion.div>
       </div>
     </div>
   );
