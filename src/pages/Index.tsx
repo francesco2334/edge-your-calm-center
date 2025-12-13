@@ -11,6 +11,7 @@ import { AllocateScreen } from '@/components/AllocateScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
 import { BottomNav } from '@/components/BottomNav';
 import { QuickStopModal } from '@/components/QuickStopModal';
+import { MojoChat } from '@/components/MojoChat';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync } from '@/components/tools';
 import { useCharge } from '@/hooks/useCharge';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +27,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [showQuickStop, setShowQuickStop] = useState(false);
+  const [showMojoChat, setShowMojoChat] = useState(false);
   const [activeQuickTool, setActiveQuickTool] = useState<QuickTool>(null);
   
   const { 
@@ -163,6 +165,7 @@ const Index = () => {
           onEarnCharge={earnCharge}
           onClaimStreak={handleClaimStreak}
           onRecordReaction={recordReactionTime}
+          onOpenMojoChat={() => setShowMojoChat(true)}
         />
       )}
       
@@ -209,6 +212,12 @@ const Index = () => {
           setShowQuickStop(false);
           setActiveQuickTool(tool);
         }}
+      />
+
+      {/* Mojo Chat */}
+      <MojoChat
+        isOpen={showMojoChat}
+        onClose={() => setShowMojoChat(false)}
       />
     </div>
   );

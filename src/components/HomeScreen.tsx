@@ -21,6 +21,7 @@ interface HomeScreenProps {
   onEarnCharge: (amount: number, reason: string) => void;
   onClaimStreak: () => boolean;
   onRecordReaction: (ms: number) => void;
+  onOpenMojoChat?: () => void;
 }
 
 type ActiveTool = 'pause' | 'name' | 'prediction' | 'breathing' | 'reaction' | null;
@@ -36,6 +37,7 @@ export function HomeScreen({
   onEarnCharge,
   onClaimStreak,
   onRecordReaction,
+  onOpenMojoChat,
 }: HomeScreenProps) {
   const [activeTool, setActiveTool] = useState<ActiveTool>(null);
   const [showPullSheet, setShowPullSheet] = useState(false);
@@ -159,9 +161,16 @@ export function HomeScreen({
           transition={{ delay: 0.1, duration: 0.6 }}
           className="flex flex-col items-center justify-center pt-6 pb-10"
         >
-          <StreakRing streak={streak} claimed={streakClaimedToday} size={220}>
-            <MojoOrb state={mojoState} size="lg" />
-          </StreakRing>
+          <button 
+            onClick={onOpenMojoChat}
+            className="focus:outline-none"
+            aria-label="Chat with Mojo"
+          >
+            <StreakRing streak={streak} claimed={streakClaimedToday} size={220}>
+              <MojoOrb state={mojoState} size="lg" />
+            </StreakRing>
+          </button>
+          <p className="text-xs text-muted-foreground/60 mt-2">Tap Mojo to chat</p>
           
           {/* Streak text - integrated with hero */}
           <motion.div
