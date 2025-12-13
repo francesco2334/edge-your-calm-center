@@ -1,7 +1,8 @@
-import { useState, useEffect, forwardRef } from 'react';
+import { useState, useEffect, forwardRef, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Zap, Target, Timer, TrendingUp, Sparkles } from 'lucide-react';
 import { MojoOrb } from '../MojoOrb';
+import { haptics } from '@/hooks/useHaptics';
 
 interface BreathingSyncProps {
   onComplete: () => void;
@@ -39,6 +40,8 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
     };
 
     // Main timer + breath phase calculation
+    const prevPhaseRef = useRef<'inhale' | 'hold' | 'exhale'>('inhale');
+    
     useEffect(() => {
       if (phase !== 'active') return;
 
@@ -49,6 +52,7 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
         setTimeRemaining((prev) => {
           if (prev <= 1) {
             setPhase('complete');
+            haptics.notifySuccess();
             return 0;
           }
           return prev - 1;
@@ -57,16 +61,25 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
         cyclePosition = (cyclePosition + 1) % (cycleLength * 10); // 10 ticks per second for smoother animation
         const position = cyclePosition / 10;
 
+        let newBreathPhase: 'inhale' | 'hold' | 'exhale';
         if (position < BREATH_CYCLE.inhale) {
-          setBreathPhase('inhale');
+          newBreathPhase = 'inhale';
           setPhaseProgress(position / BREATH_CYCLE.inhale);
         } else if (position < BREATH_CYCLE.inhale + BREATH_CYCLE.hold) {
-          setBreathPhase('hold');
+          newBreathPhase = 'hold';
           setPhaseProgress((position - BREATH_CYCLE.inhale) / BREATH_CYCLE.hold);
         } else {
-          setBreathPhase('exhale');
+          newBreathPhase = 'exhale';
           setPhaseProgress((position - BREATH_CYCLE.inhale - BREATH_CYCLE.hold) / BREATH_CYCLE.exhale);
         }
+        
+        // Haptic on phase change
+        if (newBreathPhase !== prevPhaseRef.current) {
+          prevPhaseRef.current = newBreathPhase;
+          haptics.selectionChanged();
+        }
+        
+        setBreathPhase(newBreathPhase);
       }, 100); // Update 10 times per second
 
       return () => clearInterval(timer);

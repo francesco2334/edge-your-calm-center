@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MojoOrb } from '../MojoOrb';
 import { REAL_WORLD_COMPARISONS, getReactionTier, getPercentile, type ReactionLeaderboard } from '@/lib/reaction-data';
+import { haptics } from '@/hooks/useHaptics';
 
 interface ReactionTrackerProps {
   onComplete: (reactionTimeMs: number) => void;
@@ -102,8 +103,9 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
         clearTimeout(roundTimeoutRef.current);
       }
       
-      // Explosion effect
+      // Explosion effect + haptic
       spawnExplosion(e);
+      haptics.tapMedium();
       
       // Update stats
       setReactionTime(time);
@@ -132,6 +134,7 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
       const earnedPoints = Math.floor(tapsInRound / 3) + (tapsInRound % 3) * 0.33;
       setRoundPoints(Math.round(earnedPoints * 100) / 100);
       setPhase('result');
+      haptics.notifySuccess();
     }, [tapsInRound]);
 
     const handleComplete = useCallback(() => {
