@@ -29,6 +29,7 @@ const Index = () => {
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [showQuickStop, setShowQuickStop] = useState(false);
   const [showMojoChat, setShowMojoChat] = useState(false);
+  const [showPullSheet, setShowPullSheet] = useState(false);
   const [activeQuickTool, setActiveQuickTool] = useState<QuickTool>(null);
   
   const { 
@@ -193,6 +194,7 @@ const Index = () => {
           onClaimStreak={handleClaimStreak}
           onRecordReaction={recordReactionTime}
           onOpenMojoChat={() => setShowMojoChat(true)}
+          onOpenQuickStop={() => setShowQuickStop(true)}
         />
       )}
       
@@ -228,6 +230,7 @@ const Index = () => {
           setShowQuickStop(false);
           setActiveQuickTool(tool);
         }}
+        onLogPull={() => setShowPullSheet(true)}
       />
 
       {/* Mojo Chat */}

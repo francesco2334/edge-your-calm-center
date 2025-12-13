@@ -33,11 +33,11 @@ export function StreakRing({ streak, claimed, size = 196, children }: StreakRing
           fill="none"
           stroke="hsl(var(--border))"
           strokeWidth={strokeWidth}
-          opacity={0.2}
+          opacity={0.15}
         />
       </svg>
       
-      {/* Progress ring - refined glow */}
+      {/* Progress ring - animated fill with gradient */}
       <svg
         className="absolute inset-0 -rotate-90"
         width={size}
@@ -55,7 +55,7 @@ export function StreakRing({ streak, claimed, size = 196, children }: StreakRing
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset }}
-          transition={{ duration: 1.2, ease: 'easeOut' }}
+          transition={{ duration: 1.4, ease: 'easeOut' }}
           className="dopa-ring"
         />
         <defs>
@@ -71,29 +71,29 @@ export function StreakRing({ streak, claimed, size = 196, children }: StreakRing
         {children}
       </div>
       
-      {/* Streak badge - top right */}
+      {/* Streak badge - top right, only if streak > 0 */}
       {streak > 0 && (
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.6, type: 'spring', stiffness: 300 }}
-          className="absolute -top-1 -right-1 bg-gradient-neon rounded-full px-2.5 py-1 shadow-lg shadow-primary/20"
+          transition={{ delay: 0.7, type: 'spring', stiffness: 280, damping: 18 }}
+          className="absolute -top-1 -right-1 bg-gradient-neon rounded-full px-2.5 py-1.5 shadow-lg shadow-primary/25"
         >
-          <span className="text-[11px] font-bold text-primary-foreground">
+          <span className="text-[11px] font-bold text-primary-foreground tracking-wide">
             🔥 {streak}
           </span>
         </motion.div>
       )}
       
-      {/* Completion indicator - bottom */}
+      {/* Completion indicator - bottom, only if claimed */}
       {claimed && (
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.8, type: 'spring' }}
-          className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-emerald-500/90 rounded-full px-3 py-1"
+          transition={{ delay: 0.9, type: 'spring', stiffness: 300 }}
+          className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-emerald-500/95 rounded-full px-3.5 py-1.5 shadow-md"
         >
-          <span className="text-[10px] font-semibold text-white tracking-wide">Today ✓</span>
+          <span className="text-[10px] font-bold text-white tracking-wide">Today ✓</span>
         </motion.div>
       )}
     </div>
