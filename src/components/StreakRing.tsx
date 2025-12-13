@@ -7,8 +7,8 @@ interface StreakRingProps {
   children?: React.ReactNode;
 }
 
-export function StreakRing({ streak, claimed, size = 180, children }: StreakRingProps) {
-  const strokeWidth = 4;
+export function StreakRing({ streak, claimed, size = 220, children }: StreakRingProps) {
+  const strokeWidth = 6; // +50% thicker ring
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   
