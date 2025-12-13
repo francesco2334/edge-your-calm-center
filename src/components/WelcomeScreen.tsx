@@ -10,7 +10,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute inset-0 bg-gradient-calm" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-pulse opacity-30" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-pulse opacity-40" />
       
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -18,16 +18,14 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
         transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
         className="relative z-10 text-center max-w-md"
       >
-        {/* Logo */}
+        {/* Logo - Orb */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mb-12"
         >
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-glow border border-primary/20 flex items-center justify-center shadow-glow">
-            <span className="text-3xl font-bold text-gradient-accent">E</span>
-          </div>
+          <div className="w-20 h-20 mx-auto dopa-orb" />
         </motion.div>
 
         {/* Tagline */}
@@ -37,7 +35,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-muted-foreground text-sm uppercase tracking-widest mb-6"
         >
-          EDGE
+          Dopa<span className="text-primary font-semibold">MINE</span>
         </motion.p>
 
         {/* Main message */}
@@ -47,7 +45,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="text-3xl md:text-4xl font-semibold text-foreground leading-tight mb-4"
         >
-          Some things pull harder than others.
+          Your attention is being mined.
         </motion.h1>
 
         <motion.p
@@ -56,7 +54,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="text-lg text-muted-foreground leading-relaxed mb-12"
         >
-          EDGE helps you understand the pull — and choose again.
+          DopaMINE helps you understand the pull — and choose again.
         </motion.p>
 
         {/* CTA */}
@@ -76,7 +74,7 @@ export function WelcomeScreen({ onContinue }: WelcomeScreenProps) {
           </Button>
           
           <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Why EDGE works
+            Why DopaMINE works
           </button>
         </motion.div>
       </motion.div>

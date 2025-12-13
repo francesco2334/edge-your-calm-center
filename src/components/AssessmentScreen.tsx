@@ -45,7 +45,7 @@ export function AssessmentScreen({ onComplete }: AssessmentScreenProps) {
       {/* Progress bar */}
       <div className="relative z-10 mb-8">
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-          <span>EDGE Pull Assessment</span>
+          <span>DopaMINE Scan</span>
           <span>{currentIndex + 1} / {ASSESSMENT_QUESTIONS.length}</span>
         </div>
         <div className="h-1 bg-muted rounded-full overflow-hidden">
@@ -67,7 +67,7 @@ export function AssessmentScreen({ onComplete }: AssessmentScreenProps) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.3 }}
-            className="edge-card mb-8"
+            className="dopa-card mb-8"
           >
             <p className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed">
               "{currentQuestion.text}"
@@ -89,7 +89,7 @@ export function AssessmentScreen({ onComplete }: AssessmentScreenProps) {
               className={`w-full p-4 rounded-xl text-left transition-all duration-200 border ${
                 selectedValue === option.value
                   ? 'bg-primary/10 border-primary/50 text-foreground'
-                  : 'bg-edge-surface border-border/30 text-muted-foreground hover:bg-muted hover:text-foreground'
+                  : 'bg-dopa-surface border-border/30 text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
               <span className="font-medium">{option.label}</span>
