@@ -159,9 +159,9 @@ export function HomeScreen({
               <ChargeCounter balance={chargeBalance} size="sm" />
             </button>
             <button 
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/settings')}
               className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
-              aria-label={isAuthenticated ? 'Profile' : 'Sign in'}
+              aria-label={isAuthenticated ? 'Settings' : 'Sign in'}
             >
               {isAuthenticated && user?.email ? (
                 <span className="text-xs font-medium text-foreground">
