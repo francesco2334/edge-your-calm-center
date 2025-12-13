@@ -3,16 +3,19 @@ import { WelcomeScreen } from '@/components/WelcomeScreen';
 import { PermissionScreen } from '@/components/PermissionScreen';
 import { AssessmentScreen } from '@/components/AssessmentScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
+import { PaywallScreen } from '@/components/PaywallScreen';
 import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
 import { HomeScreen } from '@/components/HomeScreen';
 import { ExchangeScreen } from '@/components/ExchangeScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
 import { useTokens } from '@/hooks/useTokens';
+import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
-type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'atlas' | 'home' | 'exchange' | 'insights';
+type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'paywall' | 'atlas' | 'home' | 'exchange' | 'insights';
 
 const Index = () => {
+  const { toast } = useToast();
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('welcome');
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [selectedMirrors, setSelectedMirrors] = useState<string[]>([]);
@@ -32,6 +35,14 @@ const Index = () => {
     );
   };
 
+  const handleSubscribe = () => {
+    toast({
+      title: "Welcome to DopaMINE",
+      description: "Full access unlocked. Let's meet Mojo.",
+    });
+    setCurrentScreen('atlas');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {currentScreen === 'welcome' && (
@@ -46,7 +57,13 @@ const Index = () => {
       {currentScreen === 'results' && (
         <ResultsScreen 
           answers={assessmentAnswers} 
-          onContinue={() => setCurrentScreen('atlas')} 
+          onContinue={() => setCurrentScreen('paywall')} 
+        />
+      )}
+      {currentScreen === 'paywall' && (
+        <PaywallScreen 
+          onSubscribe={handleSubscribe}
+          onSkip={() => setCurrentScreen('atlas')}
         />
       )}
       {currentScreen === 'atlas' && (
