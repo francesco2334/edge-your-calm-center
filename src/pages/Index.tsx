@@ -9,6 +9,7 @@ import { HomeScreen } from '@/components/HomeScreen';
 import { GamesScreen } from '@/components/GamesScreen';
 import { AllocateScreen } from '@/components/AllocateScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
+import { LearnFeed } from '@/components/LearnFeed';
 import { BottomNav } from '@/components/BottomNav';
 import { QuickStopModal } from '@/components/QuickStopModal';
 import { MojoChat, type MojoTool } from '@/components/MojoChat';
@@ -18,7 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
 type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'paywall' | 'atlas' | 'main';
-type MainTab = 'home' | 'exchange' | 'quickstop' | 'games' | 'insights';
+type MainTab = 'home' | 'learn' | 'quickstop' | 'games' | 'insights';
 type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
 
 const Index = () => {
@@ -163,6 +164,20 @@ const Index = () => {
     );
   }
 
+  // Learn tab - TikTok style fullscreen swipe feed
+  if (activeTab === 'learn') {
+    return (
+      <div className="min-h-screen bg-background">
+        <LearnFeed onClose={() => setActiveTab('home')} />
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          onQuickStop={() => setShowQuickStop(true)}
+        />
+      </div>
+    );
+  }
+
   // Main app with bottom nav
   return (
     <div className="min-h-screen bg-background">
@@ -173,22 +188,11 @@ const Index = () => {
           streak={streak}
           streakClaimedToday={streakClaimedToday}
           reactionLeaderboard={reactionLeaderboard}
-          onOpenExchange={() => setActiveTab('exchange')}
+          onOpenExchange={() => setActiveTab('games')}
           onEarnCharge={earnCharge}
           onClaimStreak={handleClaimStreak}
           onRecordReaction={recordReactionTime}
           onOpenMojoChat={() => setShowMojoChat(true)}
-        />
-      )}
-      
-      {activeTab === 'exchange' && (
-        <AllocateScreen
-          balance={balance}
-          activeSession={activeSession}
-          onEarn={earnCharge}
-          onAllocate={allocateCharge}
-          onCompleteSession={completeSession}
-          onBack={() => setActiveTab('home')}
         />
       )}
       

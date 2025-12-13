@@ -16,10 +16,10 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         // EDGE custom variants
-        edge: "bg-primary text-primary-foreground edge-glow-button font-semibold",
+        edge: "bg-primary text-primary-foreground dopa-glow-button font-semibold",
         edgeOutline: "border border-primary/30 bg-transparent text-foreground hover:bg-primary/10 hover:border-primary/50",
         edgeGhost: "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",
-        edgeSubtle: "bg-edge-surface text-foreground hover:bg-edge-surface/80 border border-border/50",
+        edgeSubtle: "bg-muted text-foreground hover:bg-muted/80 border border-border/50",
       },
       size: {
         default: "h-12 px-6 py-3",
