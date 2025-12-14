@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Share2, MoreHorizontal, EyeOff, Flag } from 'lucide-react';
+import { Heart, Share2, MoreHorizontal, EyeOff, Flag, Clock, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { type LearnCard as LearnCardData, getTopicById } from '@/lib/learn-data';
+import { getReadingTime } from '@/hooks/useLearnProgress';
+import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 
 interface LearnCardProps {
   card: LearnCardData;
@@ -15,7 +17,19 @@ export function LearnCardComponent({ card, isLiked, onLike, onShare, onHide }: L
   const [showMenu, setShowMenu] = useState(false);
   const [imageError, setImageError] = useState(false);
   const topic = getTopicById(card.topicId);
+  const { isPlaying, isLoading, toggle, isSupported } = useTextToSpeech();
 
+  const readingTime = useMemo(() => {
+    const fullText = `${card.title}. ${card.content}. ${card.fact || ''} ${card.tryThis || ''}`;
+    return getReadingTime(fullText);
+  }, [card]);
+
+  const fullNarrationText = useMemo(() => {
+    let text = `${card.title}. ${card.content}`;
+    if (card.fact) text += `. The science: ${card.fact}`;
+    if (card.tryThis) text += `. Try this: ${card.tryThis}`;
+    return text;
+  }, [card]);
   return (
     <div className="absolute inset-0 flex flex-col">
       {/* Image section - top 60% */}
@@ -38,7 +52,7 @@ export function LearnCardComponent({ card, isLiked, onLike, onShare, onHide }: L
 
       {/* Content section - bottom 40% */}
       <div className="relative flex-1 bg-background px-6 pt-4 pb-24 overflow-y-auto">
-        {/* Topic badge */}
+        {/* Topic badge + reading time */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -50,6 +64,10 @@ export function LearnCardComponent({ card, isLiked, onLike, onShare, onHide }: L
             <span className="text-xs font-semibold text-white uppercase tracking-wide">
               {topic?.label || card.topicId}
             </span>
+          </div>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-xs">{readingTime} min read</span>
           </div>
         </motion.div>
 
@@ -109,7 +127,30 @@ export function LearnCardComponent({ card, isLiked, onLike, onShare, onHide }: L
       </div>
 
       {/* Side actions - TikTok style */}
-      <div className="absolute right-4 bottom-28 flex flex-col items-center gap-5 z-10">
+      <div className="absolute right-4 bottom-28 flex flex-col items-center gap-4 z-10">
+        {/* Audio narration */}
+        {isSupported && (
+          <button
+            onClick={() => toggle(fullNarrationText)}
+            className="flex flex-col items-center gap-1"
+          >
+            <motion.div 
+              whileTap={{ scale: 1.2 }}
+              className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
+                isPlaying ? 'bg-primary' : 'bg-foreground/10 backdrop-blur-sm'
+              }`}
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 text-foreground animate-spin" />
+              ) : isPlaying ? (
+                <VolumeX className="w-5 h-5 text-white" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-foreground" />
+              )}
+            </motion.div>
+            <span className="text-[10px] text-foreground/60">{isPlaying ? 'Stop' : 'Listen'}</span>
+          </button>
+        )}
         {/* Like */}
         <button
           onClick={onLike}
