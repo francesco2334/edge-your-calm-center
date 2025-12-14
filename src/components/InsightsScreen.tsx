@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { InsightsGraph } from './InsightsGraph';
 import { ChargeCounter } from './ChargeCounter';
-import { ProgressGraph, WeeklyReflection, MonthlySummary, MonthlyNotes, TrophyCase } from './insights';
+import { ProgressGraph, WeeklyReflection, MonthlySummary, MonthlyNotes, TrophyCase, JourneyTimeline } from './insights';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 import type { PersonalStats } from '@/lib/charge-data';
-import type { MonthlyScore, Trophy, WeeklyReflection as WeeklyReflectionType, MonthlyNote } from '@/lib/progress-data';
+import type { MonthlyScore, Trophy, WeeklyReflection as WeeklyReflectionType, MonthlyNote, MonthlySummary as MonthlySummaryType } from '@/lib/progress-data';
 import { getMonthKey } from '@/lib/progress-data';
 
 interface InsightsScreenProps {
@@ -18,6 +18,8 @@ interface InsightsScreenProps {
   hasWeeklyReflection: boolean;
   hasMonthlySummary: boolean;
   monthlyNote?: MonthlyNote;
+  monthlyNotes: MonthlyNote[];
+  monthlySummaries: MonthlySummaryType[];
   onWeeklyReflection: (prompts: WeeklyReflectionType['prompts']) => void;
   onMonthlySummary: (content: string) => void;
   onSaveMonthlyNote: (improvements: string, notes: string) => void;
@@ -29,6 +31,8 @@ export function InsightsScreen({
   stats, 
   onBack,
   monthlyScores,
+  monthlyNotes,
+  monthlySummaries,
   trophies,
   hasWeeklyReflection,
   hasMonthlySummary,
@@ -216,12 +220,27 @@ export function InsightsScreen({
           </motion.div>
         )}
 
+        {/* Journey Timeline */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mb-6"
+        >
+          <JourneyTimeline
+            monthlyNotes={monthlyNotes}
+            monthlySummaries={monthlySummaries}
+            monthlyScores={monthlyScores}
+            trophies={trophies}
+          />
+        </motion.div>
+
         {/* Assessment Insights */}
         {answers.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.55 }}
           >
             <p className="text-sm text-muted-foreground mb-3">Edge Profile</p>
             <InsightsGraph answers={answers} />
