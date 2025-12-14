@@ -16,8 +16,10 @@ import { QuickStopModal } from '@/components/QuickStopModal';
 import { MojoChat, type MojoTool } from '@/components/MojoChat';
 import { ResetWithoutShameModal } from '@/components/ResetWithoutShameModal';
 import { DailyQuestionPrompt } from '@/components/DailyQuestionPrompt';
+import { TriggerRouting } from '@/components/TriggerRouting';
+import { TimeSessionBanner, TimeExpiredModal } from '@/components/TimeSession';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync } from '@/components/tools';
-import { usePersistedCharge } from '@/hooks/usePersistedCharge';
+import { useTokenEconomy } from '@/hooks/useTokenEconomy';
 import { useProgress } from '@/hooks/useProgress';
 import { useTrial } from '@/hooks/useTrial';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,29 +40,39 @@ const Index = () => {
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [showQuickStop, setShowQuickStop] = useState(false);
   const [showMojoChat, setShowMojoChat] = useState(false);
-  const [showPullSheet, setShowPullSheet] = useState(false);
   const [activeQuickTool, setActiveQuickTool] = useState<QuickTool>(null);
   const [failureContext, setFailureContext] = useState<FailureContext>(null);
   const [showDailyQuestion, setShowDailyQuestion] = useState(false);
+  const [showTriggerRouting, setShowTriggerRouting] = useState(false);
+  const [currentTrigger, setCurrentTrigger] = useState<string | null>(null);
+  const [showTimeExpired, setShowTimeExpired] = useState(false);
   
   // Daily question hook
   const { hasAnsweredToday } = useDailyQuestion();
   
+  // NEW: Clean token economy system
   const { 
-    balance, 
-    transactions,
-    earnCharge, 
-    stats,
+    tokens,
+    points,
     streak,
-    streakClaimedToday,
-    reactionLeaderboard,
-    isLoaded: chargeLoaded,
-    claimDailyStreak,
-    recordReactionTime,
-    recordEarlyExit,
-  } = usePersistedCharge(user?.id ?? null, 5);
+    stats,
+    activeSession,
+    hasLoggedToday,
+    isLoaded: economyLoaded,
+    tokenTransactions,
+    learnCardsTowardsToken,
+    LEARN_CARDS_PER_TOKEN,
+    MINUTES_PER_TOKEN,
+    logDailyPull,
+    recordLearnCard,
+    recordGameComplete,
+    recordGameFail,
+    spendTokens,
+    endSession,
+    exitSessionEarly,
+  } = useTokenEconomy(user?.id ?? null);
 
-  // Progress Engine
+  // Progress Engine (for reflections, trophies - separate from economy)
   const {
     monthlyScores,
     monthlyNotes,
@@ -79,7 +91,7 @@ const Index = () => {
   const { isActive: trialActive, hasAccepted: trialAccepted, daysRemaining, isLoaded: trialLoaded, startTrial } = useTrial(user?.id);
 
   // Show loading state while data loads
-  if (!chargeLoaded || !trialLoaded) {
+  if (!economyLoaded || !trialLoaded) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -91,43 +103,60 @@ const Index = () => {
     setAssessmentAnswers(answers);
     setCurrentScreen('results');
   };
-  const handleClaimStreak = () => {
-    const success = claimDailyStreak();
-    if (success) {
-      recordActivity('streak', 'Daily streak claimed');
-      toast({
-        title: `🔥 Day ${streak + 1} streak!`,
-        description: "+20 Charge earned for daily check-in",
-      });
+
+  // Handle daily pull logging - awards +3 tokens once per day
+  const handlePullSelect = (pullId: string) => {
+    const awarded = logDailyPull(pullId);
+    setCurrentTrigger(pullId);
+    
+    // Show trigger routing (helps based on what pulled them)
+    if (pullId !== 'none') {
+      setShowTriggerRouting(true);
     }
-    return success;
+    
+    // Show daily question if not answered
+    if (!hasAnsweredToday) {
+      setTimeout(() => setShowDailyQuestion(true), 500);
+    }
   };
 
-  const handleQuickToolComplete = (charge: number, reason: string) => {
-    earnCharge(charge, reason);
-    recordActivity('tool_used', reason);
+  // Handle relapse-type pulls
+  const handleRelapseLogged = () => {
+    setFailureContext('relapse');
+  };
+
+  // Handle game completion - awards +1 token + points
+  const handleGameComplete = (gameId: string, details: string) => {
+    recordGameComplete(gameId as any, details);
+    recordActivity('game', details, 10);
+  };
+
+  // Handle game failure/early exit - deducts points ONLY, never tokens
+  const handleGameFail = (gameId: string, reason: string) => {
+    recordGameFail(gameId as any, reason);
+    setFailureContext('game-loss');
+  };
+
+  // Handle quick tool completion
+  const handleQuickToolComplete = (gameId: string, details: string) => {
+    recordGameComplete(gameId as any, details);
+    recordActivity('tool_used', details);
     setActiveQuickTool(null);
-    toast({
-      title: "Well done",
-      description: `+${charge} Charge earned`,
-    });
   };
 
   const handleWeeklyReflection = (prompts: any) => {
     submitWeeklyReflection(prompts);
-    earnCharge(25, 'Weekly reflection');
     toast({
       title: "Reflection saved",
-      description: "+25 Charge earned",
+      description: "Your weekly reflection has been recorded.",
     });
   };
 
   const handleMonthlySummary = (content: string) => {
     submitMonthlySummary(content);
-    earnCharge(50, 'Monthly summary');
     toast({
       title: "Monthly summary saved",
-      description: "+50 Charge earned",
+      description: "Your monthly insights have been recorded.",
     });
   };
 
@@ -143,11 +172,6 @@ const Index = () => {
     setActiveQuickTool(toolMap[tool]);
   };
 
-  const handleGameComplete = (charge: number, reason: string) => {
-    earnCharge(charge, reason);
-    recordActivity('game', reason, 20);
-  };
-
   const handleTabChange = (tab: MainTab) => {
     if (tab === 'quickstop') {
       setShowQuickStop(true);
@@ -156,56 +180,62 @@ const Index = () => {
     }
   };
 
-  const handleEarlyExit = (toolName: string) => {
-    recordEarlyExit(toolName);
-    setActiveQuickTool(null);
-    // Show failure protocol modal instead of just a toast
-    setFailureContext('game-loss');
-  };
-
-  // Handle pull selection with daily question prompt
-  const handlePullLogged = () => {
-    // Show daily question if not answered today
-    if (!hasAnsweredToday) {
-      setTimeout(() => setShowDailyQuestion(true), 500);
+  // Handle spending tokens for time
+  const handleSpendTokens = (tokenCount: number, activity: string) => {
+    const session = spendTokens(tokenCount, activity);
+    if (session) {
+      setActiveTab('home'); // Go back to home, show timer
     }
   };
 
-  // Handle relapse-type pulls
-  const handleRelapseLogged = () => {
-    setFailureContext('relapse');
+  // Handle session end
+  const handleSessionEnd = () => {
+    setShowTimeExpired(true);
+    endSession();
   };
 
   // Render quick tool fullscreen
   if (activeQuickTool === 'pause') {
     return (
       <PauseLadder 
-        onComplete={(s) => handleQuickToolComplete(s >= 40 ? 2 : 1, `Standoff: ${s}s`)}
-        onCancel={() => handleEarlyExit('The Standoff')}
+        onComplete={(s) => handleQuickToolComplete('standoff', `Standoff: ${s}s`)}
+        onCancel={() => {
+          handleGameFail('standoff', 'Early exit');
+          setActiveQuickTool(null);
+        }}
       />
     );
   }
   if (activeQuickTool === 'name') {
     return (
       <NameThePull 
-        onComplete={(f) => handleQuickToolComplete(1, `Named: ${f}`)}
-        onCancel={() => handleEarlyExit('Name It')}
+        onComplete={(f) => handleQuickToolComplete('nameIt', `Named: ${f}`)}
+        onCancel={() => {
+          handleGameFail('nameIt', 'Early exit');
+          setActiveQuickTool(null);
+        }}
       />
     );
   }
   if (activeQuickTool === 'prediction') {
     return (
       <PredictionReality 
-        onComplete={(p, r) => handleQuickToolComplete(1, `Bluff: ${p}→${r}`)}
-        onCancel={() => handleEarlyExit('The Bluff')}
+        onComplete={(p, r) => handleQuickToolComplete('bluff', `Bluff: ${p}→${r}`)}
+        onCancel={() => {
+          handleGameFail('bluff', 'Early exit');
+          setActiveQuickTool(null);
+        }}
       />
     );
   }
   if (activeQuickTool === 'breathing') {
     return (
       <BreathingSync 
-        onComplete={() => handleQuickToolComplete(2, 'Sync complete')}
-        onCancel={() => handleEarlyExit('Sync')}
+        onComplete={() => handleQuickToolComplete('sync', 'Sync complete')}
+        onCancel={() => {
+          handleGameFail('sync', 'Early exit');
+          setActiveQuickTool(null);
+        }}
       />
     );
   }
@@ -265,7 +295,10 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <LearnFeed 
           onClose={() => setActiveTab('home')}
-          onCardViewed={() => recordActivity('learn', 'Card viewed', 2)}
+          onCardViewed={() => {
+            recordLearnCard();
+            recordActivity('learn', 'Card viewed', 2);
+          }}
           onCardSaved={() => recordActivity('learn', 'Card saved', 5)}
         />
         <BottomNav
@@ -280,60 +313,55 @@ const Index = () => {
   // Main app with bottom nav
   return (
     <div className="min-h-screen bg-background">
+      {/* Active time session banner */}
+      {activeSession && (
+        <TimeSessionBanner
+          session={activeSession}
+          onEndSession={handleSessionEnd}
+          onExitEarly={exitSessionEarly}
+        />
+      )}
+
       {activeTab === 'home' && (
         <HomeScreen 
-          chargeBalance={balance}
-          stats={stats}
+          tokens={tokens}
+          points={points}
           streak={streak}
-          streakClaimedToday={streakClaimedToday}
-          reactionLeaderboard={reactionLeaderboard}
+          hasLoggedToday={hasLoggedToday}
           trialDaysRemaining={trialActive ? daysRemaining : undefined}
+          currentTrigger={currentTrigger}
           onOpenExchange={() => setActiveTab('exchange')}
-          onEarnCharge={earnCharge}
-          onClaimStreak={handleClaimStreak}
-          onRecordReaction={recordReactionTime}
           onOpenMojoChat={() => setShowMojoChat(true)}
           onOpenQuickStop={() => setShowQuickStop(true)}
-          onPullLogged={handlePullLogged}
+          onPullSelect={handlePullSelect}
           onRelapseLogged={handleRelapseLogged}
         />
       )}
       
       {activeTab === 'exchange' && (
         <ExchangeScreen
-          balance={balance}
-          onEarn={(amount, reason) => {
-            earnCharge(amount, reason);
-            recordActivity('game', reason, 5);
-          }}
-          onSpend={(amount, reason) => {
-            earnCharge(-amount, reason);
-            recordActivity('game', reason, 5);
-            return true;
-          }}
+          tokens={tokens}
+          minutesPerToken={MINUTES_PER_TOKEN}
+          onSpendTokens={handleSpendTokens}
           onBack={() => setActiveTab('home')}
         />
       )}
 
       {activeTab === 'games' && (
         <GamesScreen
-          reactionLeaderboard={reactionLeaderboard}
-          onEarnCharge={(charge, reason) => {
-            earnCharge(charge, reason);
-            recordActivity('game', reason, 10);
-          }}
-          onRecordReaction={recordReactionTime}
-          onEarlyExit={recordEarlyExit}
+          onGameComplete={handleGameComplete}
+          onGameFail={handleGameFail}
         />
       )}
       
       {activeTab === 'insights' && (
         <InsightsScreen
           answers={assessmentAnswers}
-          chargeBalance={balance}
-          stats={stats}
+          tokens={tokens}
+          points={points}
           streak={streak}
-          transactions={transactions}
+          stats={stats}
+          tokenTransactions={tokenTransactions}
           onBack={() => setActiveTab('home')}
           userId={user?.id}
           monthlyScores={monthlyScores}
@@ -372,7 +400,10 @@ const Index = () => {
           setShowQuickStop(false);
           setActiveQuickTool(tool);
         }}
-        onLogPull={() => setShowPullSheet(true)}
+        onLogPull={() => {
+          setShowQuickStop(false);
+          // This will be handled by HomeScreen
+        }}
       />
 
       {/* Mojo Chat */}
@@ -381,6 +412,19 @@ const Index = () => {
         onClose={() => setShowMojoChat(false)}
         onTriggerTool={handleMojoTool}
         userId={user?.id}
+      />
+
+      {/* Trigger Routing - shows relevant content after logging */}
+      <TriggerRouting
+        isOpen={showTriggerRouting}
+        onClose={() => setShowTriggerRouting(false)}
+        trigger={currentTrigger}
+        onLearnCard={() => setActiveTab('learn')}
+        onGame={(gameId) => {
+          setActiveTab('games');
+          // TODO: Auto-start specific game
+        }}
+        onMojo={() => setShowMojoChat(true)}
       />
 
       {/* Reset Without Shame Modal - Failure Protocol */}
@@ -403,6 +447,11 @@ const Index = () => {
         isOpen={showDailyQuestion}
         onClose={() => setShowDailyQuestion(false)}
       />
+
+      {/* Time Expired Modal */}
+      {showTimeExpired && (
+        <TimeExpiredModal onClose={() => setShowTimeExpired(false)} />
+      )}
     </div>
   );
 };
