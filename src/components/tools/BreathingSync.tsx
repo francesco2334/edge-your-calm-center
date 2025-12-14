@@ -46,17 +46,23 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
       if (phase !== 'active') return;
 
       let cyclePosition = 0;
+      let tickCount = 0;
       const cycleLength = BREATH_CYCLE.inhale + BREATH_CYCLE.hold + BREATH_CYCLE.exhale;
       
       const timer = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            setPhase('complete');
-            haptics.notifySuccess();
-            return 0;
-          }
-          return prev - 1;
-        });
+        tickCount++;
+        
+        // Only decrement time every 10 ticks (1 second)
+        if (tickCount % 10 === 0) {
+          setTimeRemaining((prev) => {
+            if (prev <= 1) {
+              setPhase('complete');
+              haptics.notifySuccess();
+              return 0;
+            }
+            return prev - 1;
+          });
+        }
 
         cyclePosition = (cyclePosition + 1) % (cycleLength * 10); // 10 ticks per second for smoother animation
         const position = cyclePosition / 10;
@@ -80,7 +86,7 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
         }
         
         setBreathPhase(newBreathPhase);
-      }, 100); // Update 10 times per second
+      }, 100); // Update 10 ticks per second for smooth animation
 
       return () => clearInterval(timer);
     }, [phase]);
