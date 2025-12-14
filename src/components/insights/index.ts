@@ -4,3 +4,4 @@ export { MonthlySummary } from './MonthlySummary';
 export { MonthlyNotes } from './MonthlyNotes';
 export { TrophyCase } from './TrophyCase';
 export { JourneyTimeline } from './JourneyTimeline';
+export { DailyActivityGraph } from './DailyActivityGraph';
