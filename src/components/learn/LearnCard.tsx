@@ -37,7 +37,7 @@ export function LearnCardComponent({ card, isLiked, onLike, onShare, onHide }: L
       </div>
 
       {/* Content section - bottom 40% */}
-      <div className="relative flex-1 bg-background px-6 pt-5 pb-20 overflow-hidden">
+      <div className="relative flex-1 bg-background px-6 pt-4 pb-24 overflow-y-auto">
         {/* Topic badge */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
