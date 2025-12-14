@@ -3,8 +3,9 @@ import { WelcomeScreen } from '@/components/WelcomeScreen';
 import { PermissionScreen } from '@/components/PermissionScreen';
 import { AssessmentScreen } from '@/components/AssessmentScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
-import { PaywallScreen } from '@/components/PaywallScreen';
 import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
+import { TrialScreen } from '@/components/TrialScreen';
+import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { HomeScreen } from '@/components/HomeScreen';
 import { GamesScreen } from '@/components/GamesScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
@@ -15,10 +16,11 @@ import { MojoChat, type MojoTool } from '@/components/MojoChat';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync } from '@/components/tools';
 import { useCharge } from '@/hooks/useCharge';
 import { useProgress } from '@/hooks/useProgress';
+import { useTrial } from '@/hooks/useTrial';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
-type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'paywall' | 'atlas' | 'main';
+type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'trial' | 'atlas' | 'main';
 type MainTab = 'home' | 'learn' | 'quickstop' | 'games' | 'insights';
 type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
 
@@ -60,19 +62,13 @@ const Index = () => {
     recordActivity,
   } = useProgress();
 
+  // Trial system
+  const { isActive: trialActive, hasAccepted: trialAccepted, daysRemaining, startTrial } = useTrial();
+
   const handleAssessmentComplete = (answers: AssessmentAnswer[]) => {
     setAssessmentAnswers(answers);
     setCurrentScreen('results');
   };
-
-  const handleSubscribe = () => {
-    toast({
-      title: "Welcome to DopaMINE",
-      description: "Full access unlocked. Let's meet Mojo.",
-    });
-    setCurrentScreen('atlas');
-  };
-
   const handleClaimStreak = () => {
     const success = claimDailyStreak();
     if (success) {
@@ -182,6 +178,20 @@ const Index = () => {
     );
   }
 
+  // Trial expired - show subscription screen
+  if (trialAccepted && !trialActive) {
+    return (
+      <TrialExpiredScreen 
+        onSubscribe={() => {
+          toast({
+            title: "Coming soon",
+            description: "Premium subscriptions launching soon!",
+          });
+        }}
+      />
+    );
+  }
+
   // Onboarding screens
   if (currentScreen !== 'main') {
     return (
@@ -198,13 +208,16 @@ const Index = () => {
         {currentScreen === 'results' && (
           <ResultsScreen 
             answers={assessmentAnswers} 
-            onContinue={() => setCurrentScreen('paywall')} 
+            onContinue={() => setCurrentScreen('trial')} 
           />
         )}
-        {currentScreen === 'paywall' && (
-          <PaywallScreen 
-            onSubscribe={handleSubscribe}
-            onSkip={() => setCurrentScreen('atlas')}
+        {currentScreen === 'trial' && (
+          <TrialScreen 
+            onAccept={() => {
+              startTrial();
+              setCurrentScreen('atlas');
+            }}
+            daysRemaining={7}
           />
         )}
         {currentScreen === 'atlas' && (
