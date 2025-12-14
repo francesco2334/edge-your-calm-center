@@ -412,20 +412,47 @@ export function useTokenEconomy(userId: string | null) {
    * 1 token = 10 minutes
    * Tokens deducted immediately, timer starts
    * Background timer runs and notifies when time expires
+   * STACKING: If session is active, adds time to existing session
    */
   const spendTokens = useCallback(async (tokens: number, activity: string): Promise<ActiveTimeSession | null> => {
-    const minutes = tokens * MINUTES_PER_TOKEN;
+    const additionalMinutes = tokens * MINUTES_PER_TOKEN;
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
 
-    const session: ActiveTimeSession = {
-      id: `${Date.now()}`,
-      activity,
-      tokensSpent: tokens,
-      minutesAllocated: minutes,
-      startedAt: now,
-      expiresAt,
-    };
+    let session: ActiveTimeSession;
+
+    // Check if there's an active session to extend
+    if (state.activeSession && new Date(state.activeSession.expiresAt) > now) {
+      // STACK: Extend existing session
+      const currentExpiry = new Date(state.activeSession.expiresAt);
+      const newExpiresAt = new Date(currentExpiry.getTime() + additionalMinutes * 60 * 1000);
+      
+      session = {
+        ...state.activeSession,
+        tokensSpent: state.activeSession.tokensSpent + tokens,
+        minutesAllocated: state.activeSession.minutesAllocated + additionalMinutes,
+        expiresAt: newExpiresAt,
+      };
+
+      toast.success(`+${additionalMinutes} minutes added`, {
+        description: `Total: ${session.minutesAllocated} min`,
+      });
+    } else {
+      // NEW SESSION
+      const expiresAt = new Date(now.getTime() + additionalMinutes * 60 * 1000);
+      
+      session = {
+        id: `${Date.now()}`,
+        activity,
+        tokensSpent: tokens,
+        minutesAllocated: additionalMinutes,
+        startedAt: now,
+        expiresAt,
+      };
+
+      toast.success(`${additionalMinutes} minutes unlocked`, {
+        description: activity,
+      });
+    }
 
     setState(prev => ({
       ...prev,
@@ -437,16 +464,15 @@ export function useTokenEconomy(userId: string | null) {
       },
     }));
 
-    addTokenTransaction('spend', -tokens, `${minutes} min ${activity}`);
+    addTokenTransaction('spend', -tokens, `${additionalMinutes} min ${activity}`);
 
     // Schedule time-expired notification
-    // This runs in background - user can leave app
     try {
       await supabase.functions.invoke('schedule-notification', {
         body: {
           type: 'time-expired',
           userId: userId || 'anonymous',
-          scheduledFor: expiresAt.toISOString(),
+          scheduledFor: session.expiresAt.toISOString(),
           activity,
         },
       });
@@ -454,12 +480,8 @@ export function useTokenEconomy(userId: string | null) {
       console.log('Notification scheduling failed (non-critical):', error);
     }
 
-    toast.success(`${minutes} minutes unlocked`, {
-      description: activity,
-    });
-
     return session;
-  }, [addTokenTransaction, userId]);
+  }, [state.activeSession, addTokenTransaction, userId]);
 
   /**
    * END SESSION: Session completed (time expired)
