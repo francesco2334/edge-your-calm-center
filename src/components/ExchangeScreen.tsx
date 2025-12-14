@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import { TokenCounter } from './TokenCounter';
+import { FocusTimer } from './FocusTimer';
+import { EarnConfirmModal } from './EarnConfirmModal';
 import { EARN_OPTIONS, SPEND_OPTIONS } from '@/lib/token-data';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,16 +13,55 @@ interface ExchangeScreenProps {
   onBack: () => void;
 }
 
+type ActiveTimer = {
+  minutes: number;
+  tokensReward: number;
+  label: string;
+} | null;
+
+type ConfirmOption = typeof EARN_OPTIONS[0] | null;
+
 export function ExchangeScreen({ balance, onEarn, onSpend, onBack }: ExchangeScreenProps) {
   const [activeTab, setActiveTab] = useState<'earn' | 'spend'>('earn');
+  const [activeTimer, setActiveTimer] = useState<ActiveTimer>(null);
+  const [confirmOption, setConfirmOption] = useState<ConfirmOption>(null);
   const { toast } = useToast();
 
-  const handleEarn = (option: typeof EARN_OPTIONS[0]) => {
-    onEarn(option.tokensEarned, option.label);
-    toast({
-      title: `+${option.tokensEarned} Token${option.tokensEarned > 1 ? 's' : ''}`,
-      description: option.label,
-    });
+  const handleEarnClick = (option: typeof EARN_OPTIONS[0]) => {
+    // Timer-based options (focus sessions)
+    if (option.id === 'focus-10' || option.id === 'focus-25') {
+      setActiveTimer({
+        minutes: option.earnMinutes,
+        tokensReward: option.tokensEarned,
+        label: option.label,
+      });
+      return;
+    }
+
+    // Self-report options - show confirmation modal
+    setConfirmOption(option);
+  };
+
+  const handleTimerComplete = () => {
+    if (activeTimer) {
+      onEarn(activeTimer.tokensReward, activeTimer.label);
+      toast({
+        title: `+${activeTimer.tokensReward} Token${activeTimer.tokensReward > 1 ? 's' : ''} earned!`,
+        description: `Great focus session: ${activeTimer.label}`,
+      });
+      setActiveTimer(null);
+    }
+  };
+
+  const handleConfirmEarn = () => {
+    if (confirmOption) {
+      onEarn(confirmOption.tokensEarned, confirmOption.label);
+      toast({
+        title: `+${confirmOption.tokensEarned} Token${confirmOption.tokensEarned > 1 ? 's' : ''}`,
+        description: confirmOption.label,
+      });
+      setConfirmOption(null);
+    }
   };
 
   const handleSpend = (option: typeof SPEND_OPTIONS[0]) => {
@@ -42,6 +82,19 @@ export function ExchangeScreen({ balance, onEarn, onSpend, onBack }: ExchangeScr
       });
     }
   };
+
+  // Show focus timer fullscreen
+  if (activeTimer) {
+    return (
+      <FocusTimer
+        minutes={activeTimer.minutes}
+        tokensReward={activeTimer.tokensReward}
+        label={activeTimer.label}
+        onComplete={handleTimerComplete}
+        onCancel={() => setActiveTimer(null)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden">
@@ -119,28 +172,33 @@ export function ExchangeScreen({ balance, onEarn, onSpend, onBack }: ExchangeScr
               exit={{ opacity: 0, x: 20 }}
               className="space-y-3"
             >
-              {EARN_OPTIONS.map((option, i) => (
-                <motion.div
-                  key={option.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  onClick={() => handleEarn(option)}
-                  className="dopa-card cursor-pointer flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="text-2xl">{option.icon}</span>
-                    <div>
-                      <p className="font-medium text-foreground">{option.label}</p>
-                      <p className="text-sm text-muted-foreground">{option.description}</p>
+              {EARN_OPTIONS.map((option, i) => {
+                const isTimerBased = option.id === 'focus-10' || option.id === 'focus-25';
+                return (
+                  <motion.div
+                    key={option.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    onClick={() => handleEarnClick(option)}
+                    className="dopa-card cursor-pointer flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-2xl">{option.icon}</span>
+                      <div>
+                        <p className="font-medium text-foreground">{option.label}</p>
+                        <p className="text-sm text-muted-foreground">{option.description}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-primary">+{option.tokensEarned}</p>
-                    <p className="text-xs text-muted-foreground">tokens</p>
-                  </div>
-                </motion.div>
-              ))}
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-primary">+{option.tokensEarned}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isTimerBased ? `${option.earnMinutes} min` : 'tokens'}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           ) : (
             <motion.div
@@ -193,6 +251,16 @@ export function ExchangeScreen({ balance, onEarn, onSpend, onBack }: ExchangeScr
           )}
         </AnimatePresence>
       </div>
+
+      {/* Earn Confirmation Modal */}
+      {confirmOption && (
+        <EarnConfirmModal
+          isOpen={!!confirmOption}
+          option={confirmOption}
+          onConfirm={handleConfirmEarn}
+          onCancel={() => setConfirmOption(null)}
+        />
+      )}
     </div>
   );
 }
