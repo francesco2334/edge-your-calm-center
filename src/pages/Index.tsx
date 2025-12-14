@@ -181,8 +181,8 @@ const Index = () => {
   };
 
   // Handle spending tokens for time
-  const handleSpendTokens = (tokenCount: number, activity: string) => {
-    const session = spendTokens(tokenCount, activity);
+  const handleSpendTokens = async (tokenCount: number, activity: string) => {
+    const session = await spendTokens(tokenCount, activity);
     if (session) {
       setActiveTab('home'); // Go back to home, show timer
     }

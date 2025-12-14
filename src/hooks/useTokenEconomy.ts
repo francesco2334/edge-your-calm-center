@@ -404,8 +404,9 @@ export function useTokenEconomy(userId: string | null) {
    * SPEND TOKENS: Purchase time
    * 1 token = 10 minutes
    * Tokens deducted immediately, timer starts
+   * Background timer runs and notifies when time expires
    */
-  const spendTokens = useCallback((tokens: number, activity: string): ActiveTimeSession | null => {
+  const spendTokens = useCallback(async (tokens: number, activity: string): Promise<ActiveTimeSession | null> => {
     const minutes = tokens * MINUTES_PER_TOKEN;
     const now = new Date();
     const expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
@@ -431,12 +432,27 @@ export function useTokenEconomy(userId: string | null) {
 
     addTokenTransaction('spend', -tokens, `${minutes} min ${activity}`);
 
+    // Schedule time-expired notification
+    // This runs in background - user can leave app
+    try {
+      await supabase.functions.invoke('schedule-notification', {
+        body: {
+          type: 'time-expired',
+          userId: userId || 'anonymous',
+          scheduledFor: expiresAt.toISOString(),
+          activity,
+        },
+      });
+    } catch (error) {
+      console.log('Notification scheduling failed (non-critical):', error);
+    }
+
     toast.success(`${minutes} minutes unlocked`, {
       description: activity,
     });
 
     return session;
-  }, [addTokenTransaction]);
+  }, [addTokenTransaction, userId]);
 
   /**
    * END SESSION: Session completed (time expired)
