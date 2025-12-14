@@ -40,15 +40,19 @@ export function useSmartInsights(
   const [mojoThemes, setMojoThemes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load insights from database
+  // Load insights from database - only run when userId changes
   useEffect(() => {
+    let cancelled = false;
+    
     async function loadInsights() {
       if (!userId) {
         // Calculate locally for non-authenticated users
         const patterns = calculateLocalPatterns(stats, transactions);
-        setBehaviorPatterns(patterns);
-        setFocusAreas(generateLocalFocusAreas(patterns));
-        setIsLoading(false);
+        if (!cancelled) {
+          setBehaviorPatterns(patterns);
+          setFocusAreas(generateLocalFocusAreas(patterns));
+          setIsLoading(false);
+        }
         return;
       }
 
@@ -59,7 +63,7 @@ export function useSmartInsights(
           .eq('user_id', userId)
           .single();
 
-        if (progress) {
+        if (!cancelled && progress) {
           if (progress.behavior_patterns) {
             setBehaviorPatterns(progress.behavior_patterns as unknown as BehaviorPatterns);
           }
@@ -73,12 +77,18 @@ export function useSmartInsights(
       } catch (error) {
         console.error('Failed to load insights:', error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadInsights();
-  }, [userId, stats, transactions]);
+    
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]); // Only depend on userId to prevent infinite loops
 
   const refreshInsights = useCallback(async () => {
     if (!userId) {
