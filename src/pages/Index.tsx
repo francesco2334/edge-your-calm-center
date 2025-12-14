@@ -34,6 +34,7 @@ const Index = () => {
   
   const { 
     balance, 
+    transactions,
     earnCharge, 
     stats,
     streak,
@@ -267,6 +268,7 @@ const Index = () => {
           answers={assessmentAnswers}
           chargeBalance={balance}
           stats={stats}
+          transactions={transactions}
           onBack={() => setActiveTab('home')}
           monthlyScores={monthlyScores}
           monthlyNotes={monthlyNotes}

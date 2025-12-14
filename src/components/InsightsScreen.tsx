@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 import { InsightsGraph } from './InsightsGraph';
 import { ChargeCounter } from './ChargeCounter';
-import { ProgressGraph, WeeklyReflection, MonthlySummary, MonthlyNotes, TrophyCase, JourneyTimeline } from './insights';
+import { ProgressGraph, WeeklyReflection, MonthlySummary, MonthlyNotes, TrophyCase, JourneyTimeline, DailyActivityGraph } from './insights';
 import type { AssessmentAnswer } from '@/lib/edge-data';
-import type { PersonalStats } from '@/lib/charge-data';
+import type { PersonalStats, ChargeTransaction } from '@/lib/charge-data';
 import type { MonthlyScore, Trophy, WeeklyReflection as WeeklyReflectionType, MonthlyNote, MonthlySummary as MonthlySummaryType } from '@/lib/progress-data';
 import { getMonthKey } from '@/lib/progress-data';
 
@@ -11,6 +11,7 @@ interface InsightsScreenProps {
   answers: AssessmentAnswer[];
   chargeBalance: number;
   stats: PersonalStats;
+  transactions: ChargeTransaction[];
   onBack: () => void;
   // Progress Engine props
   monthlyScores: MonthlyScore[];
@@ -28,7 +29,8 @@ interface InsightsScreenProps {
 export function InsightsScreen({ 
   answers, 
   chargeBalance, 
-  stats, 
+  stats,
+  transactions,
   onBack,
   monthlyScores,
   monthlyNotes,
@@ -79,11 +81,21 @@ export function InsightsScreen({
           </p>
         </motion.div>
 
-        {/* Progress Graph */}
+        {/* Daily Activity Graph - This Week */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
+          className="dopa-card mb-6"
+        >
+          <DailyActivityGraph transactions={transactions} />
+        </motion.div>
+
+        {/* Progress Graph */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
           className="dopa-card mb-6"
         >
           <ProgressGraph scores={monthlyScores} />
