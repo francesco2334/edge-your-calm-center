@@ -194,9 +194,10 @@ export function ProductivityScreen({ logsToday, logsRemaining, onLogProductivity
                 <Textarea
                   placeholder="Describe what you did..."
                   value={otherDescription}
-                  onChange={(e) => setOtherDescription(e.target.value)}
+                  onChange={(e) => setOtherDescription(e.target.value.slice(0, 200))}
                   className="bg-card border-border/50 resize-none"
                   rows={3}
+                  maxLength={200}
                 />
               </motion.div>
             )}

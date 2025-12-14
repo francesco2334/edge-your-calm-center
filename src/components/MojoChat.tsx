@@ -19,10 +19,13 @@ interface MojoChatProps {
   userId?: string;
 }
 
+const MAX_MESSAGE_LENGTH = 2000;
+
 export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasConsented, setHasConsented] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -75,9 +78,10 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    const trimmedInput = input.trim().slice(0, MAX_MESSAGE_LENGTH);
+    if (!trimmedInput || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input.trim() };
+    const userMessage: Message = { role: 'user', content: trimmedInput };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -219,7 +223,27 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-5 py-4 h-[calc(100vh-180px)]">
-            {messages.length === 0 && (
+            {!hasConsented ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center pt-8"
+              >
+                <MojoOrb state="calm" size="lg" />
+                <p className="text-muted-foreground mt-6 text-sm font-medium">
+                  Before we chat
+                </p>
+                <p className="text-muted-foreground/70 mt-3 text-xs max-w-xs mx-auto leading-relaxed">
+                  Your messages are processed by AI to provide responses. No personal data is stored or shared. Mojo is a support tool, not medical advice.
+                </p>
+                <button
+                  onClick={() => setHasConsented(true)}
+                  className="mt-6 px-6 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  I understand, let's chat
+                </button>
+              </motion.div>
+            ) : messages.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -233,7 +257,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                   I help with everyday attention habits — not medical or mental health advice.
                 </p>
               </motion.div>
-            )}
+            ) : null}
 
             <div className="space-y-4">
               {messages.map((msg, i) => (
@@ -280,11 +304,12 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                 ref={inputRef}
                 type="text"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => setInput(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
                 onKeyPress={handleKeyPress}
-                placeholder="Talk to Mojo..."
+                placeholder={hasConsented ? "Talk to Mojo..." : "Accept above to chat"}
                 className="flex-1 bg-muted/30 border border-border/30 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
-                disabled={isLoading}
+                disabled={isLoading || !hasConsented}
+                maxLength={MAX_MESSAGE_LENGTH}
               />
               <button
                 onClick={sendMessage}
