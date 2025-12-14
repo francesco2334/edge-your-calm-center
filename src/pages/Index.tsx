@@ -46,6 +46,8 @@ const Index = () => {
   // Progress Engine
   const {
     monthlyScores,
+    monthlyNotes,
+    monthlySummaries,
     trophies,
     hasWeeklyReflection,
     hasMonthlySummary,
@@ -255,6 +257,8 @@ const Index = () => {
           stats={stats}
           onBack={() => setActiveTab('home')}
           monthlyScores={monthlyScores}
+          monthlyNotes={monthlyNotes}
+          monthlySummaries={monthlySummaries}
           trophies={trophies}
           hasWeeklyReflection={hasWeeklyReflection()}
           hasMonthlySummary={hasMonthlySummary()}
