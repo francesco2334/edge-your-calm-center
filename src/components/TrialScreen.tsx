@@ -29,6 +29,9 @@ export function TrialScreen({ onAccept, daysRemaining = 7 }: TrialScreenProps) {
           <p className="text-muted-foreground">
             {daysRemaining} days of full access. Cancel anytime.
           </p>
+          <p className="text-sm text-primary font-medium mt-2">
+            For those who WANT change
+          </p>
         </motion.div>
 
         {/* Features */}
