@@ -46,7 +46,7 @@ export function AssessmentScreen({ onComplete }: AssessmentScreenProps) {
       <div className="relative z-10 mb-8">
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
           <span>DopaMINE Scan</span>
-          <span>{currentIndex + 1} / {ASSESSMENT_QUESTIONS.length}</span>
+          <span>{currentIndex + 1}</span>
         </div>
         <div className="h-1 bg-muted rounded-full overflow-hidden">
           <motion.div
