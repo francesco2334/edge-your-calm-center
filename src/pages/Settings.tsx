@@ -99,7 +99,7 @@ export default function Settings() {
       <motion.button
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
-        onClick={() => navigate('/')}
+        onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
       >
         <ArrowLeft className="w-5 h-5" />
