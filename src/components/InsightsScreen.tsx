@@ -3,6 +3,8 @@ import { InsightsGraph } from './InsightsGraph';
 import { ChargeCounter } from './ChargeCounter';
 import { ProgressGraph, WeeklyReflection, MonthlySummary, MonthlyNotes, TrophyCase, JourneyTimeline, DailyActivityGraph } from './insights';
 import { SmartEdgeProfile } from './insights/SmartEdgeProfile';
+import { WeeklyNarrativeSummary } from './insights/WeeklyNarrativeSummary';
+import { ExitPhilosophy } from './ExitPhilosophy';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 import type { PersonalStats, ChargeTransaction } from '@/lib/charge-data';
 import type { MonthlyScore, Trophy, WeeklyReflection as WeeklyReflectionType, MonthlyNote, MonthlySummary as MonthlySummaryType } from '@/lib/progress-data';
@@ -14,6 +16,7 @@ interface InsightsScreenProps {
   chargeBalance: number;
   stats: PersonalStats;
   transactions: ChargeTransaction[];
+  streak: number;
   onBack: () => void;
   userId?: string | null;
   // Progress Engine props
@@ -33,6 +36,7 @@ export function InsightsScreen({
   answers, 
   chargeBalance, 
   stats,
+  streak,
   transactions,
   onBack,
   userId,
@@ -90,6 +94,26 @@ export function InsightsScreen({
           <p className="text-muted-foreground">
             Your progress over time
           </p>
+        </motion.div>
+
+        {/* Exit Philosophy - Ethical framing */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+          className="mb-6"
+        >
+          <ExitPhilosophy transactions={transactions} streak={streak} />
+        </motion.div>
+
+        {/* Weekly Narrative - Stories, not charts */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.13 }}
+          className="mb-6"
+        >
+          <WeeklyNarrativeSummary />
         </motion.div>
 
         {/* Daily Activity Graph - This Week */}

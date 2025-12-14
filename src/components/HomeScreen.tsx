@@ -27,6 +27,8 @@ interface HomeScreenProps {
   onRecordReaction: (ms: number) => void;
   onOpenMojoChat?: () => void;
   onOpenQuickStop?: () => void;
+  onPullLogged?: () => void;
+  onRelapseLogged?: () => void;
 }
 
 type ActiveTool = 'pause' | 'name' | 'prediction' | 'breathing' | 'reaction' | null;
@@ -45,6 +47,8 @@ export function HomeScreen({
   onRecordReaction,
   onOpenMojoChat,
   onOpenQuickStop,
+  onPullLogged,
+  onRelapseLogged,
 }: HomeScreenProps) {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
@@ -299,6 +303,8 @@ export function HomeScreen({
         isOpen={showPullSheet}
         onClose={() => setShowPullSheet(false)}
         onSelectPull={handlePullSelect}
+        onPullLogged={onPullLogged}
+        onRelapseLogged={onRelapseLogged}
       />
     </div>
   );
