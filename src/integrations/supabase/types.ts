@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      charge_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          reason: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -38,6 +65,48 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          last_active_date: string | null
+          reaction_leaderboard: Json
+          stats: Json
+          streak: number
+          streak_claimed_today: boolean
+          trial_start: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          last_active_date?: string | null
+          reaction_leaderboard?: Json
+          stats?: Json
+          streak?: number
+          streak_claimed_today?: boolean
+          trial_start?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          last_active_date?: string | null
+          reaction_leaderboard?: Json
+          stats?: Json
+          streak?: number
+          streak_claimed_today?: boolean
+          trial_start?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

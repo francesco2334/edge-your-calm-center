@@ -1,14 +1,19 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail } from 'lucide-react';
+import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTrial } from '@/hooks/useTrial';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
 import { MojoOrb } from '@/components/MojoOrb';
+import { Switch } from '@/components/ui/switch';
 
 export default function Settings() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, isAuthenticated, signOut } = useAuth();
+  const { daysRemaining, isActive: trialActive, hasAccepted: trialAccepted } = useTrial(user?.id);
+  const { isSupported: pushSupported, permission, requestPermission } = usePushNotifications();
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -24,6 +29,22 @@ export default function Settings() {
         description: 'See you soon'
       });
       navigate('/');
+    }
+  };
+
+  const handleEnableNotifications = async () => {
+    const granted = await requestPermission();
+    if (granted) {
+      toast({
+        title: 'Notifications enabled',
+        description: "We'll send you helpful reminders"
+      });
+    } else {
+      toast({
+        title: 'Notifications blocked',
+        description: 'You can enable them in your device settings',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -115,6 +136,74 @@ export default function Settings() {
                 <LogOut className="w-5 h-5 text-destructive" />
                 <span className="text-sm font-medium text-destructive">Sign out</span>
               </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Notifications Section */}
+        {pushSupported && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-6"
+          >
+            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1">
+              Notifications
+            </h2>
+            <div className="bg-muted/30 rounded-2xl border border-border/30 overflow-hidden">
+              <div className="flex items-center gap-4 p-4">
+                {permission === 'granted' ? (
+                  <Bell className="w-5 h-5 text-primary" />
+                ) : (
+                  <BellOff className="w-5 h-5 text-muted-foreground" />
+                )}
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">Push Notifications</p>
+                  <p className="text-xs text-muted-foreground">
+                    {permission === 'granted' ? 'Enabled' : 'Get daily reminders'}
+                  </p>
+                </div>
+                <Switch
+                  checked={permission === 'granted'}
+                  onCheckedChange={handleEnableNotifications}
+                  disabled={permission === 'denied'}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Trial Status */}
+        {trialAccepted && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.17 }}
+            className="mb-6"
+          >
+            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1">
+              Subscription
+            </h2>
+            <div className="bg-muted/30 rounded-2xl border border-border/30 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {trialActive ? 'Free Trial' : 'Trial Expired'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {trialActive ? `${daysRemaining} days remaining` : 'Upgrade to continue'}
+                  </p>
+                </div>
+                {!trialActive && (
+                  <button
+                    onClick={() => toast({ title: 'Coming soon', description: 'Premium subscriptions launching soon!' })}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium"
+                  >
+                    Upgrade
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         )}

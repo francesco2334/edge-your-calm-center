@@ -6,6 +6,7 @@ import { MojoOrb } from './MojoOrb';
 import { StreakRing } from './StreakRing';
 import { PullSheet } from './PullSheet';
 import { SwipeFeed } from './SwipeFeed';
+import { TrialBadge } from './TrialBadge';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker } from './tools';
 import { generateFeedCards } from '@/lib/feed-data';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,6 +20,7 @@ interface HomeScreenProps {
   streak: number;
   streakClaimedToday: boolean;
   reactionLeaderboard: ReactionLeaderboard;
+  trialDaysRemaining?: number;
   onOpenExchange: () => void;
   onEarnCharge: (amount: number, reason: string) => void;
   onClaimStreak: () => boolean;
@@ -36,6 +38,7 @@ export function HomeScreen({
   streak,
   streakClaimedToday,
   reactionLeaderboard,
+  trialDaysRemaining,
   onOpenExchange,
   onEarnCharge,
   onClaimStreak,
@@ -160,8 +163,11 @@ export function HomeScreen({
             DopaMINE
           </span>
           
-          {/* Right: Charge pill + Settings */}
+          {/* Right: Trial badge + Charge pill + Settings */}
           <div className="flex items-center gap-2">
+            {trialDaysRemaining !== undefined && trialDaysRemaining > 0 && (
+              <TrialBadge daysRemaining={trialDaysRemaining} />
+            )}
             <button 
               onClick={onOpenExchange}
               className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 flex items-center gap-1.5 hover:bg-primary/15 active:scale-95 transition-all"
