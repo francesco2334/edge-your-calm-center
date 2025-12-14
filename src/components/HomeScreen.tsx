@@ -231,6 +231,18 @@ export function HomeScreen({
               }
             </p>
           </motion.div>
+
+          {/* Mojo CTA */}
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            onClick={onOpenMojoChat}
+            className="mt-4 px-5 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium hover:bg-accent/20 active:scale-95 transition-all flex items-center gap-2"
+          >
+            <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+            Talk to Mojo
+          </motion.button>
         </motion.div>
 
         {/* PRIMARY ACTION - Level 2: One clear CTA */}
