@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { WelcomeScreen } from '@/components/WelcomeScreen';
 import { PermissionScreen } from '@/components/PermissionScreen';
 import { AssessmentScreen } from '@/components/AssessmentScreen';
@@ -25,6 +25,7 @@ import { useProgress } from '@/hooks/useProgress';
 import { useTrial } from '@/hooks/useTrial';
 import { useAuth } from '@/hooks/useAuth';
 import { useDailyQuestion } from '@/hooks/useDailyQuestion';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
@@ -94,6 +95,26 @@ const Index = () => {
   // Trial system
   const { isActive: trialActive, hasAccepted: trialAccepted, daysRemaining, isLoaded: trialLoaded, startTrial } = useTrial(user?.id);
 
+  // Push notifications - real local notifications on native
+  const { 
+    scheduleTimeExpiredNotification, 
+    cancelTimeExpiredNotification,
+    scheduleStreakWarningNotification,
+    cancelStreakWarning,
+    permission: notificationPermission,
+  } = usePushNotifications();
+
+  // Schedule streak warning if user hasn't logged today
+  useEffect(() => {
+    if (!hasLoggedToday && notificationPermission === 'granted') {
+      // Schedule reminder for 12 hours from now (or end of day)
+      scheduleStreakWarningNotification(12);
+    } else if (hasLoggedToday) {
+      // Cancel streak warning - user logged today
+      cancelStreakWarning();
+    }
+  }, [hasLoggedToday, notificationPermission, scheduleStreakWarningNotification, cancelStreakWarning]);
+
   // Show loading state while data loads
   if (!economyLoaded || !trialLoaded) {
     return (
@@ -112,6 +133,11 @@ const Index = () => {
   const handlePullSelect = (pullId: string) => {
     const awarded = logDailyPull(pullId);
     setCurrentTrigger(pullId);
+    
+    // Cancel streak warning since user logged
+    if (awarded) {
+      cancelStreakWarning();
+    }
     
     // Show trigger routing (helps based on what pulled them)
     if (pullId !== 'none') {
@@ -184,6 +210,8 @@ const Index = () => {
   const handleSpendTokens = async (tokenCount: number, activity: string) => {
     const session = await spendTokens(tokenCount, activity);
     if (session) {
+      // Schedule real local notification for when time expires
+      scheduleTimeExpiredNotification(activity, session.expiresAt);
       setActiveTab('home'); // Go back to home, show timer
     }
   };
@@ -192,6 +220,12 @@ const Index = () => {
   const handleSessionEnd = () => {
     setShowTimeExpired(true);
     endSession();
+  };
+
+  // Handle early exit - cancel the scheduled notification
+  const handleExitEarly = () => {
+    cancelTimeExpiredNotification();
+    exitSessionEarly();
   };
 
   // Render quick tool fullscreen
@@ -317,7 +351,7 @@ const Index = () => {
         <TimeSessionBanner
           session={activeSession}
           onEndSession={handleSessionEnd}
-          onExitEarly={exitSessionEarly}
+          onExitEarly={handleExitEarly}
         />
       )}
 
