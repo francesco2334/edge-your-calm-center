@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 const DAILY_LOG_TOKENS = 3;        // Free daily allowance when logging pull
 const LEARN_CARDS_PER_TOKEN = 5;   // Every 5 learn cards = +1 token
 const GAME_COMPLETION_TOKEN = 1;   // Completing any game = +1 token
+const PRODUCTIVITY_LOG_TOKEN = 1;  // Productivity log = +1 token (once per day)
 const MINUTES_PER_TOKEN = 10;      // 1 token = 10 minutes
 
 // Game point values (points only, not tokens)
@@ -76,6 +77,7 @@ interface EconomyState {
   points: number;
   streak: number;
   lastDailyLogDate: string | null;
+  lastProductivityLogDate: string | null;
   learnCardsTowardsToken: number;
   stats: EconomyStats;
   activeSession: ActiveTimeSession | null;
@@ -86,6 +88,7 @@ const DEFAULT_STATE: EconomyState = {
   points: 0,
   streak: 0,
   lastDailyLogDate: null,
+  lastProductivityLogDate: null,
   learnCardsTowardsToken: 0,
   stats: {
     totalTokensEarned: 0,
@@ -500,8 +503,47 @@ export function useTokenEconomy(userId: string | null) {
     return refundTokens;
   }, [state.activeSession, addTokenTransaction]);
 
+  /**
+   * PRODUCTIVITY LOG: +1 token once per day
+   * Self-reported real-world action
+   * Honesty-based, no verification
+   */
+  const logProductivity = useCallback((category: string, description?: string): boolean => {
+    const today = getTodayString();
+    
+    if (state.lastProductivityLogDate === today) {
+      // Already logged productivity today
+      return false;
+    }
+
+    setState(prev => ({
+      ...prev,
+      tokens: prev.tokens + PRODUCTIVITY_LOG_TOKEN,
+      lastProductivityLogDate: today,
+      stats: {
+        ...prev.stats,
+        totalTokensEarned: prev.stats.totalTokensEarned + PRODUCTIVITY_LOG_TOKEN,
+      },
+    }));
+
+    const reason = description 
+      ? `Productivity: ${category} - ${description}` 
+      : `Productivity: ${category}`;
+    
+    addTokenTransaction('game', PRODUCTIVITY_LOG_TOKEN, reason); // Using 'game' type for now
+
+    toast.success('+1 Token', {
+      description: 'Productivity logged',
+    });
+
+    return true;
+  }, [state.lastProductivityLogDate, addTokenTransaction]);
+
   // Utility: Check if daily log was done today
   const hasLoggedToday = state.lastDailyLogDate === getTodayString();
+  
+  // Utility: Check if productivity was logged today
+  const hasLoggedProductivityToday = state.lastProductivityLogDate === getTodayString();
 
   // Utility: Check session expiry
   const isSessionExpired = useCallback(() => {
@@ -525,6 +567,7 @@ export function useTokenEconomy(userId: string | null) {
     activeSession: state.activeSession,
     learnCardsTowardsToken: state.learnCardsTowardsToken,
     hasLoggedToday,
+    hasLoggedProductivityToday,
     isLoaded,
 
     // Token transactions
@@ -533,6 +576,7 @@ export function useTokenEconomy(userId: string | null) {
 
     // Actions
     logDailyPull,
+    logProductivity,
     recordLearnCard,
     recordGameComplete,
     recordGameFail,
