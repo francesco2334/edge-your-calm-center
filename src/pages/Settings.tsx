@@ -1,12 +1,13 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrial } from '@/hooks/useTrial';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
 import { MojoOrb } from '@/components/MojoOrb';
 import { Switch } from '@/components/ui/switch';
+import { useState } from 'react';
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -14,6 +15,51 @@ export default function Settings() {
   const { user, isAuthenticated, signOut } = useAuth();
   const { daysRemaining, isActive: trialActive, hasAccepted: trialAccepted } = useTrial(user?.id);
   const { isSupported: pushSupported, permission, requestPermission } = usePushNotifications();
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportData = () => {
+    setIsExporting(true);
+    try {
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        userId: user?.id || 'anonymous',
+        email: user?.email || null,
+        data: {
+          tokenEconomy: JSON.parse(localStorage.getItem('dopamine_token_economy') || '{}'),
+          dailyQuestions: JSON.parse(localStorage.getItem('daily_question_data') || '{}'),
+          learnProgress: JSON.parse(localStorage.getItem('learn_progress') || '{}'),
+          progressActivities: JSON.parse(localStorage.getItem('progress_activities') || '[]'),
+          weeklyReflections: JSON.parse(localStorage.getItem('progress_weekly_reflections') || '[]'),
+          monthlySummaries: JSON.parse(localStorage.getItem('progress_monthly_summaries') || '[]'),
+          trophies: JSON.parse(localStorage.getItem('progress_trophies') || '[]'),
+          monthlyNotes: JSON.parse(localStorage.getItem('progress_monthly_notes') || '[]'),
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dopamine-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Data exported',
+        description: 'Your data has been downloaded as JSON'
+      });
+    } catch (error) {
+      toast({
+        title: 'Export failed',
+        description: 'Could not export your data',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -208,11 +254,37 @@ export default function Settings() {
           </motion.div>
         )}
 
-        {/* Legal Section */}
+        {/* Data Export Section */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="mb-6"
+        >
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1">
+            Your Data
+          </h2>
+          <div className="bg-muted/30 rounded-2xl border border-border/30 overflow-hidden">
+            <button
+              onClick={handleExportData}
+              disabled={isExporting}
+              className="flex items-center gap-4 p-4 w-full hover:bg-muted/50 transition-colors disabled:opacity-50"
+            >
+              <Download className="w-5 h-5 text-primary" />
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-foreground">Export Data</p>
+                <p className="text-xs text-muted-foreground">Download usage stats & activity history</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Legal Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
           className="mb-6"
         >
           <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1">
