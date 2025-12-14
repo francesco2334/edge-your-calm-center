@@ -8,6 +8,7 @@ import { TrialScreen } from '@/components/TrialScreen';
 import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { HomeScreen } from '@/components/HomeScreen';
 import { GamesScreen } from '@/components/GamesScreen';
+import { ExchangeScreen } from '@/components/ExchangeScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
 import { LearnFeed } from '@/components/LearnFeed';
 import { BottomNav } from '@/components/BottomNav';
@@ -22,7 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
 type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'trial' | 'atlas' | 'main';
-type MainTab = 'home' | 'learn' | 'quickstop' | 'games' | 'insights';
+type MainTab = 'home' | 'learn' | 'quickstop' | 'games' | 'insights' | 'exchange';
 type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
 
 const Index = () => {
@@ -268,7 +269,7 @@ const Index = () => {
           streakClaimedToday={streakClaimedToday}
           reactionLeaderboard={reactionLeaderboard}
           trialDaysRemaining={trialActive ? daysRemaining : undefined}
-          onOpenExchange={() => setActiveTab('games')}
+          onOpenExchange={() => setActiveTab('exchange')}
           onEarnCharge={earnCharge}
           onClaimStreak={handleClaimStreak}
           onRecordReaction={recordReactionTime}
@@ -277,6 +278,22 @@ const Index = () => {
         />
       )}
       
+      {activeTab === 'exchange' && (
+        <ExchangeScreen
+          balance={balance}
+          onEarn={(amount, reason) => {
+            earnCharge(amount, reason);
+            recordActivity('game', reason, 5);
+          }}
+          onSpend={(amount, reason) => {
+            earnCharge(-amount, reason);
+            recordActivity('game', reason, 5);
+            return true;
+          }}
+          onBack={() => setActiveTab('home')}
+        />
+      )}
+
       {activeTab === 'games' && (
         <GamesScreen
           reactionLeaderboard={reactionLeaderboard}
@@ -317,11 +334,13 @@ const Index = () => {
       )}
 
       {/* Bottom Navigation */}
-      <BottomNav
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onQuickStop={() => setShowQuickStop(true)}
-      />
+      {activeTab !== 'exchange' && (
+        <BottomNav
+          activeTab={activeTab as 'home' | 'learn' | 'quickstop' | 'games' | 'insights'}
+          onTabChange={handleTabChange}
+          onQuickStop={() => setShowQuickStop(true)}
+        />
+      )}
 
       {/* Quick Stop Modal */}
       <QuickStopModal
