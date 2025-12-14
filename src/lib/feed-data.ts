@@ -168,7 +168,7 @@ export const INSIGHT_CARDS: Omit<FeedCardData, 'id'>[] = [
   {
     type: 'insight',
     title: 'Charge available.',
-    content: 'You\'ve earned control. Exchange it for time.',
+    content: "You've built control. Grant yourself permission when ready.",
     action: { label: 'Open Exchange', screen: 'exchange' },
     gradient: 'from-violet-900/80 via-purple-900/60 to-background',
     icon: '⚡',

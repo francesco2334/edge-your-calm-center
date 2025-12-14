@@ -8,7 +8,8 @@ interface EarnConfirmModalProps {
     id: string;
     label: string;
     icon: string;
-    tokensEarned: number;
+    tokensAllowed?: number;
+    tokensEarned?: number; // backward compat
     description: string;
   };
   onConfirm: () => void;
@@ -74,10 +75,10 @@ export function EarnConfirmModal({ isOpen, option, onConfirm, onCancel }: EarnCo
             {/* Question */}
             <p className="text-muted-foreground mb-6">{prompt.question}</p>
 
-            {/* Reward preview */}
+            {/* Permission preview */}
             <div className="bg-primary/10 rounded-xl p-4 mb-6 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Reward</span>
-              <span className="text-xl font-bold text-primary">+{option.tokensEarned} ⚡</span>
+              <span className="text-sm text-muted-foreground">You're allowing yourself</span>
+              <span className="text-xl font-bold text-primary">+{option.tokensAllowed || option.tokensEarned} ⚡</span>
             </div>
 
             {/* Actions */}

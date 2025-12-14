@@ -43,7 +43,7 @@ export function MonthlySummary({ month, hasSummary, onSubmit, earnedPoints = 50 
           </div>
           <div>
             <p className="text-sm font-medium text-foreground">{monthLabel} Summary Complete</p>
-            <p className="text-xs text-muted-foreground">+{earnedPoints} points earned</p>
+            <p className="text-xs text-muted-foreground">+{earnedPoints} points allowed</p>
           </div>
         </div>
       </motion.div>

@@ -74,8 +74,8 @@ export function useLearnProgress() {
       // Check if earned a token
       if (newCardsTowardsToken >= CARDS_PER_TOKEN) {
         earnedToken = true;
-        toast.success('🪙 +1 Token earned!', {
-          description: `You read ${CARDS_PER_TOKEN} cards!`,
+        toast.success('🪙 +1 Token allowed', {
+          description: `${CARDS_PER_TOKEN} cards read — permission granted`,
         });
         
         return {

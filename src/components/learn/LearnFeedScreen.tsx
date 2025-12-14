@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { ChevronUp, RefreshCw, Settings2, Flame, Target } from 'lucide-react';
+import { ChevronUp, RefreshCw, Settings2, Flame, Target, Coins } from 'lucide-react';
 import { LearnCardComponent } from './LearnCard';
 import { 
   LEARN_CARDS, 
@@ -11,6 +11,7 @@ import {
 } from '@/lib/learn-data';
 import { useToast } from '@/hooks/use-toast';
 import { useLearnProgress } from '@/hooks/useLearnProgress';
+import { useEmotionalContext, scoreCardRelevance } from '@/hooks/useEmotionalContext';
 
 interface LearnFeedScreenProps {
   selectedTopics: string[];
@@ -23,7 +24,19 @@ const CARDS_PER_BATCH = 10;
 
 export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker, onCardViewed, onCardSaved }: LearnFeedScreenProps) {
   const { toast } = useToast();
-  const { cardsReadToday, dailyGoal, streak, goalProgress, goalMet, recordCardRead } = useLearnProgress();
+  const { 
+    cardsReadToday, 
+    dailyGoal, 
+    streak, 
+    goalProgress, 
+    goalMet, 
+    tokenProgress,
+    cardsTowardsNextToken,
+    cardsPerToken,
+    recordCardRead 
+  } = useLearnProgress();
+  const { currentState, getPriorityTopics, isStateRecent } = useEmotionalContext();
+  
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'up' | 'down'>('up');
   const [likedCards, setLikedCards] = useState<Set<string>>(() => {
@@ -45,13 +58,35 @@ export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker, onCardViewe
   const [feedCards, setFeedCards] = useState<LearnCard[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Generate initial feed
+  // Generate feed with emotional context awareness
   const generateFeed = useCallback(() => {
     const baseCards = getCardsByTopics(selectedTopics);
     const visibleCards = baseCards.filter(c => !hiddenCards.has(c.id));
-    const shuffled = shuffleCards(visibleCards);
-    return shuffled;
-  }, [selectedTopics, hiddenCards]);
+    
+    // If emotional state is recent, prioritize relevant content
+    if (isStateRecent() && currentState !== 'neutral') {
+      // Score and sort cards by relevance
+      const scoredCards = visibleCards.map(card => ({
+        card,
+        score: scoreCardRelevance(
+          `${card.title} ${card.content} ${card.fact || ''}`,
+          card.topicId,
+          currentState
+        ),
+      }));
+      
+      // Sort by score (highest first), then shuffle within score groups
+      scoredCards.sort((a, b) => b.score - a.score);
+      
+      // Take top relevant cards first, then shuffle the rest
+      const highScoreCards = scoredCards.filter(s => s.score > 0).map(s => s.card);
+      const otherCards = scoredCards.filter(s => s.score === 0).map(s => s.card);
+      
+      return [...shuffleCards(highScoreCards), ...shuffleCards(otherCards)];
+    }
+    
+    return shuffleCards(visibleCards);
+  }, [selectedTopics, hiddenCards, currentState, isStateRecent]);
 
   // Initialize feed
   useEffect(() => {
@@ -235,6 +270,14 @@ export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker, onCardViewe
                 <span className="text-xs font-semibold text-orange-500">{streak}</span>
               </div>
             )}
+            
+            {/* Token progress indicator */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/20 backdrop-blur-sm">
+              <Coins className="w-3.5 h-3.5 text-amber-500" />
+              <span className="text-xs font-medium text-amber-500">
+                {cardsTowardsNextToken}/{cardsPerToken}
+              </span>
+            </div>
           </div>
 
           {/* Actions */}
