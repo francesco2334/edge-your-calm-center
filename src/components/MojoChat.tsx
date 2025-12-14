@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send } from 'lucide-react';
 import { MojoOrb } from './MojoOrb';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -15,9 +16,10 @@ interface MojoChatProps {
   isOpen: boolean;
   onClose: () => void;
   onTriggerTool?: (tool: MojoTool) => void;
+  userId?: string;
 }
 
-export function MojoChat({ isOpen, onClose, onTriggerTool }: MojoChatProps) {
+export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -154,6 +156,27 @@ export function MojoChat({ isOpen, onClose, onTriggerTool }: MojoChatProps) {
     }
   };
 
+  // Save conversation when closing chat (if there are messages)
+  const saveConversation = useCallback(async () => {
+    if (!userId || messages.length < 2) return;
+    
+    try {
+      await supabase.functions.invoke('analyze-insights', {
+        body: { messages },
+      });
+    } catch (error) {
+      console.error('Failed to save conversation insights:', error);
+    }
+  }, [userId, messages]);
+
+  // Save when closing
+  const handleClose = useCallback(() => {
+    if (messages.length >= 2) {
+      saveConversation();
+    }
+    onClose();
+  }, [messages, saveConversation, onClose]);
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -180,7 +203,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool }: MojoChatProps) {
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-2 rounded-full hover:bg-muted/50 transition-colors"
             >
               <X className="w-5 h-5 text-muted-foreground" />

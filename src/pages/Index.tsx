@@ -296,6 +296,7 @@ const Index = () => {
           stats={stats}
           transactions={transactions}
           onBack={() => setActiveTab('home')}
+          userId={user?.id}
           monthlyScores={monthlyScores}
           monthlyNotes={monthlyNotes}
           monthlySummaries={monthlySummaries}
@@ -338,6 +339,7 @@ const Index = () => {
         isOpen={showMojoChat}
         onClose={() => setShowMojoChat(false)}
         onTriggerTool={handleMojoTool}
+        userId={user?.id}
       />
     </div>
   );
