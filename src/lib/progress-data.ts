@@ -1,0 +1,163 @@
+// Progress Engine - Activity-Driven Progress Tracking
+
+export interface ActivityEvent {
+  id: string;
+  type: 'check_in' | 'learn' | 'reflection' | 'tool_used' | 'streak' | 'session';
+  points: number;
+  timestamp: Date;
+  details?: string;
+}
+
+export interface WeeklyReflection {
+  id: string;
+  weekStart: string; // ISO date string of week start (Monday)
+  content: string;
+  createdAt: Date;
+  prompts: {
+    wentWell?: string;
+    didDifferently?: string;
+    proudOf?: string;
+  };
+}
+
+export interface MonthlySummary {
+  id: string;
+  month: string; // Format: "2024-01"
+  content: string;
+  createdAt: Date;
+  score: number;
+  trend: 'up' | 'down' | 'stable';
+}
+
+export interface MonthlyScore {
+  month: string;
+  score: number;
+  activities: number;
+  reflectionsCount: number;
+  streakDays: number;
+  label: string; // "Jan", "Feb", etc.
+}
+
+export interface Trophy {
+  id: string;
+  type: 'consistency' | 'streak' | 'reflection' | 'growth' | 'learner' | 'master';
+  name: string;
+  icon: string;
+  description: string;
+  earnedAt: Date;
+  month: string;
+}
+
+export const TROPHY_DEFINITIONS = {
+  consistency: {
+    name: 'Consistency',
+    icon: '🏆',
+    description: 'Checked in most days this month',
+    threshold: 20, // days
+  },
+  streak: {
+    name: 'Streak Master',
+    icon: '🔥',
+    description: 'Maintained a 7+ day streak',
+    threshold: 7,
+  },
+  reflection: {
+    name: 'Deep Thinker',
+    icon: '🧠',
+    description: 'Completed all weekly reflections',
+    threshold: 4, // weeks
+  },
+  growth: {
+    name: 'Rising Star',
+    icon: '📈',
+    description: 'Best month so far',
+    threshold: 0, // dynamic
+  },
+  learner: {
+    name: 'Knowledge Seeker',
+    icon: '📚',
+    description: 'Engaged deeply with Learn content',
+    threshold: 30, // cards viewed
+  },
+  master: {
+    name: 'Self-Mastery',
+    icon: '✨',
+    description: 'Perfect month - all trophies earned',
+    threshold: 4, // other trophies
+  },
+};
+
+export const ACTIVITY_POINTS = {
+  check_in: 10,
+  learn_card: 2,
+  learn_save: 5,
+  weekly_reflection: 25,
+  monthly_summary: 50,
+  tool_used: 15,
+  streak_day: 5,
+  session_complete: 20,
+  session_early_exit: 30,
+};
+
+export const REFLECTION_PROMPTS = {
+  weekly: [
+    { key: 'wentWell', label: 'What went well?', placeholder: 'Something that worked for me this week...' },
+    { key: 'didDifferently', label: 'What did you do differently?', placeholder: 'A change I made or tried...' },
+    { key: 'proudOf', label: 'What are you proud of?', placeholder: 'Something I accomplished...' },
+  ],
+  monthly: {
+    prompt: 'Looking back on this month — what moved the needle for you?',
+    placeholder: 'What habits helped, what changed, what you want to carry forward...',
+  },
+};
+
+export const PROGRESS_STORAGE_KEYS = {
+  activities: 'dopa_activities',
+  weeklyReflections: 'dopa_weekly_reflections',
+  monthlySummaries: 'dopa_monthly_summaries',
+  trophies: 'dopa_trophies',
+  monthlyScores: 'dopa_monthly_scores',
+};
+
+// Utility functions
+export function getWeekStart(date: Date = new Date()): string {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
+  d.setDate(diff);
+  return d.toISOString().split('T')[0];
+}
+
+export function getMonthKey(date: Date = new Date()): string {
+  return date.toISOString().slice(0, 7); // "2024-01"
+}
+
+export function getMonthLabel(monthKey: string): string {
+  const [year, month] = monthKey.split('-');
+  const date = new Date(parseInt(year), parseInt(month) - 1);
+  return date.toLocaleDateString('en-US', { month: 'short' });
+}
+
+export function calculateMonthlyScore(activities: ActivityEvent[], month: string): number {
+  const monthActivities = activities.filter(a => 
+    getMonthKey(new Date(a.timestamp)) === month
+  );
+  return monthActivities.reduce((sum, a) => sum + a.points, 0);
+}
+
+export function getLast6Months(): string[] {
+  const months: string[] = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(getMonthKey(d));
+  }
+  return months;
+}
+
+export function getScoreTrend(currentScore: number, previousScore: number): 'up' | 'down' | 'stable' {
+  const diff = currentScore - previousScore;
+  if (diff > 20) return 'up';
+  if (diff < -20) return 'down';
+  return 'stable';
+}

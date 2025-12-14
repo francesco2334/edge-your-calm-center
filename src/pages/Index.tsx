@@ -7,7 +7,6 @@ import { PaywallScreen } from '@/components/PaywallScreen';
 import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
 import { HomeScreen } from '@/components/HomeScreen';
 import { GamesScreen } from '@/components/GamesScreen';
-import { AllocateScreen } from '@/components/AllocateScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
 import { LearnFeed } from '@/components/LearnFeed';
 import { BottomNav } from '@/components/BottomNav';
@@ -15,6 +14,7 @@ import { QuickStopModal } from '@/components/QuickStopModal';
 import { MojoChat, type MojoTool } from '@/components/MojoChat';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync } from '@/components/tools';
 import { useCharge } from '@/hooks/useCharge';
+import { useProgress } from '@/hooks/useProgress';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
@@ -34,10 +34,7 @@ const Index = () => {
   
   const { 
     balance, 
-    activeSession, 
     earnCharge, 
-    allocateCharge, 
-    completeSession, 
     stats,
     streak,
     streakClaimedToday,
@@ -45,6 +42,17 @@ const Index = () => {
     claimDailyStreak,
     recordReactionTime,
   } = useCharge(5);
+
+  // Progress Engine
+  const {
+    monthlyScores,
+    trophies,
+    hasWeeklyReflection,
+    hasMonthlySummary,
+    submitWeeklyReflection,
+    submitMonthlySummary,
+    recordActivity,
+  } = useProgress();
 
   const handleAssessmentComplete = (answers: AssessmentAnswer[]) => {
     setAssessmentAnswers(answers);
@@ -62,6 +70,7 @@ const Index = () => {
   const handleClaimStreak = () => {
     const success = claimDailyStreak();
     if (success) {
+      recordActivity('streak', 'Daily streak claimed');
       toast({
         title: `🔥 Day ${streak + 1} streak!`,
         description: "+20 Charge earned for daily check-in",
@@ -72,6 +81,7 @@ const Index = () => {
 
   const handleQuickToolComplete = (charge: number, reason: string) => {
     earnCharge(charge, reason);
+    recordActivity('tool_used', reason);
     setActiveQuickTool(null);
     toast({
       title: "Well done",
@@ -79,9 +89,26 @@ const Index = () => {
     });
   };
 
+  const handleWeeklyReflection = (prompts: any) => {
+    submitWeeklyReflection(prompts);
+    earnCharge(25, 'Weekly reflection');
+    toast({
+      title: "Reflection saved",
+      description: "+25 Charge earned",
+    });
+  };
+
+  const handleMonthlySummary = (content: string) => {
+    submitMonthlySummary(content);
+    earnCharge(50, 'Monthly summary');
+    toast({
+      title: "Monthly summary saved",
+      description: "+50 Charge earned",
+    });
+  };
+
   const handleMojoTool = (tool: MojoTool) => {
     setShowMojoChat(false);
-    // Map Mojo tool names to quick tool names
     const toolMap: Record<MojoTool, QuickTool> = {
       breathing: 'breathing',
       standoff: 'pause',
@@ -212,6 +239,12 @@ const Index = () => {
           chargeBalance={balance}
           stats={stats}
           onBack={() => setActiveTab('home')}
+          monthlyScores={monthlyScores}
+          trophies={trophies}
+          hasWeeklyReflection={hasWeeklyReflection()}
+          hasMonthlySummary={hasMonthlySummary()}
+          onWeeklyReflection={handleWeeklyReflection}
+          onMonthlySummary={handleMonthlySummary}
         />
       )}
 
