@@ -117,31 +117,39 @@ export function PaywallScreen({ onSubscribe, onSkip, onRestore }: PaywallScreenP
               exit={{ opacity: 0, y: -20 }}
               className="text-center max-w-md mx-auto"
             >
-              {/* Price */}
+              {/* Pricing Options */}
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="mb-6"
+                className="mb-6 space-y-4"
               >
-                <p className="text-muted-foreground text-sm uppercase tracking-widest mb-2">
-                  Full Access
-                </p>
-                <p className="text-5xl md:text-6xl font-bold text-foreground">
-                  £9.99
-                  <span className="text-lg text-muted-foreground font-normal">/month</span>
-                </p>
-              </motion.div>
+                {/* Monthly Option */}
+                <div className="dopa-card border-primary/30">
+                  <p className="text-muted-foreground text-xs uppercase tracking-widest mb-1">
+                    Monthly
+                  </p>
+                  <p className="text-3xl font-bold text-foreground">
+                    £7.99
+                    <span className="text-sm text-muted-foreground font-normal">/month</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Auto-renews until cancelled</p>
+                </div>
 
-              {/* Subscription terms */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.15 }}
-                className="text-xs text-muted-foreground mb-6 space-y-1"
-              >
-                <p>Auto-renews monthly until cancelled</p>
-                <p>Payment will be charged to your Apple ID account</p>
+                {/* Lifetime Option */}
+                <div className="dopa-card border-primary bg-primary/5 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-bl-lg font-medium">
+                    Best Value
+                  </div>
+                  <p className="text-muted-foreground text-xs uppercase tracking-widest mb-1">
+                    Lifetime
+                  </p>
+                  <p className="text-3xl font-bold text-foreground">
+                    £80
+                    <span className="text-sm text-muted-foreground font-normal"> one-time</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Pay once, own forever</p>
+                </div>
               </motion.div>
 
               {/* What's included */}
@@ -212,7 +220,16 @@ export function PaywallScreen({ onSubscribe, onSkip, onRestore }: PaywallScreenP
                   onClick={onSubscribe}
                   className="w-full"
                 >
-                  Subscribe — £9.99/month
+                  Get Lifetime — £80
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={onSubscribe}
+                  className="w-full"
+                >
+                  Subscribe — £7.99/month
                 </Button>
                 
                 {/* Restore Purchases */}
