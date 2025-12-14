@@ -36,8 +36,8 @@ type FailureContext = 'game-loss' | 'streak-break' | 'relapse' | null;
 
 const Index = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const [currentScreen, setCurrentScreen] = useState<AppScreen>('welcome');
+  const { user, loading: authLoading } = useAuth();
+  const [currentScreen, setCurrentScreen] = useState<AppScreen | null>(null);
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [showQuickStop, setShowQuickStop] = useState(false);
@@ -115,8 +115,22 @@ const Index = () => {
     }
   }, [hasLoggedToday, notificationPermission, scheduleStreakWarningNotification, cancelStreakWarning]);
 
+  // Determine initial screen based on auth status and trial acceptance
+  useEffect(() => {
+    if (authLoading || !economyLoaded || !trialLoaded) return;
+    
+    // If user is authenticated AND has already completed onboarding (trial accepted)
+    // Skip straight to main app
+    if (user && trialAccepted) {
+      setCurrentScreen('main');
+    } else {
+      // New user or not logged in - show full onboarding
+      setCurrentScreen('welcome');
+    }
+  }, [user, trialAccepted, authLoading, economyLoaded, trialLoaded]);
+
   // Show loading state while data loads
-  if (!economyLoaded || !trialLoaded) {
+  if (authLoading || !economyLoaded || !trialLoaded || currentScreen === null) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
