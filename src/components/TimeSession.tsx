@@ -11,7 +11,7 @@ interface TimeSessionProps {
     tokensSpent: number;
   } | null;
   onEndSession: () => void;
-  onExitEarly: () => number;
+  onExitEarly: () => void;
 }
 
 export function TimeSessionBanner({ session, onEndSession, onExitEarly }: TimeSessionProps) {
