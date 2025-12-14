@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { InsightsGraph } from './InsightsGraph';
 import { ChargeCounter } from './ChargeCounter';
-import { ProgressGraph, WeeklyReflection, MonthlySummary, TrophyCase } from './insights';
+import { ProgressGraph, WeeklyReflection, MonthlySummary, MonthlyNotes, TrophyCase } from './insights';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 import type { PersonalStats } from '@/lib/charge-data';
-import type { MonthlyScore, Trophy, WeeklyReflection as WeeklyReflectionType } from '@/lib/progress-data';
+import type { MonthlyScore, Trophy, WeeklyReflection as WeeklyReflectionType, MonthlyNote } from '@/lib/progress-data';
 import { getMonthKey } from '@/lib/progress-data';
 
 interface InsightsScreenProps {
@@ -17,8 +17,10 @@ interface InsightsScreenProps {
   trophies: Trophy[];
   hasWeeklyReflection: boolean;
   hasMonthlySummary: boolean;
+  monthlyNote?: MonthlyNote;
   onWeeklyReflection: (prompts: WeeklyReflectionType['prompts']) => void;
   onMonthlySummary: (content: string) => void;
+  onSaveMonthlyNote: (improvements: string, notes: string) => void;
 }
 
 export function InsightsScreen({ 
@@ -30,11 +32,14 @@ export function InsightsScreen({
   trophies,
   hasWeeklyReflection,
   hasMonthlySummary,
+  monthlyNote,
   onWeeklyReflection,
   onMonthlySummary,
+  onSaveMonthlyNote,
 }: InsightsScreenProps) {
   const currentMonth = getMonthKey();
   const currentMonthTrophies = trophies.filter(t => t.month === currentMonth);
+  const currentMonthData = monthlyScores.find(s => s.month === currentMonth);
 
   return (
     <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden pb-24">
@@ -70,7 +75,7 @@ export function InsightsScreen({
           </p>
         </motion.div>
 
-        {/* Progress Graph - NEW */}
+        {/* Progress Graph */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -80,11 +85,52 @@ export function InsightsScreen({
           <ProgressGraph scores={monthlyScores} />
         </motion.div>
 
-        {/* Weekly Reflection - NEW */}
+        {/* This Month Stats */}
+        {currentMonthData && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="grid grid-cols-4 gap-2 mb-6"
+          >
+            <div className="dopa-card text-center py-3 px-2">
+              <p className="text-xl font-bold text-primary">{currentMonthData.activities}</p>
+              <p className="text-[10px] text-muted-foreground">Activities</p>
+            </div>
+            <div className="dopa-card text-center py-3 px-2">
+              <p className="text-xl font-bold text-emerald-400">{currentMonthData.learnCards}</p>
+              <p className="text-[10px] text-muted-foreground">Cards Read</p>
+            </div>
+            <div className="dopa-card text-center py-3 px-2">
+              <p className="text-xl font-bold text-accent">{currentMonthData.toolsUsed}</p>
+              <p className="text-[10px] text-muted-foreground">Tools Used</p>
+            </div>
+            <div className="dopa-card text-center py-3 px-2">
+              <p className="text-xl font-bold text-amber-400">{currentMonthData.streakDays}</p>
+              <p className="text-[10px] text-muted-foreground">Streak Days</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Monthly Improvements & Notes - NEW */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="mb-4"
+        >
+          <MonthlyNotes
+            month={currentMonth}
+            existingNote={monthlyNote}
+            onSave={onSaveMonthlyNote}
+          />
+        </motion.div>
+
+        {/* Weekly Reflection */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
           className="mb-4"
         >
           <WeeklyReflection 
@@ -93,11 +139,11 @@ export function InsightsScreen({
           />
         </motion.div>
 
-        {/* Monthly Summary - NEW */}
+        {/* Monthly Summary */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: 0.3 }}
           className="mb-6"
         >
           <MonthlySummary
@@ -107,11 +153,11 @@ export function InsightsScreen({
           />
         </motion.div>
 
-        {/* Trophy Case - NEW */}
+        {/* Trophy Case */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.35 }}
           className="dopa-card mb-6"
         >
           <TrophyCase earnedTrophies={currentMonthTrophies} month={currentMonth} />
@@ -121,7 +167,7 @@ export function InsightsScreen({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
+          transition={{ delay: 0.4 }}
           className="grid grid-cols-3 gap-3 mb-6"
         >
           <div className="dopa-card text-center">
@@ -143,7 +189,7 @@ export function InsightsScreen({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.45 }}
             className="dopa-card mb-6"
           >
             <p className="text-sm text-muted-foreground mb-3">Control Metrics</p>
@@ -175,7 +221,7 @@ export function InsightsScreen({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
+            transition={{ delay: 0.5 }}
           >
             <p className="text-sm text-muted-foreground mb-3">Edge Profile</p>
             <InsightsGraph answers={answers} />
