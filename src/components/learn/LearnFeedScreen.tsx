@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { ChevronUp, RefreshCw, Settings2 } from 'lucide-react';
+import { ChevronUp, RefreshCw, Settings2, Flame, Target } from 'lucide-react';
 import { LearnCardComponent } from './LearnCard';
 import { 
   LEARN_CARDS, 
@@ -10,6 +10,7 @@ import {
   type LearnCard 
 } from '@/lib/learn-data';
 import { useToast } from '@/hooks/use-toast';
+import { useLearnProgress } from '@/hooks/useLearnProgress';
 
 interface LearnFeedScreenProps {
   selectedTopics: string[];
@@ -22,6 +23,7 @@ const CARDS_PER_BATCH = 10;
 
 export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker, onCardViewed, onCardSaved }: LearnFeedScreenProps) {
   const { toast } = useToast();
+  const { cardsReadToday, dailyGoal, streak, goalProgress, goalMet, recordCardRead } = useLearnProgress();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'up' | 'down'>('up');
   const [likedCards, setLikedCards] = useState<Set<string>>(() => {
@@ -80,6 +82,7 @@ export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker, onCardViewe
         setCurrentIndex(prev => prev + 1);
         // Track card viewed
         onCardViewed?.();
+        recordCardRead();
       } else {
         // End of feed - load more
         loadMoreCards();
@@ -207,37 +210,59 @@ export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker, onCardViewe
   return (
     <div className="fixed inset-0 bg-background overflow-hidden">
       {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 z-20 px-4 pt-4 pb-2 flex items-center justify-between">
-        {/* Progress */}
-        <div className="flex items-center gap-2">
-          <div className="h-1 w-24 bg-muted/30 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-primary"
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min(((currentIndex + 1) / feedCards.length) * 100, 100)}%` }}
-              transition={{ duration: 0.3 }}
-            />
+      <div className="absolute top-0 left-0 right-0 z-20 px-4 pt-4 pb-2">
+        <div className="flex items-center justify-between mb-2">
+          {/* Daily goal tracker */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/30 backdrop-blur-sm">
+              <Target className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium text-foreground">
+                {cardsReadToday}/{dailyGoal}
+              </span>
+              {goalMet && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="text-xs"
+                >
+                  ✓
+                </motion.span>
+              )}
+            </div>
+            {streak > 0 && (
+              <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-orange-500/20 backdrop-blur-sm">
+                <Flame className="w-3.5 h-3.5 text-orange-500" />
+                <span className="text-xs font-semibold text-orange-500">{streak}</span>
+              </div>
+            )}
           </div>
-          <span className="text-xs text-muted-foreground tabular-nums">
-            {currentIndex + 1}
-          </span>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={refreshFeed}
+              disabled={isRefreshing}
+              className="w-9 h-9 rounded-full bg-muted/30 backdrop-blur-sm flex items-center justify-center"
+            >
+              <RefreshCw className={`w-4 h-4 text-foreground ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              onClick={onOpenTopicPicker}
+              className="w-9 h-9 rounded-full bg-muted/30 backdrop-blur-sm flex items-center justify-center"
+            >
+              <Settings2 className="w-4 h-4 text-foreground" />
+            </button>
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={refreshFeed}
-            disabled={isRefreshing}
-            className="w-9 h-9 rounded-full bg-muted/30 backdrop-blur-sm flex items-center justify-center"
-          >
-            <RefreshCw className={`w-4 h-4 text-foreground ${isRefreshing ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            onClick={onOpenTopicPicker}
-            className="w-9 h-9 rounded-full bg-muted/30 backdrop-blur-sm flex items-center justify-center"
-          >
-            <Settings2 className="w-4 h-4 text-foreground" />
-          </button>
+        {/* Goal progress bar */}
+        <div className="h-1 w-full bg-muted/30 rounded-full overflow-hidden">
+          <motion.div
+            className={`h-full ${goalMet ? 'bg-green-500' : 'bg-primary'}`}
+            initial={{ width: 0 }}
+            animate={{ width: `${goalProgress * 100}%` }}
+            transition={{ duration: 0.3 }}
+          />
         </div>
       </div>
 
