@@ -4,10 +4,11 @@ const config: CapacitorConfig = {
   appId: 'app.lovable.28b1c303b9134ed0ab6f2a95cc21741e',
   appName: 'DopaMINE',
   webDir: 'dist',
-  server: {
-    url: 'https://28b1c303-b913-4ed0-ab6f-2a95cc21741e.lovableproject.com?forceHideBadge=true',
-    cleartext: true
-  }
+  // Production: Remove server block entirely or set cleartext: false
+  // server: {
+  //   url: 'https://your-production-url.com',
+  //   cleartext: false
+  // }
 };
 
 export default config;
