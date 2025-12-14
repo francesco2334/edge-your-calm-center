@@ -2,10 +2,12 @@ import { motion } from 'framer-motion';
 import { InsightsGraph } from './InsightsGraph';
 import { ChargeCounter } from './ChargeCounter';
 import { ProgressGraph, WeeklyReflection, MonthlySummary, MonthlyNotes, TrophyCase, JourneyTimeline, DailyActivityGraph } from './insights';
+import { SmartEdgeProfile } from './insights/SmartEdgeProfile';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 import type { PersonalStats, ChargeTransaction } from '@/lib/charge-data';
 import type { MonthlyScore, Trophy, WeeklyReflection as WeeklyReflectionType, MonthlyNote, MonthlySummary as MonthlySummaryType } from '@/lib/progress-data';
 import { getMonthKey } from '@/lib/progress-data';
+import { useSmartInsights } from '@/hooks/useSmartInsights';
 
 interface InsightsScreenProps {
   answers: AssessmentAnswer[];
@@ -13,6 +15,7 @@ interface InsightsScreenProps {
   stats: PersonalStats;
   transactions: ChargeTransaction[];
   onBack: () => void;
+  userId?: string | null;
   // Progress Engine props
   monthlyScores: MonthlyScore[];
   trophies: Trophy[];
@@ -32,6 +35,7 @@ export function InsightsScreen({
   stats,
   transactions,
   onBack,
+  userId,
   monthlyScores,
   monthlyNotes,
   monthlySummaries,
@@ -46,6 +50,13 @@ export function InsightsScreen({
   const currentMonth = getMonthKey();
   const currentMonthTrophies = trophies.filter(t => t.month === currentMonth);
   const currentMonthData = monthlyScores.find(s => s.month === currentMonth);
+  
+  // Smart insights from user activity
+  const { behaviorPatterns, focusAreas, mojoThemes, isLoading: insightsLoading } = useSmartInsights(
+    userId ?? null,
+    stats,
+    transactions
+  );
 
   return (
     <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden pb-24">
@@ -128,7 +139,7 @@ export function InsightsScreen({
           </motion.div>
         )}
 
-        {/* Monthly Improvements & Notes - NEW */}
+        {/* Monthly Improvements & Notes */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -247,14 +258,29 @@ export function InsightsScreen({
           />
         </motion.div>
 
-        {/* Assessment Insights */}
-        {answers.length > 0 && (
+        {/* Smart Edge Profile - Uses real behavioral data */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+          className="mb-6"
+        >
+          <SmartEdgeProfile 
+            behaviorPatterns={behaviorPatterns}
+            focusAreas={focusAreas}
+            mojoThemes={mojoThemes}
+            isLoading={insightsLoading}
+          />
+        </motion.div>
+
+        {/* Assessment Insights - Fallback if no smart data */}
+        {answers.length > 0 && Object.values(behaviorPatterns).every(v => v === 50) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55 }}
+            transition={{ delay: 0.6 }}
           >
-            <p className="text-sm text-muted-foreground mb-3">Edge Profile</p>
+            <p className="text-sm text-muted-foreground mb-3">Initial Edge Profile</p>
             <InsightsGraph answers={answers} />
           </motion.div>
         )}

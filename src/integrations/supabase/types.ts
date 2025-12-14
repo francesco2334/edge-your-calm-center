@@ -41,6 +41,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mojo_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          themes: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          themes?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          themes?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -70,10 +97,15 @@ export type Database = {
       }
       user_progress: {
         Row: {
+          ai_insights: Json | null
           balance: number
+          behavior_patterns: Json | null
           created_at: string
+          focus_areas: Json | null
           id: string
           last_active_date: string | null
+          last_insight_update: string | null
+          mojo_themes: Json | null
           reaction_leaderboard: Json
           stats: Json
           streak: number
@@ -83,10 +115,15 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_insights?: Json | null
           balance?: number
+          behavior_patterns?: Json | null
           created_at?: string
+          focus_areas?: Json | null
           id?: string
           last_active_date?: string | null
+          last_insight_update?: string | null
+          mojo_themes?: Json | null
           reaction_leaderboard?: Json
           stats?: Json
           streak?: number
@@ -96,10 +133,15 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_insights?: Json | null
           balance?: number
+          behavior_patterns?: Json | null
           created_at?: string
+          focus_areas?: Json | null
           id?: string
           last_active_date?: string | null
+          last_insight_update?: string | null
+          mojo_themes?: Json | null
           reaction_leaderboard?: Json
           stats?: Json
           streak?: number
