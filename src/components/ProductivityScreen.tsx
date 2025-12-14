@@ -51,11 +51,14 @@ const CATEGORIES: ProductivityCategory[] = [
 ];
 
 interface ProductivityScreenProps {
-  hasLoggedToday: boolean;
+  logsToday: number;
+  logsRemaining: number;
   onLogProductivity: (category: string, description?: string) => void;
 }
 
-export function ProductivityScreen({ hasLoggedToday, onLogProductivity }: ProductivityScreenProps) {
+const MAX_LOGS = 3;
+
+export function ProductivityScreen({ logsToday, logsRemaining, onLogProductivity }: ProductivityScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [otherDescription, setOtherDescription] = useState('');
   const [isLogging, setIsLogging] = useState(false);
@@ -90,12 +93,12 @@ export function ProductivityScreen({ hasLoggedToday, onLogProductivity }: Produc
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          Log one real-world action today
+          Log up to 3 real-world actions today ({logsRemaining} remaining)
         </motion.p>
       </div>
 
-      {/* Already logged state */}
-      {hasLoggedToday ? (
+      {/* All logged state */}
+      {logsRemaining === 0 ? (
         <motion.div 
           className="mx-6 p-8 rounded-2xl bg-primary/10 border border-primary/20 text-center"
           initial={{ opacity: 0, scale: 0.95 }}
@@ -105,10 +108,10 @@ export function ProductivityScreen({ hasLoggedToday, onLogProductivity }: Produc
             <Check className="w-8 h-8 text-primary" />
           </div>
           <h2 className="text-xl font-semibold text-foreground mb-2">
-            Today's action logged
+            All 3 actions logged
           </h2>
           <p className="text-muted-foreground text-sm">
-            You've already earned your +1 token today.<br />
+            You've earned +{MAX_LOGS} tokens today.<br />
             Come back tomorrow.
           </p>
         </motion.div>

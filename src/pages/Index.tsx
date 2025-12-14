@@ -72,7 +72,8 @@ const Index = () => {
     endSession,
     exitSessionEarly,
     logProductivity,
-    hasLoggedProductivityToday,
+    productivityLogsToday,
+    productivityLogsRemaining,
   } = useTokenEconomy(user?.id ?? null);
 
   // Progress Engine (for reflections, trophies - separate from economy)
@@ -383,7 +384,8 @@ const Index = () => {
 
       {activeTab === 'productivity' && (
         <ProductivityScreen
-          hasLoggedToday={hasLoggedProductivityToday}
+          logsToday={productivityLogsToday}
+          logsRemaining={productivityLogsRemaining}
           onLogProductivity={logProductivity}
         />
       )}
