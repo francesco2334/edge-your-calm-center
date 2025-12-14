@@ -4,11 +4,13 @@ import { LEARN_STORAGE_KEYS, LEARN_TOPICS } from '@/lib/learn-data';
 
 interface LearnFeedProps {
   onClose?: () => void;
+  onCardViewed?: () => void;
+  onCardSaved?: () => void;
 }
 
 type LearnView = 'intro' | 'topics' | 'feed';
 
-export function LearnFeed({ onClose }: LearnFeedProps) {
+export function LearnFeed({ onClose, onCardViewed, onCardSaved }: LearnFeedProps) {
   const [view, setView] = useState<LearnView>('intro');
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
@@ -77,6 +79,8 @@ export function LearnFeed({ onClose }: LearnFeedProps) {
     <LearnFeedScreen
       selectedTopics={selectedTopics}
       onOpenTopicPicker={handleOpenTopicPicker}
+      onCardViewed={onCardViewed}
+      onCardSaved={onCardSaved}
     />
   );
 }

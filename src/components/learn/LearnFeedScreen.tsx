@@ -14,11 +14,13 @@ import { useToast } from '@/hooks/use-toast';
 interface LearnFeedScreenProps {
   selectedTopics: string[];
   onOpenTopicPicker: () => void;
+  onCardViewed?: () => void;
+  onCardSaved?: () => void;
 }
 
 const CARDS_PER_BATCH = 10;
 
-export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker }: LearnFeedScreenProps) {
+export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker, onCardViewed, onCardSaved }: LearnFeedScreenProps) {
   const { toast } = useToast();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<'up' | 'down'>('up');
@@ -76,6 +78,8 @@ export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker }: LearnFeed
       if (currentIndex < feedCards.length - 1) {
         setDirection('up');
         setCurrentIndex(prev => prev + 1);
+        // Track card viewed
+        onCardViewed?.();
       } else {
         // End of feed - load more
         loadMoreCards();
@@ -87,7 +91,7 @@ export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker }: LearnFeed
         setCurrentIndex(prev => prev - 1);
       }
     }
-  }, [currentIndex, feedCards.length]);
+  }, [currentIndex, feedCards.length, onCardViewed]);
 
   // Load more cards (infinite scroll simulation)
   const loadMoreCards = useCallback(() => {
@@ -121,6 +125,8 @@ export function LearnFeedScreen({ selectedTopics, onOpenTopicPicker }: LearnFeed
         next.delete(id);
       } else {
         next.add(id);
+        // Track card saved
+        onCardSaved?.();
         toast({
           title: "Saved!",
           description: "Card added to your saves.",

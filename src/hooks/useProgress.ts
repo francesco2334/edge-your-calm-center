@@ -113,9 +113,36 @@ export function useProgress() {
       timestamp: new Date(),
       details,
     };
-    setActivities(prev => [event, ...prev]);
+    setActivities(prev => {
+      const updated = [event, ...prev];
+      
+      // Check for Learner trophy on Learn activities
+      if (type === 'learn') {
+        const currentMonth = getMonthKey();
+        const learnCount = updated.filter(a => 
+          a.type === 'learn' && getMonthKey(new Date(a.timestamp)) === currentMonth
+        ).length;
+        
+        if (learnCount >= TROPHY_DEFINITIONS.learner.threshold) {
+          const hasLearnerTrophy = trophies.some(t => t.type === 'learner' && t.month === currentMonth);
+          if (!hasLearnerTrophy) {
+            setTrophies(prevTrophies => [{
+              id: `${Date.now()}-learner`,
+              type: 'learner',
+              name: TROPHY_DEFINITIONS.learner.name,
+              icon: TROPHY_DEFINITIONS.learner.icon,
+              description: TROPHY_DEFINITIONS.learner.description,
+              earnedAt: new Date(),
+              month: currentMonth,
+            }, ...prevTrophies]);
+          }
+        }
+      }
+      
+      return updated;
+    });
     return points;
-  }, []);
+  }, [trophies]);
 
   // Check if weekly reflection exists for current week
   const hasWeeklyReflection = useCallback(() => {
@@ -231,6 +258,25 @@ export function useProgress() {
         name: TROPHY_DEFINITIONS.growth.name,
         icon: TROPHY_DEFINITIONS.growth.icon,
         description: TROPHY_DEFINITIONS.growth.description,
+        earnedAt: new Date(),
+        month,
+      });
+    }
+
+    // Learner trophy (engaged with Learn content)
+    const learnActivities = activities.filter(a => 
+      a.type === 'learn' && getMonthKey(new Date(a.timestamp)) === month
+    );
+    if (
+      learnActivities.length >= TROPHY_DEFINITIONS.learner.threshold &&
+      !existingTrophiesForMonth.some(t => t.type === 'learner')
+    ) {
+      newTrophies.push({
+        id: `${Date.now()}-learner`,
+        type: 'learner',
+        name: TROPHY_DEFINITIONS.learner.name,
+        icon: TROPHY_DEFINITIONS.learner.icon,
+        description: TROPHY_DEFINITIONS.learner.description,
         earnedAt: new Date(),
         month,
       });
