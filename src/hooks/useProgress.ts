@@ -3,6 +3,7 @@ import {
   ActivityEvent,
   WeeklyReflection,
   MonthlySummary,
+  MonthlyNote,
   Trophy,
   MonthlyScore,
   ACTIVITY_POINTS,
@@ -19,6 +20,7 @@ export function useProgress() {
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
   const [weeklyReflections, setWeeklyReflections] = useState<WeeklyReflection[]>([]);
   const [monthlySummaries, setMonthlySummaries] = useState<MonthlySummary[]>([]);
+  const [monthlyNotes, setMonthlyNotes] = useState<MonthlyNote[]>([]);
   const [trophies, setTrophies] = useState<Trophy[]>([]);
   const [monthlyScores, setMonthlyScores] = useState<MonthlyScore[]>([]);
 
@@ -86,6 +88,8 @@ export function useProgress() {
       const score = monthActivities.reduce((sum, a) => sum + a.points, 0);
       const reflections = weeklyReflections.filter(r => r.weekStart.startsWith(month)).length;
       const streakDays = monthActivities.filter(a => a.type === 'streak').length;
+      const learnCards = monthActivities.filter(a => a.type === 'learn').length;
+      const toolsUsed = monthActivities.filter(a => a.type === 'tool_used').length;
 
       return {
         month,
@@ -93,6 +97,8 @@ export function useProgress() {
         activities: monthActivities.length,
         reflectionsCount: reflections,
         streakDays,
+        learnCards,
+        toolsUsed,
         label: getMonthLabel(month),
       };
     });
@@ -307,11 +313,66 @@ export function useProgress() {
     return weeklyReflections.filter(r => r.weekStart.startsWith(currentMonth));
   }, [weeklyReflections]);
 
+  // Get monthly note for a specific month
+  const getMonthlyNote = useCallback((month?: string) => {
+    const targetMonth = month ?? getMonthKey();
+    return monthlyNotes.find(n => n.month === targetMonth);
+  }, [monthlyNotes]);
+
+  // Save or update monthly note (improvements + comments)
+  const saveMonthlyNote = useCallback((improvements: string, notes: string, month?: string) => {
+    const targetMonth = month ?? getMonthKey();
+    const existingIndex = monthlyNotes.findIndex(n => n.month === targetMonth);
+    
+    if (existingIndex >= 0) {
+      // Update existing
+      setMonthlyNotes(prev => prev.map((n, i) => 
+        i === existingIndex 
+          ? { ...n, improvements, notes, updatedAt: new Date() }
+          : n
+      ));
+    } else {
+      // Create new
+      const newNote: MonthlyNote = {
+        id: `${Date.now()}`,
+        month: targetMonth,
+        improvements,
+        notes,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      setMonthlyNotes(prev => [newNote, ...prev]);
+      recordActivity('reflection', 'Monthly note added', ACTIVITY_POINTS.monthly_note);
+    }
+  }, [monthlyNotes, recordActivity]);
+
+  // Save monthly notes to localStorage
+  useEffect(() => {
+    localStorage.setItem(PROGRESS_STORAGE_KEYS.monthlyNotes, JSON.stringify(monthlyNotes));
+  }, [monthlyNotes]);
+
+  // Load monthly notes from localStorage
+  useEffect(() => {
+    try {
+      const storedNotes = localStorage.getItem(PROGRESS_STORAGE_KEYS.monthlyNotes);
+      if (storedNotes) {
+        setMonthlyNotes(JSON.parse(storedNotes).map((n: any) => ({
+          ...n,
+          createdAt: new Date(n.createdAt),
+          updatedAt: new Date(n.updatedAt),
+        })));
+      }
+    } catch (e) {
+      console.error('Failed to load monthly notes:', e);
+    }
+  }, []);
+
   return {
     // Data
     activities,
     weeklyReflections,
     monthlySummaries,
+    monthlyNotes,
     trophies,
     monthlyScores,
     
@@ -319,6 +380,7 @@ export function useProgress() {
     recordActivity,
     submitWeeklyReflection,
     submitMonthlySummary,
+    saveMonthlyNote,
     
     // Helpers
     hasWeeklyReflection,
@@ -326,5 +388,6 @@ export function useProgress() {
     getCurrentMonthData,
     getTrophiesForMonth,
     getReflectionsThisMonth,
+    getMonthlyNote,
   };
 }

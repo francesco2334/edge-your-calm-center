@@ -49,8 +49,10 @@ const Index = () => {
     trophies,
     hasWeeklyReflection,
     hasMonthlySummary,
+    getMonthlyNote,
     submitWeeklyReflection,
     submitMonthlySummary,
+    saveMonthlyNote,
     recordActivity,
   } = useProgress();
 
@@ -109,6 +111,7 @@ const Index = () => {
 
   const handleMojoTool = (tool: MojoTool) => {
     setShowMojoChat(false);
+    recordActivity('mojo_chat', `Mojo tool: ${tool}`, 8);
     const toolMap: Record<MojoTool, QuickTool> = {
       breathing: 'breathing',
       standoff: 'pause',
@@ -116,6 +119,11 @@ const Index = () => {
       name: 'name',
     };
     setActiveQuickTool(toolMap[tool]);
+  };
+
+  const handleGameComplete = (charge: number, reason: string) => {
+    earnCharge(charge, reason);
+    recordActivity('game', reason, 20);
   };
 
   const handleTabChange = (tab: MainTab) => {
@@ -232,7 +240,10 @@ const Index = () => {
       {activeTab === 'games' && (
         <GamesScreen
           reactionLeaderboard={reactionLeaderboard}
-          onEarnCharge={earnCharge}
+          onEarnCharge={(charge, reason) => {
+            earnCharge(charge, reason);
+            recordActivity('game', reason, 10);
+          }}
           onRecordReaction={recordReactionTime}
         />
       )}
@@ -247,8 +258,16 @@ const Index = () => {
           trophies={trophies}
           hasWeeklyReflection={hasWeeklyReflection()}
           hasMonthlySummary={hasMonthlySummary()}
+          monthlyNote={getMonthlyNote()}
           onWeeklyReflection={handleWeeklyReflection}
           onMonthlySummary={handleMonthlySummary}
+          onSaveMonthlyNote={(improvements, notes) => {
+            saveMonthlyNote(improvements, notes);
+            toast({
+              title: "Notes saved",
+              description: "Your monthly improvements have been recorded.",
+            });
+          }}
         />
       )}
 
