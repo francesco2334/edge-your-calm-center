@@ -196,7 +196,11 @@ const Index = () => {
   if (activeTab === 'learn') {
     return (
       <div className="min-h-screen bg-background">
-        <LearnFeed onClose={() => setActiveTab('home')} />
+        <LearnFeed 
+          onClose={() => setActiveTab('home')}
+          onCardViewed={() => recordActivity('learn', 'Card viewed', 2)}
+          onCardSaved={() => recordActivity('learn', 'Card saved', 5)}
+        />
         <BottomNav
           activeTab={activeTab}
           onTabChange={handleTabChange}
