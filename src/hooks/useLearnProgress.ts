@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 
 const STORAGE_KEY = 'learn_progress';
+const CARDS_PER_TOKEN = 5;
 
 interface LearnProgress {
   cardsReadToday: number;
@@ -8,6 +10,8 @@ interface LearnProgress {
   streak: number;
   dailyGoal: number;
   totalCardsRead: number;
+  cardsTowardsNextToken: number;
+  tokensEarned: number;
 }
 
 const getInitialProgress = (): LearnProgress => {
@@ -27,9 +31,15 @@ const getInitialProgress = (): LearnProgress => {
         cardsReadToday: 0,
         lastReadDate: today,
         streak: wasYesterday ? parsed.streak : 0,
+        cardsTowardsNextToken: parsed.cardsTowardsNextToken || 0,
+        tokensEarned: parsed.tokensEarned || 0,
       };
     }
-    return parsed;
+    return {
+      ...parsed,
+      cardsTowardsNextToken: parsed.cardsTowardsNextToken || 0,
+      tokensEarned: parsed.tokensEarned || 0,
+    };
   }
   
   return {
@@ -38,6 +48,8 @@ const getInitialProgress = (): LearnProgress => {
     streak: 0,
     dailyGoal: 5,
     totalCardsRead: 0,
+    cardsTowardsNextToken: 0,
+    tokensEarned: 0,
   };
 };
 
@@ -48,11 +60,34 @@ export function useLearnProgress() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
   }, [progress]);
 
-  const recordCardRead = useCallback(() => {
+  const recordCardRead = useCallback((): { earnedToken: boolean } => {
+    let earnedToken = false;
+    
     setProgress(prev => {
       const today = new Date().toDateString();
       const newCardsReadToday = prev.cardsReadToday + 1;
       const hitGoalNow = newCardsReadToday === prev.dailyGoal && prev.cardsReadToday < prev.dailyGoal;
+      
+      // Track progress towards next token
+      const newCardsTowardsToken = prev.cardsTowardsNextToken + 1;
+      
+      // Check if earned a token
+      if (newCardsTowardsToken >= CARDS_PER_TOKEN) {
+        earnedToken = true;
+        toast.success('🪙 +1 Token earned!', {
+          description: `You read ${CARDS_PER_TOKEN} cards!`,
+        });
+        
+        return {
+          ...prev,
+          cardsReadToday: newCardsReadToday,
+          lastReadDate: today,
+          streak: hitGoalNow ? prev.streak + 1 : prev.streak,
+          totalCardsRead: prev.totalCardsRead + 1,
+          cardsTowardsNextToken: 0,
+          tokensEarned: prev.tokensEarned + 1,
+        };
+      }
       
       return {
         ...prev,
@@ -60,8 +95,11 @@ export function useLearnProgress() {
         lastReadDate: today,
         streak: hitGoalNow ? prev.streak + 1 : prev.streak,
         totalCardsRead: prev.totalCardsRead + 1,
+        cardsTowardsNextToken: newCardsTowardsToken,
       };
     });
+    
+    return { earnedToken };
   }, []);
 
   const setDailyGoal = useCallback((goal: number) => {
@@ -70,11 +108,14 @@ export function useLearnProgress() {
 
   const goalProgress = Math.min(progress.cardsReadToday / progress.dailyGoal, 1);
   const goalMet = progress.cardsReadToday >= progress.dailyGoal;
+  const tokenProgress = progress.cardsTowardsNextToken / CARDS_PER_TOKEN;
 
   return {
     ...progress,
     goalProgress,
     goalMet,
+    tokenProgress,
+    cardsPerToken: CARDS_PER_TOKEN,
     recordCardRead,
     setDailyGoal,
   };
