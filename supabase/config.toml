@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.analyze-insights]
 verify_jwt = true
+
+[functions.schedule-notification]
+verify_jwt = false
