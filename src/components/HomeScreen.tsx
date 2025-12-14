@@ -169,7 +169,10 @@ export function HomeScreen({
               <TrialBadge daysRemaining={trialDaysRemaining} />
             )}
             <button 
-              onClick={onOpenExchange}
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenExchange();
+              }}
               className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 flex items-center gap-1.5 hover:bg-primary/15 active:scale-95 transition-all"
             >
               <span className="text-[13px]">⚡</span>
