@@ -14,9 +14,10 @@ import { BottomNav } from '@/components/BottomNav';
 import { QuickStopModal } from '@/components/QuickStopModal';
 import { MojoChat, type MojoTool } from '@/components/MojoChat';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync } from '@/components/tools';
-import { useCharge } from '@/hooks/useCharge';
+import { usePersistedCharge } from '@/hooks/usePersistedCharge';
 import { useProgress } from '@/hooks/useProgress';
 import { useTrial } from '@/hooks/useTrial';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
@@ -26,6 +27,7 @@ type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
 
 const Index = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('welcome');
   const [activeTab, setActiveTab] = useState<MainTab>('home');
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
@@ -42,10 +44,11 @@ const Index = () => {
     streak,
     streakClaimedToday,
     reactionLeaderboard,
+    isLoaded: chargeLoaded,
     claimDailyStreak,
     recordReactionTime,
     recordEarlyExit,
-  } = useCharge(5);
+  } = usePersistedCharge(user?.id ?? null, 5);
 
   // Progress Engine
   const {
@@ -63,7 +66,16 @@ const Index = () => {
   } = useProgress();
 
   // Trial system
-  const { isActive: trialActive, hasAccepted: trialAccepted, daysRemaining, startTrial } = useTrial();
+  const { isActive: trialActive, hasAccepted: trialAccepted, daysRemaining, isLoaded: trialLoaded, startTrial } = useTrial(user?.id);
+
+  // Show loading state while data loads
+  if (!chargeLoaded || !trialLoaded) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const handleAssessmentComplete = (answers: AssessmentAnswer[]) => {
     setAssessmentAnswers(answers);
@@ -255,6 +267,7 @@ const Index = () => {
           streak={streak}
           streakClaimedToday={streakClaimedToday}
           reactionLeaderboard={reactionLeaderboard}
+          trialDaysRemaining={trialActive ? daysRemaining : undefined}
           onOpenExchange={() => setActiveTab('games')}
           onEarnCharge={earnCharge}
           onClaimStreak={handleClaimStreak}
