@@ -41,6 +41,7 @@ const Index = () => {
     reactionLeaderboard,
     claimDailyStreak,
     recordReactionTime,
+    recordEarlyExit,
   } = useCharge(5);
 
   // Progress Engine
@@ -136,12 +137,22 @@ const Index = () => {
     }
   };
 
+  const handleEarlyExit = (toolName: string) => {
+    recordEarlyExit(toolName);
+    setActiveQuickTool(null);
+    toast({
+      title: "Early exit",
+      description: "-5 Charge deducted",
+      variant: "destructive",
+    });
+  };
+
   // Render quick tool fullscreen
   if (activeQuickTool === 'pause') {
     return (
       <PauseLadder 
         onComplete={(s) => handleQuickToolComplete(s >= 40 ? 2 : 1, `Standoff: ${s}s`)}
-        onCancel={() => setActiveQuickTool(null)}
+        onCancel={() => handleEarlyExit('The Standoff')}
       />
     );
   }
@@ -149,7 +160,7 @@ const Index = () => {
     return (
       <NameThePull 
         onComplete={(f) => handleQuickToolComplete(1, `Named: ${f}`)}
-        onCancel={() => setActiveQuickTool(null)}
+        onCancel={() => handleEarlyExit('Name It')}
       />
     );
   }
@@ -157,7 +168,7 @@ const Index = () => {
     return (
       <PredictionReality 
         onComplete={(p, r) => handleQuickToolComplete(1, `Bluff: ${p}→${r}`)}
-        onCancel={() => setActiveQuickTool(null)}
+        onCancel={() => handleEarlyExit('The Bluff')}
       />
     );
   }
@@ -165,7 +176,7 @@ const Index = () => {
     return (
       <BreathingSync 
         onComplete={() => handleQuickToolComplete(2, 'Sync complete')}
-        onCancel={() => setActiveQuickTool(null)}
+        onCancel={() => handleEarlyExit('Sync')}
       />
     );
   }
@@ -247,6 +258,7 @@ const Index = () => {
             recordActivity('game', reason, 10);
           }}
           onRecordReaction={recordReactionTime}
+          onEarlyExit={recordEarlyExit}
         />
       )}
       

@@ -4,6 +4,7 @@ import { OUTCOME_BONUSES } from '@/lib/charge-data';
 import type { ReactionLeaderboard, ReactionRecord } from '@/lib/reaction-data';
 
 const DAILY_STREAK_CHARGE = 20;
+const EARLY_EXIT_PENALTY = 5;
 
 function getStoredDate(): string | null {
   return localStorage.getItem('dopa_last_active_date');
@@ -205,6 +206,24 @@ export function useCharge(initialBalance = 5) {
     setActiveSession(null);
   }, [activeSession]);
 
+  const recordEarlyExit = useCallback((toolName: string) => {
+    setBalance(prev => Math.max(0, prev - EARLY_EXIT_PENALTY));
+    setTransactions(prev => [
+      {
+        id: `${Date.now()}`,
+        type: 'allocate',
+        amount: EARLY_EXIT_PENALTY,
+        reason: `Early exit: ${toolName}`,
+        timestamp: new Date(),
+      },
+      ...prev,
+    ]);
+    setStats(prev => ({
+      ...prev,
+      earlyExits: prev.earlyExits + 1,
+    }));
+  }, []);
+
   const canAfford = useCallback((amount: number) => balance >= amount, [balance]);
 
   return {
@@ -221,5 +240,6 @@ export function useCharge(initialBalance = 5) {
     canAfford,
     claimDailyStreak,
     recordReactionTime,
+    recordEarlyExit,
   };
 }

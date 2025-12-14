@@ -8,6 +8,7 @@ interface GamesScreenProps {
   reactionLeaderboard: ReactionLeaderboard;
   onEarnCharge: (amount: number, reason: string) => void;
   onRecordReaction: (ms: number) => void;
+  onEarlyExit: (toolName: string) => void;
 }
 
 type GameId = 'pause' | 'name' | 'prediction' | 'breathing' | 'reaction';
@@ -82,7 +83,7 @@ const GAMES: {
 ];
 
 export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
-  function GamesScreen({ reactionLeaderboard, onEarnCharge, onRecordReaction }, ref) {
+  function GamesScreen({ reactionLeaderboard, onEarnCharge, onRecordReaction, onEarlyExit }, ref) {
     const [activeGame, setActiveGame] = useState<ActiveGame>(null);
 
     const handleGameComplete = (charge: number, reason: string) => {
@@ -125,6 +126,11 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
       );
     }
 
+    const handleEarlyExit = (gameName: string) => {
+      onEarlyExit(gameName);
+      setActiveGame(null);
+    };
+
     // Render active game
     if (activeGame?.started) {
       switch (activeGame.id) {
@@ -132,35 +138,35 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
           return (
             <PauseLadder 
               onComplete={(seconds) => handleGameComplete(seconds >= 40 ? 2 : 1, `The Standoff: ${seconds}s`)}
-              onCancel={() => setActiveGame(null)}
+              onCancel={() => handleEarlyExit('The Standoff')}
             />
           );
         case 'name':
           return (
             <NameThePull 
               onComplete={(feeling) => handleGameComplete(1, `Named the pull: ${feeling}`)}
-              onCancel={() => setActiveGame(null)}
+              onCancel={() => handleEarlyExit('Name It')}
             />
           );
         case 'prediction':
           return (
             <PredictionReality 
               onComplete={(pred, real) => handleGameComplete(1, `The Bluff: ${pred} → ${real}`)}
-              onCancel={() => setActiveGame(null)}
+              onCancel={() => handleEarlyExit('The Bluff')}
             />
           );
         case 'breathing':
           return (
             <BreathingSync 
               onComplete={() => handleGameComplete(2, 'Sync completed')}
-              onCancel={() => setActiveGame(null)}
+              onCancel={() => handleEarlyExit('Sync')}
             />
           );
         case 'reaction':
           return (
             <ReactionTracker 
               onComplete={handleReactionComplete}
-              onCancel={() => setActiveGame(null)}
+              onCancel={() => handleEarlyExit('Catch the Flicker')}
               leaderboard={reactionLeaderboard}
             />
           );
