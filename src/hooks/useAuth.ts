@@ -52,6 +52,16 @@ export function useAuth() {
     return { error };
   };
 
+  const signInWithApple = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: {
+        redirectTo: `${window.location.origin}/`
+      }
+    });
+    return { error };
+  };
+
   return {
     user,
     session,
@@ -59,6 +69,7 @@ export function useAuth() {
     signUp,
     signIn,
     signOut,
+    signInWithApple,
     isAuthenticated: !!session
   };
 }
