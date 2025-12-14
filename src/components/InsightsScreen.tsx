@@ -6,17 +6,18 @@ import { SmartEdgeProfile } from './insights/SmartEdgeProfile';
 import { WeeklyNarrativeSummary } from './insights/WeeklyNarrativeSummary';
 import { ExitPhilosophy } from './ExitPhilosophy';
 import type { AssessmentAnswer } from '@/lib/edge-data';
-import type { PersonalStats, ChargeTransaction } from '@/lib/charge-data';
 import type { MonthlyScore, Trophy, WeeklyReflection as WeeklyReflectionType, MonthlyNote, MonthlySummary as MonthlySummaryType } from '@/lib/progress-data';
 import { getMonthKey } from '@/lib/progress-data';
 import { useSmartInsights } from '@/hooks/useSmartInsights';
+import type { TokenTransaction, EconomyStats } from '@/hooks/useTokenEconomy';
 
 interface InsightsScreenProps {
   answers: AssessmentAnswer[];
-  chargeBalance: number;
-  stats: PersonalStats;
-  transactions: ChargeTransaction[];
+  tokens: number;
+  points: number;
   streak: number;
+  stats: EconomyStats;
+  tokenTransactions: TokenTransaction[];
   onBack: () => void;
   userId?: string | null;
   // Progress Engine props
@@ -34,10 +35,11 @@ interface InsightsScreenProps {
 
 export function InsightsScreen({ 
   answers, 
-  chargeBalance, 
+  tokens,
+  points,
   stats,
   streak,
-  transactions,
+  tokenTransactions,
   onBack,
   userId,
   monthlyScores,
@@ -55,11 +57,31 @@ export function InsightsScreen({
   const currentMonthTrophies = trophies.filter(t => t.month === currentMonth);
   const currentMonthData = monthlyScores.find(s => s.month === currentMonth);
   
+  // Convert token transactions to ChargeTransaction format for compatibility
+  const chargeTransactions = tokenTransactions.map(t => ({
+    id: t.id,
+    type: t.type === 'spend' ? 'allocate' as const : 'earn' as const,
+    amount: t.amount,
+    reason: t.reason,
+    timestamp: t.timestamp,
+  }));
+  
+  // Adapt stats for smart insights (legacy format)
+  const legacyStats = {
+    plannedSessions: stats.gamesCompleted + stats.gamesFailed,
+    earlyExits: stats.gamesFailed,
+    stayedWithin: stats.gamesCompleted,
+    wentOver: 0,
+    averageDelaySeconds: 0,
+    longestStabilityRun: 0,
+    currentStabilityRun: stats.dailyLogsCount,
+  };
+  
   // Smart insights from user activity
   const { behaviorPatterns, focusAreas, mojoThemes, isLoading: insightsLoading } = useSmartInsights(
     userId ?? null,
-    stats,
-    transactions
+    legacyStats,
+    chargeTransactions
   );
 
   return (
@@ -80,7 +102,7 @@ export function InsightsScreen({
           >
             ← Back
           </button>
-          <ChargeCounter balance={chargeBalance} size="sm" />
+          <ChargeCounter balance={tokens} size="sm" />
         </motion.div>
 
         {/* Title */}
@@ -103,7 +125,7 @@ export function InsightsScreen({
           transition={{ delay: 0.12 }}
           className="mb-6"
         >
-          <ExitPhilosophy transactions={transactions} streak={streak} />
+          <ExitPhilosophy transactions={chargeTransactions} streak={streak} />
         </motion.div>
 
         {/* Weekly Narrative - Stories, not charts */}
@@ -116,21 +138,63 @@ export function InsightsScreen({
           <WeeklyNarrativeSummary />
         </motion.div>
 
-        {/* Daily Activity Graph - This Week */}
+        {/* Economy Stats - Tokens & Points */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
+          className="grid grid-cols-2 gap-3 mb-6"
+        >
+          <div className="dopa-card text-center py-4">
+            <p className="text-3xl font-bold text-amber-500">{tokens}</p>
+            <p className="text-xs text-muted-foreground mt-1">Tokens (Permission)</p>
+          </div>
+          <div className="dopa-card text-center py-4">
+            <p className="text-3xl font-bold text-blue-500">{points}</p>
+            <p className="text-xs text-muted-foreground mt-1">Points (Activity)</p>
+          </div>
+        </motion.div>
+
+        {/* Token Economy Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="grid grid-cols-4 gap-2 mb-6"
+        >
+          <div className="dopa-card text-center py-3 px-2">
+            <p className="text-xl font-bold text-primary">{stats.dailyLogsCount}</p>
+            <p className="text-[10px] text-muted-foreground">Days Logged</p>
+          </div>
+          <div className="dopa-card text-center py-3 px-2">
+            <p className="text-xl font-bold text-emerald-400">{stats.learnCardsRead}</p>
+            <p className="text-[10px] text-muted-foreground">Cards Read</p>
+          </div>
+          <div className="dopa-card text-center py-3 px-2">
+            <p className="text-xl font-bold text-accent">{stats.gamesCompleted}</p>
+            <p className="text-[10px] text-muted-foreground">Games Won</p>
+          </div>
+          <div className="dopa-card text-center py-3 px-2">
+            <p className="text-xl font-bold text-amber-400">{stats.totalTokensSpent}</p>
+            <p className="text-[10px] text-muted-foreground">Time Bought</p>
+          </div>
+        </motion.div>
+
+        {/* Daily Activity Graph - This Week */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
           className="dopa-card mb-6"
         >
-          <DailyActivityGraph transactions={transactions} />
+          <DailyActivityGraph transactions={chargeTransactions} />
         </motion.div>
 
         {/* Progress Graph */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.22 }}
           className="dopa-card mb-6"
         >
           <ProgressGraph scores={monthlyScores} />
@@ -141,7 +205,7 @@ export function InsightsScreen({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
+            transition={{ delay: 0.25 }}
             className="grid grid-cols-4 gap-2 mb-6"
           >
             <div className="dopa-card text-center py-3 px-2">
@@ -167,7 +231,7 @@ export function InsightsScreen({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.28 }}
           className="mb-4"
         >
           <MonthlyNotes
@@ -181,7 +245,7 @@ export function InsightsScreen({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: 0.3 }}
           className="mb-4"
         >
           <WeeklyReflection 
@@ -194,7 +258,7 @@ export function InsightsScreen({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.32 }}
           className="mb-6"
         >
           <MonthlySummary
@@ -214,64 +278,11 @@ export function InsightsScreen({
           <TrophyCase earnedTrophies={currentMonthTrophies} month={currentMonth} />
         </motion.div>
 
-        {/* Control Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="grid grid-cols-3 gap-3 mb-6"
-        >
-          <div className="dopa-card text-center">
-            <p className="text-2xl font-bold text-primary">{stats.plannedSessions}</p>
-            <p className="text-xs text-muted-foreground">Planned</p>
-          </div>
-          <div className="dopa-card text-center">
-            <p className="text-2xl font-bold text-emerald-400">{stats.earlyExits}</p>
-            <p className="text-xs text-muted-foreground">Early Exits</p>
-          </div>
-          <div className="dopa-card text-center">
-            <p className="text-2xl font-bold text-amber-400">{stats.currentStabilityRun}</p>
-            <p className="text-xs text-muted-foreground">Run</p>
-          </div>
-        </motion.div>
-
-        {/* Personal Progress */}
-        {stats.plannedSessions > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="dopa-card mb-6"
-          >
-            <p className="text-sm text-muted-foreground mb-3">Control Metrics</p>
-            <div className="space-y-3">
-              {stats.stayedWithin > 0 && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground">Stayed within plan</span>
-                  <span className="text-sm font-medium text-emerald-400">{stats.stayedWithin}x</span>
-                </div>
-              )}
-              {stats.earlyExits > 0 && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground">Exited early</span>
-                  <span className="text-sm font-medium text-primary">{stats.earlyExits}x</span>
-                </div>
-              )}
-              {stats.wentOver > 0 && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground">Went over</span>
-                  <span className="text-sm font-medium text-muted-foreground">{stats.wentOver}x</span>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-
         {/* Journey Timeline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.4 }}
           className="mb-6"
         >
           <JourneyTimeline
@@ -286,7 +297,7 @@ export function InsightsScreen({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55 }}
+          transition={{ delay: 0.45 }}
           className="mb-6"
         >
           <SmartEdgeProfile 
@@ -302,7 +313,7 @@ export function InsightsScreen({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.5 }}
           >
             <p className="text-sm text-muted-foreground mb-3">Initial Edge Profile</p>
             <InsightsGraph answers={answers} />
@@ -313,7 +324,7 @@ export function InsightsScreen({
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
+          transition={{ delay: 0.6 }}
           className="text-center text-sm text-muted-foreground mt-8 italic"
         >
           "Progress is measured by activity, not perfection."
