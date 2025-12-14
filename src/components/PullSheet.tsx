@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useEmotionalContext, type EmotionalState } from '@/hooks/useEmotionalContext';
 
 interface PullSheetProps {
   isOpen: boolean;
@@ -7,17 +8,25 @@ interface PullSheetProps {
 }
 
 const PULL_OPTIONS = [
-  { id: 'scrolling', label: 'Scrolling', icon: '📱' },
-  { id: 'porn', label: 'Porn', icon: '🔞' },
-  { id: 'trading', label: 'Trading', icon: '📈' },
-  { id: 'gambling', label: 'Gambling', icon: '🎰' },
-  { id: 'spending', label: 'Spending', icon: '💳' },
-  { id: 'avoidance', label: 'Avoidance', icon: '🙈' },
-  { id: 'other', label: 'Other', icon: '❓' },
+  { id: 'scrolling', label: 'Scrolling', icon: '📱', emotionalState: 'craving' as EmotionalState },
+  { id: 'porn', label: 'Porn', icon: '🔞', emotionalState: 'craving' as EmotionalState },
+  { id: 'trading', label: 'Trading', icon: '📈', emotionalState: 'anxious' as EmotionalState },
+  { id: 'gambling', label: 'Gambling', icon: '🎰', emotionalState: 'craving' as EmotionalState },
+  { id: 'spending', label: 'Spending', icon: '💳', emotionalState: 'craving' as EmotionalState },
+  { id: 'avoidance', label: 'Avoidance', icon: '🙈', emotionalState: 'boredom' as EmotionalState },
+  { id: 'other', label: 'Other', icon: '❓', emotionalState: 'neutral' as EmotionalState },
 ];
 
 export function PullSheet({ isOpen, onClose, onSelectPull }: PullSheetProps) {
-  const handleSelect = (pullId: string) => {
+  const { logState } = useEmotionalContext();
+
+  const handleSelect = (pullId: string, emotionalState?: EmotionalState) => {
+    // Log emotional state based on pull type
+    if (emotionalState && emotionalState !== 'neutral') {
+      logState(emotionalState);
+    } else if (pullId === 'none') {
+      logState('calm');
+    }
     onSelectPull(pullId);
     onClose();
   };
@@ -59,19 +68,19 @@ export function PullSheet({ isOpen, onClose, onSelectPull }: PullSheetProps) {
               
               {/* Pull options - 2 column grid with large touch targets */}
               <div className="grid grid-cols-2 gap-3 mb-5">
-                {PULL_OPTIONS.map((option, i) => (
-                  <motion.button
-                    key={option.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.035 }}
-                    onClick={() => handleSelect(option.id)}
-                    className="p-4 rounded-[18px] bg-muted/35 border border-border/15 hover:border-primary/25 hover:bg-muted/50 active:scale-[0.97] transition-all text-left"
-                  >
-                    <span className="text-[32px] mb-2.5 block">{option.icon}</span>
-                    <span className="text-[15px] font-semibold text-foreground">{option.label}</span>
-                  </motion.button>
-                ))}
+                  {PULL_OPTIONS.map((option, i) => (
+                    <motion.button
+                      key={option.id}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.035 }}
+                      onClick={() => handleSelect(option.id, option.emotionalState)}
+                      className="p-4 rounded-[18px] bg-muted/35 border border-border/15 hover:border-primary/25 hover:bg-muted/50 active:scale-[0.97] transition-all text-left"
+                    >
+                      <span className="text-[32px] mb-2.5 block">{option.icon}</span>
+                      <span className="text-[15px] font-semibold text-foreground">{option.label}</span>
+                    </motion.button>
+                  ))}
               </div>
               
               {/* No pull option - Full width, positive */}

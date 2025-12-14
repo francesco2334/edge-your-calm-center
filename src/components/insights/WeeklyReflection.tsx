@@ -42,7 +42,7 @@ export function WeeklyReflection({ hasReflected, onSubmit, earnedPoints = 25 }: 
           </div>
           <div>
             <p className="text-sm font-medium text-foreground">Weekly Reflection Complete</p>
-            <p className="text-xs text-muted-foreground">+{earnedPoints} points earned</p>
+            <p className="text-xs text-muted-foreground">+{earnedPoints} points allowed</p>
           </div>
         </div>
       </motion.div>

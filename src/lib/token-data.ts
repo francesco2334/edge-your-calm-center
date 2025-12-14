@@ -11,7 +11,7 @@ export interface ExchangeRate {
   label: string;
   icon: string;
   earnMinutes: number;
-  tokensEarned: number;
+  tokensAllowed: number; // Changed from tokensEarned - agency framing
   description: string;
 }
 
@@ -24,13 +24,16 @@ export interface SpendOption {
   description: string;
 }
 
-export const EARN_OPTIONS: ExchangeRate[] = [
-  { id: 'focus-10', label: '10 min Focus', icon: '🎯', earnMinutes: 10, tokensEarned: 1, description: 'Complete a focus session' },
-  { id: 'focus-25', label: '25 min Focus', icon: '⚡', earnMinutes: 25, tokensEarned: 3, description: 'Deep work block' },
-  { id: 'anchor-task', label: 'Anchor Task', icon: '⚓', earnMinutes: 0, tokensEarned: 2, description: 'Complete a priority task' },
-  { id: 'early-exit', label: 'Exit Loop Early', icon: '🚪', earnMinutes: 0, tokensEarned: 1, description: 'Leave before hook' },
-  { id: 'delay-impulse', label: 'Delay Impulse', icon: '⏸️', earnMinutes: 0, tokensEarned: 1, description: 'Pause before acting' },
+export const PERMISSION_OPTIONS: ExchangeRate[] = [
+  { id: 'focus-10', label: '10 min Focus', icon: '🎯', earnMinutes: 10, tokensAllowed: 1, description: 'Complete a focus session' },
+  { id: 'focus-25', label: '25 min Focus', icon: '⚡', earnMinutes: 25, tokensAllowed: 3, description: 'Deep work block' },
+  { id: 'anchor-task', label: 'Anchor Task', icon: '⚓', earnMinutes: 0, tokensAllowed: 2, description: 'Complete a priority task' },
+  { id: 'early-exit', label: 'Exit Loop Early', icon: '🚪', earnMinutes: 0, tokensAllowed: 1, description: 'Leave before hook' },
+  { id: 'delay-impulse', label: 'Delay Impulse', icon: '⏸️', earnMinutes: 0, tokensAllowed: 1, description: 'Pause before acting' },
 ];
+
+// Backward compatibility alias
+export const EARN_OPTIONS = PERMISSION_OPTIONS;
 
 export const SPEND_OPTIONS: SpendOption[] = [
   { id: 'scroll-10', label: '10 min Scroll', icon: '📱', tokenCost: 1, minutes: 10, description: 'TikTok, Instagram, etc.' },

@@ -62,7 +62,7 @@ export function ExchangeScreen({ balance, onSpend, onBack }: ExchangeScreenProps
         >
           <h1 className="text-3xl font-bold text-foreground mb-2">The Exchange</h1>
           <p className="text-muted-foreground">
-            You're not banning dopamine. You're pricing it.
+            You're not banning dopamine. You're choosing when to allow it.
           </p>
         </motion.div>
 
