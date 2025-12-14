@@ -14,17 +14,21 @@ import { LearnFeed } from '@/components/LearnFeed';
 import { BottomNav } from '@/components/BottomNav';
 import { QuickStopModal } from '@/components/QuickStopModal';
 import { MojoChat, type MojoTool } from '@/components/MojoChat';
+import { ResetWithoutShameModal } from '@/components/ResetWithoutShameModal';
+import { DailyQuestionPrompt } from '@/components/DailyQuestionPrompt';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync } from '@/components/tools';
 import { usePersistedCharge } from '@/hooks/usePersistedCharge';
 import { useProgress } from '@/hooks/useProgress';
 import { useTrial } from '@/hooks/useTrial';
 import { useAuth } from '@/hooks/useAuth';
+import { useDailyQuestion } from '@/hooks/useDailyQuestion';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
 type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'trial' | 'atlas' | 'main';
 type MainTab = 'home' | 'learn' | 'quickstop' | 'games' | 'insights' | 'exchange';
 type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
+type FailureContext = 'game-loss' | 'streak-break' | 'relapse' | null;
 
 const Index = () => {
   const { toast } = useToast();
@@ -36,6 +40,11 @@ const Index = () => {
   const [showMojoChat, setShowMojoChat] = useState(false);
   const [showPullSheet, setShowPullSheet] = useState(false);
   const [activeQuickTool, setActiveQuickTool] = useState<QuickTool>(null);
+  const [failureContext, setFailureContext] = useState<FailureContext>(null);
+  const [showDailyQuestion, setShowDailyQuestion] = useState(false);
+  
+  // Daily question hook
+  const { hasAnsweredToday } = useDailyQuestion();
   
   const { 
     balance, 
@@ -150,11 +159,21 @@ const Index = () => {
   const handleEarlyExit = (toolName: string) => {
     recordEarlyExit(toolName);
     setActiveQuickTool(null);
-    toast({
-      title: "Early exit",
-      description: "-5 Charge deducted",
-      variant: "destructive",
-    });
+    // Show failure protocol modal instead of just a toast
+    setFailureContext('game-loss');
+  };
+
+  // Handle pull selection with daily question prompt
+  const handlePullLogged = () => {
+    // Show daily question if not answered today
+    if (!hasAnsweredToday) {
+      setTimeout(() => setShowDailyQuestion(true), 500);
+    }
+  };
+
+  // Handle relapse-type pulls
+  const handleRelapseLogged = () => {
+    setFailureContext('relapse');
   };
 
   // Render quick tool fullscreen
@@ -275,6 +294,8 @@ const Index = () => {
           onRecordReaction={recordReactionTime}
           onOpenMojoChat={() => setShowMojoChat(true)}
           onOpenQuickStop={() => setShowQuickStop(true)}
+          onPullLogged={handlePullLogged}
+          onRelapseLogged={handleRelapseLogged}
         />
       )}
       
@@ -311,6 +332,7 @@ const Index = () => {
           answers={assessmentAnswers}
           chargeBalance={balance}
           stats={stats}
+          streak={streak}
           transactions={transactions}
           onBack={() => setActiveTab('home')}
           userId={user?.id}
@@ -359,6 +381,27 @@ const Index = () => {
         onClose={() => setShowMojoChat(false)}
         onTriggerTool={handleMojoTool}
         userId={user?.id}
+      />
+
+      {/* Reset Without Shame Modal - Failure Protocol */}
+      <ResetWithoutShameModal
+        isOpen={failureContext !== null}
+        onClose={() => setFailureContext(null)}
+        onBreathing={() => {
+          setFailureContext(null);
+          setActiveQuickTool('breathing');
+        }}
+        onMojo={() => {
+          setFailureContext(null);
+          setShowMojoChat(true);
+        }}
+        context={failureContext || 'relapse'}
+      />
+
+      {/* Daily Question Prompt */}
+      <DailyQuestionPrompt
+        isOpen={showDailyQuestion}
+        onClose={() => setShowDailyQuestion(false)}
       />
     </div>
   );

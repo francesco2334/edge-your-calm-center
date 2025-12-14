@@ -5,6 +5,8 @@ interface PullSheetProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectPull: (pullId: string) => void;
+  onPullLogged?: () => void;
+  onRelapseLogged?: () => void;
 }
 
 const PULL_OPTIONS = [
@@ -17,7 +19,7 @@ const PULL_OPTIONS = [
   { id: 'other', label: 'Other', icon: '❓', emotionalState: 'neutral' as EmotionalState },
 ];
 
-export function PullSheet({ isOpen, onClose, onSelectPull }: PullSheetProps) {
+export function PullSheet({ isOpen, onClose, onSelectPull, onPullLogged, onRelapseLogged }: PullSheetProps) {
   const { logState } = useEmotionalContext();
 
   const handleSelect = (pullId: string, emotionalState?: EmotionalState) => {
@@ -29,6 +31,15 @@ export function PullSheet({ isOpen, onClose, onSelectPull }: PullSheetProps) {
     }
     onSelectPull(pullId);
     onClose();
+    
+    // Trigger callbacks after selection
+    if (pullId === 'porn' || pullId === 'gambling') {
+      // These are high-risk pulls - show failure protocol
+      onRelapseLogged?.();
+    } else {
+      // Regular pull - show daily question
+      onPullLogged?.();
+    }
   };
 
   return (
