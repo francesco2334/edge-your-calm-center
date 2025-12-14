@@ -10,6 +10,7 @@ import { HomeScreen } from '@/components/HomeScreen';
 import { GamesScreen } from '@/components/GamesScreen';
 import { ExchangeScreen } from '@/components/ExchangeScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
+import { ProductivityScreen } from '@/components/ProductivityScreen';
 import { LearnFeed } from '@/components/LearnFeed';
 import { BottomNav } from '@/components/BottomNav';
 import { QuickStopModal } from '@/components/QuickStopModal';
@@ -28,7 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
 type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'trial' | 'atlas' | 'main';
-type MainTab = 'home' | 'learn' | 'quickstop' | 'games' | 'insights' | 'exchange';
+type MainTab = 'home' | 'learn' | 'games' | 'productivity' | 'insights' | 'exchange';
 type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
 type FailureContext = 'game-loss' | 'streak-break' | 'relapse' | null;
 
@@ -70,6 +71,8 @@ const Index = () => {
     spendTokens,
     endSession,
     exitSessionEarly,
+    logProductivity,
+    hasLoggedProductivityToday,
   } = useTokenEconomy(user?.id ?? null);
 
   // Progress Engine (for reflections, trophies - separate from economy)
@@ -173,11 +176,7 @@ const Index = () => {
   };
 
   const handleTabChange = (tab: MainTab) => {
-    if (tab === 'quickstop') {
-      setShowQuickStop(true);
-    } else {
-      setActiveTab(tab);
-    }
+    setActiveTab(tab);
   };
 
   // Handle spending tokens for time
@@ -304,7 +303,6 @@ const Index = () => {
         <BottomNav
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          onQuickStop={() => setShowQuickStop(true)}
         />
       </div>
     );
@@ -383,12 +381,18 @@ const Index = () => {
         />
       )}
 
+      {activeTab === 'productivity' && (
+        <ProductivityScreen
+          hasLoggedToday={hasLoggedProductivityToday}
+          onLogProductivity={logProductivity}
+        />
+      )}
+
       {/* Bottom Navigation */}
       {activeTab !== 'exchange' && (
         <BottomNav
-          activeTab={activeTab as 'home' | 'learn' | 'quickstop' | 'games' | 'insights'}
+          activeTab={activeTab as 'home' | 'learn' | 'games' | 'productivity' | 'insights'}
           onTabChange={handleTabChange}
-          onQuickStop={() => setShowQuickStop(true)}
         />
       )}
 
