@@ -1,14 +1,31 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.28b1c303b9134ed0ab6f2a95cc21741e',
+  appId: 'com.dopamine.app',
   appName: 'DopaMINE',
   webDir: 'dist',
-  // Production: Remove server block entirely or set cleartext: false
-  // server: {
-  //   url: 'https://your-production-url.com',
-  //   cleartext: false
-  // }
+  ios: {
+    contentInset: 'automatic',
+    preferredContentMode: 'mobile',
+    backgroundColor: '#0a0a0f',
+  },
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert'],
+    },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_icon_config_sample',
+      iconColor: '#6366f1',
+    },
+    SplashScreen: {
+      launchShowDuration: 2000,
+      launchAutoHide: true,
+      backgroundColor: '#0a0a0f',
+      showSpinner: false,
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
+  },
 };
 
 export default config;
