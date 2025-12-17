@@ -115,7 +115,7 @@ export function useProgress() {
   }, [activities, weeklyReflections]);
 
   // Check and award trophies based on total days active
-  const checkTrophyProgress = useCallback((days: number) => {
+  const checkTrophyProgress = useCallback((days: number): { newTrophies: Trophy[], nextTrophy: { name: string; daysRemaining: number } | null } => {
     const trophyTypes = Object.keys(TROPHY_DEFINITIONS) as Array<keyof typeof TROPHY_DEFINITIONS>;
     const newTrophies: Trophy[] = [];
 
@@ -140,11 +140,28 @@ export function useProgress() {
       setTrophies(prev => [...prev, ...newTrophies]);
     }
 
-    return newTrophies;
+    // Find next trophy to earn
+    const nextTrophyType = trophyTypes.find(type => {
+      const definition = TROPHY_DEFINITIONS[type];
+      const hasEarned = trophies.some(t => t.type === type) || newTrophies.some(t => t.type === type);
+      return !hasEarned && days < definition.threshold;
+    });
+
+    const nextTrophy = nextTrophyType ? {
+      name: TROPHY_DEFINITIONS[nextTrophyType].name,
+      daysRemaining: TROPHY_DEFINITIONS[nextTrophyType].threshold - days,
+    } : null;
+
+    return { newTrophies, nextTrophy };
   }, [trophies]);
 
   // Increment daily activity count (call once per day when user is active)
-  const recordDailyActivity = useCallback(() => {
+  // Returns trophy progress info for notifications
+  const recordDailyActivity = useCallback((): { 
+    isNewDay: boolean; 
+    newTrophies: Trophy[]; 
+    nextTrophy: { name: string; daysRemaining: number } | null 
+  } => {
     const today = new Date().toISOString().split('T')[0];
     const lastActiveDay = localStorage.getItem('dopa_last_active_day');
     
@@ -152,10 +169,13 @@ export function useProgress() {
       localStorage.setItem('dopa_last_active_day', today);
       const newDaysActive = totalDaysActive + 1;
       setTotalDaysActive(newDaysActive);
-      checkTrophyProgress(newDaysActive);
-      return true;
+      const { newTrophies, nextTrophy } = checkTrophyProgress(newDaysActive);
+      return { isNewDay: true, newTrophies, nextTrophy };
     }
-    return false;
+    
+    // Not a new day, just return current progress
+    const { nextTrophy } = checkTrophyProgress(totalDaysActive);
+    return { isNewDay: false, newTrophies: [], nextTrophy };
   }, [totalDaysActive, checkTrophyProgress]);
 
   // Record activity
