@@ -184,9 +184,48 @@
     );
   }
 
-  /* Safe area for mobile */
+  /* Safe area for mobile - comprehensive */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-area-inset {
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .pt-safe-top {
+    padding-top: max(env(safe-area-inset-top, 0px), 20px);
+  }
+
+  .pb-safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 20px);
+  }
+
+  /* Keyboard avoiding container */
+  .keyboard-avoiding {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height */
+  }
+
+  /* Fixed bottom CTA - always visible */
+  .fixed-bottom-cta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+    background: linear-gradient(to top, hsl(var(--background)) 60%, transparent);
   }
 
   /* Hide scrollbar */
