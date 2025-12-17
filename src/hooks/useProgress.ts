@@ -23,6 +23,7 @@ export function useProgress() {
   const [monthlyNotes, setMonthlyNotes] = useState<MonthlyNote[]>([]);
   const [trophies, setTrophies] = useState<Trophy[]>([]);
   const [monthlyScores, setMonthlyScores] = useState<MonthlyScore[]>([]);
+  const [totalDaysActive, setTotalDaysActive] = useState(0);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -31,6 +32,7 @@ export function useProgress() {
       const storedReflections = localStorage.getItem(PROGRESS_STORAGE_KEYS.weeklyReflections);
       const storedSummaries = localStorage.getItem(PROGRESS_STORAGE_KEYS.monthlySummaries);
       const storedTrophies = localStorage.getItem(PROGRESS_STORAGE_KEYS.trophies);
+      const storedDaysActive = localStorage.getItem('dopa_total_days_active');
 
       if (storedActivities) {
         setActivities(JSON.parse(storedActivities).map((a: any) => ({
@@ -56,6 +58,9 @@ export function useProgress() {
           earnedAt: new Date(t.earnedAt),
         })));
       }
+      if (storedDaysActive) {
+        setTotalDaysActive(parseInt(storedDaysActive, 10) || 0);
+      }
     } catch (e) {
       console.error('Failed to load progress data:', e);
     }
@@ -78,10 +83,14 @@ export function useProgress() {
     localStorage.setItem(PROGRESS_STORAGE_KEYS.trophies, JSON.stringify(trophies));
   }, [trophies]);
 
+  useEffect(() => {
+    localStorage.setItem('dopa_total_days_active', String(totalDaysActive));
+  }, [totalDaysActive]);
+
   // Calculate monthly scores whenever activities change
   useEffect(() => {
     const months = getLast6Months();
-    const scores: MonthlyScore[] = months.map((month, idx) => {
+    const scores: MonthlyScore[] = months.map((month) => {
       const monthActivities = activities.filter(a => 
         getMonthKey(new Date(a.timestamp)) === month
       );
@@ -105,6 +114,50 @@ export function useProgress() {
     setMonthlyScores(scores);
   }, [activities, weeklyReflections]);
 
+  // Check and award trophies based on total days active
+  const checkTrophyProgress = useCallback((days: number) => {
+    const trophyTypes = Object.keys(TROPHY_DEFINITIONS) as Array<keyof typeof TROPHY_DEFINITIONS>;
+    const newTrophies: Trophy[] = [];
+
+    trophyTypes.forEach(type => {
+      const definition = TROPHY_DEFINITIONS[type];
+      const hasEarned = trophies.some(t => t.type === type);
+      
+      if (!hasEarned && days >= definition.threshold) {
+        newTrophies.push({
+          id: `${Date.now()}-${type}`,
+          type,
+          name: definition.name,
+          icon: definition.icon,
+          description: definition.description,
+          earnedAt: new Date(),
+          daysRequired: definition.threshold,
+        });
+      }
+    });
+
+    if (newTrophies.length > 0) {
+      setTrophies(prev => [...prev, ...newTrophies]);
+    }
+
+    return newTrophies;
+  }, [trophies]);
+
+  // Increment daily activity count (call once per day when user is active)
+  const recordDailyActivity = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastActiveDay = localStorage.getItem('dopa_last_active_day');
+    
+    if (lastActiveDay !== today) {
+      localStorage.setItem('dopa_last_active_day', today);
+      const newDaysActive = totalDaysActive + 1;
+      setTotalDaysActive(newDaysActive);
+      checkTrophyProgress(newDaysActive);
+      return true;
+    }
+    return false;
+  }, [totalDaysActive, checkTrophyProgress]);
+
   // Record activity
   const recordActivity = useCallback((
     type: ActivityEvent['type'],
@@ -119,36 +172,13 @@ export function useProgress() {
       timestamp: new Date(),
       details,
     };
-    setActivities(prev => {
-      const updated = [event, ...prev];
-      
-      // Check for Learner trophy on Learn activities
-      if (type === 'learn') {
-        const currentMonth = getMonthKey();
-        const learnCount = updated.filter(a => 
-          a.type === 'learn' && getMonthKey(new Date(a.timestamp)) === currentMonth
-        ).length;
-        
-        if (learnCount >= TROPHY_DEFINITIONS.learner.threshold) {
-          const hasLearnerTrophy = trophies.some(t => t.type === 'learner' && t.month === currentMonth);
-          if (!hasLearnerTrophy) {
-            setTrophies(prevTrophies => [{
-              id: `${Date.now()}-learner`,
-              type: 'learner',
-              name: TROPHY_DEFINITIONS.learner.name,
-              icon: TROPHY_DEFINITIONS.learner.icon,
-              description: TROPHY_DEFINITIONS.learner.description,
-              earnedAt: new Date(),
-              month: currentMonth,
-            }, ...prevTrophies]);
-          }
-        }
-      }
-      
-      return updated;
-    });
+    setActivities(prev => [event, ...prev]);
+    
+    // Also record daily activity for trophy progress
+    recordDailyActivity();
+    
     return points;
-  }, [trophies]);
+  }, [recordDailyActivity]);
 
   // Check if weekly reflection exists for current week
   const hasWeeklyReflection = useCallback(() => {
@@ -203,109 +233,14 @@ export function useProgress() {
     setMonthlySummaries(prev => [summary, ...prev]);
     recordActivity('reflection', 'Monthly summary completed', ACTIVITY_POINTS.monthly_summary);
     
-    // Check for trophies
-    checkAndAwardTrophies(targetMonth);
-    
     return summary;
   }, [monthlyScores, recordActivity]);
-
-  // Check and award trophies
-  const checkAndAwardTrophies = useCallback((month: string) => {
-    const newTrophies: Trophy[] = [];
-    const monthData = monthlyScores.find(s => s.month === month);
-    const existingTrophiesForMonth = trophies.filter(t => t.month === month);
-
-    // Consistency trophy
-    if (
-      monthData && 
-      monthData.activities >= TROPHY_DEFINITIONS.consistency.threshold &&
-      !existingTrophiesForMonth.some(t => t.type === 'consistency')
-    ) {
-      newTrophies.push({
-        id: `${Date.now()}-consistency`,
-        type: 'consistency',
-        name: TROPHY_DEFINITIONS.consistency.name,
-        icon: TROPHY_DEFINITIONS.consistency.icon,
-        description: TROPHY_DEFINITIONS.consistency.description,
-        earnedAt: new Date(),
-        month,
-      });
-    }
-
-    // Reflection trophy
-    if (
-      monthData &&
-      monthData.reflectionsCount >= TROPHY_DEFINITIONS.reflection.threshold &&
-      !existingTrophiesForMonth.some(t => t.type === 'reflection')
-    ) {
-      newTrophies.push({
-        id: `${Date.now()}-reflection`,
-        type: 'reflection',
-        name: TROPHY_DEFINITIONS.reflection.name,
-        icon: TROPHY_DEFINITIONS.reflection.icon,
-        description: TROPHY_DEFINITIONS.reflection.description,
-        earnedAt: new Date(),
-        month,
-      });
-    }
-
-    // Growth trophy (best month so far)
-    const allScores = monthlyScores.map(s => s.score);
-    const maxPrevScore = Math.max(...allScores.slice(0, -1), 0);
-    if (
-      monthData &&
-      monthData.score > maxPrevScore &&
-      monthData.score > 100 &&
-      !existingTrophiesForMonth.some(t => t.type === 'growth')
-    ) {
-      newTrophies.push({
-        id: `${Date.now()}-growth`,
-        type: 'growth',
-        name: TROPHY_DEFINITIONS.growth.name,
-        icon: TROPHY_DEFINITIONS.growth.icon,
-        description: TROPHY_DEFINITIONS.growth.description,
-        earnedAt: new Date(),
-        month,
-      });
-    }
-
-    // Learner trophy (engaged with Learn content)
-    const learnActivities = activities.filter(a => 
-      a.type === 'learn' && getMonthKey(new Date(a.timestamp)) === month
-    );
-    if (
-      learnActivities.length >= TROPHY_DEFINITIONS.learner.threshold &&
-      !existingTrophiesForMonth.some(t => t.type === 'learner')
-    ) {
-      newTrophies.push({
-        id: `${Date.now()}-learner`,
-        type: 'learner',
-        name: TROPHY_DEFINITIONS.learner.name,
-        icon: TROPHY_DEFINITIONS.learner.icon,
-        description: TROPHY_DEFINITIONS.learner.description,
-        earnedAt: new Date(),
-        month,
-      });
-    }
-
-    if (newTrophies.length > 0) {
-      setTrophies(prev => [...newTrophies, ...prev]);
-    }
-
-    return newTrophies;
-  }, [monthlyScores, trophies]);
 
   // Get current month data
   const getCurrentMonthData = useCallback(() => {
     const currentMonth = getMonthKey();
     return monthlyScores.find(s => s.month === currentMonth);
   }, [monthlyScores]);
-
-  // Get trophies for month
-  const getTrophiesForMonth = useCallback((month?: string) => {
-    const targetMonth = month ?? getMonthKey();
-    return trophies.filter(t => t.month === targetMonth);
-  }, [trophies]);
 
   // Get weekly reflections for current month
   const getReflectionsThisMonth = useCallback(() => {
@@ -375,9 +310,11 @@ export function useProgress() {
     monthlyNotes,
     trophies,
     monthlyScores,
+    totalDaysActive,
     
     // Actions
     recordActivity,
+    recordDailyActivity,
     submitWeeklyReflection,
     submitMonthlySummary,
     saveMonthlyNote,
@@ -386,7 +323,6 @@ export function useProgress() {
     hasWeeklyReflection,
     hasMonthlySummary,
     getCurrentMonthData,
-    getTrophiesForMonth,
     getReflectionsThisMonth,
     getMonthlyNote,
   };

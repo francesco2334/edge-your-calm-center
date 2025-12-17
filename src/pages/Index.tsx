@@ -85,6 +85,7 @@ const Index = () => {
     monthlyNotes,
     monthlySummaries,
     trophies,
+    totalDaysActive,
     hasWeeklyReflection,
     hasMonthlySummary,
     getMonthlyNote,
@@ -457,6 +458,7 @@ const Index = () => {
           monthlyNotes={monthlyNotes}
           monthlySummaries={monthlySummaries}
           trophies={trophies}
+          totalDaysActive={totalDaysActive}
           hasWeeklyReflection={hasWeeklyReflection()}
           hasMonthlySummary={hasMonthlySummary()}
           monthlyNote={getMonthlyNote()}

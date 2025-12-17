@@ -4,27 +4,54 @@ import type { Trophy } from '@/lib/progress-data';
 import { TROPHY_DEFINITIONS } from '@/lib/progress-data';
 
 interface TrophyCaseProps {
-  earnedTrophies: Trophy[];
-  month?: string;
+  totalDaysActive: number;
+  earnedTrophies?: Trophy[];
 }
 
-export function TrophyCase({ earnedTrophies, month }: TrophyCaseProps) {
+export function TrophyCase({ totalDaysActive, earnedTrophies = [] }: TrophyCaseProps) {
   const allTrophyTypes = Object.keys(TROPHY_DEFINITIONS) as Array<keyof typeof TROPHY_DEFINITIONS>;
   
-  const earnedTypes = new Set(earnedTrophies.map(t => t.type));
+  // Determine which trophies are earned based on total active days
+  const getEarnedTrophies = () => {
+    return allTrophyTypes.filter(type => totalDaysActive >= TROPHY_DEFINITIONS[type].threshold);
+  };
+  
+  const earnedTypes = new Set(getEarnedTrophies());
+  const nextTrophy = allTrophyTypes.find(type => !earnedTypes.has(type));
+  const nextThreshold = nextTrophy ? TROPHY_DEFINITIONS[nextTrophy].threshold : 365;
+  const progressToNext = nextTrophy 
+    ? Math.min(100, (totalDaysActive / nextThreshold) * 100)
+    : 100;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">Trophies</h3>
-        <span className="text-xs text-primary">{earnedTrophies.length}/{allTrophyTypes.length}</span>
+        <span className="text-xs text-primary">{earnedTypes.size}/{allTrophyTypes.length}</span>
+      </div>
+      
+      {/* Progress indicator */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-xs">
+          <span className="text-muted-foreground">{totalDaysActive} days active</span>
+          {nextTrophy && (
+            <span className="text-primary">{nextThreshold - totalDaysActive} days to {TROPHY_DEFINITIONS[nextTrophy].name}</span>
+          )}
+        </div>
+        <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-primary to-accent"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressToNext}%` }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         {allTrophyTypes.map((type, i) => {
           const definition = TROPHY_DEFINITIONS[type];
           const isEarned = earnedTypes.has(type);
-          const trophy = earnedTrophies.find(t => t.type === type);
 
           return (
             <motion.div
@@ -45,6 +72,11 @@ export function TrophyCase({ earnedTrophies, month }: TrophyCaseProps) {
                 isEarned ? 'text-foreground' : 'text-muted-foreground'
               }`}>
                 {definition.name}
+              </p>
+              <p className={`text-[8px] text-center ${
+                isEarned ? 'text-primary' : 'text-muted-foreground/50'
+              }`}>
+                {definition.threshold}d
               </p>
               
               {!isEarned && (
@@ -67,9 +99,9 @@ export function TrophyCase({ earnedTrophies, month }: TrophyCaseProps) {
         })}
       </div>
 
-      {earnedTrophies.length === 0 && (
+      {earnedTypes.size === 0 && (
         <p className="text-xs text-muted-foreground text-center mt-2">
-          Complete activities and reflections to earn trophies
+          Use the app daily to unlock trophies over the year
         </p>
       )}
     </div>

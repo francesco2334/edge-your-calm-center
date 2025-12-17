@@ -495,39 +495,24 @@ export function useTokenEconomy(userId: string | null) {
   }, []);
 
   /**
-   * EARLY EXIT REFUND: User exits before time expires
-   * Partial refund based on unused time
+   * EXIT SESSION: User exits early
+   * NO REFUNDS - once tokens are spent, they're gone
+   * This enforces intentional spending
    */
   const exitSessionEarly = useCallback(() => {
-    if (!state.activeSession) return 0;
+    if (!state.activeSession) return;
 
-    const { startedAt, minutesAllocated, tokensSpent, activity } = state.activeSession;
-    const now = new Date();
-    const usedMinutes = (now.getTime() - new Date(startedAt).getTime()) / (1000 * 60);
-    const unusedMinutes = Math.max(0, minutesAllocated - usedMinutes);
-    const refundTokens = Math.floor(unusedMinutes / MINUTES_PER_TOKEN);
+    const { activity } = state.activeSession;
 
-    if (refundTokens > 0) {
-      setState(prev => ({
-        ...prev,
-        tokens: prev.tokens + refundTokens,
-        activeSession: null,
-      }));
+    setState(prev => ({
+      ...prev,
+      activeSession: null,
+    }));
 
-      addTokenTransaction('refund', refundTokens, `Early exit: ${activity}`);
-
-      toast.success(`+${refundTokens} tokens refunded`, {
-        description: 'Exited early',
-      });
-    } else {
-      setState(prev => ({
-        ...prev,
-        activeSession: null,
-      }));
-    }
-
-    return refundTokens;
-  }, [state.activeSession, addTokenTransaction]);
+    toast.info('Session ended', {
+      description: `No refunds - ${activity}`,
+    });
+  }, [state.activeSession]);
 
   /**
    * PRODUCTIVITY LOG: +1 token per log, up to 3 per day
