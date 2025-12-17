@@ -1,8 +1,9 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff, Download } from 'lucide-react';
+import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff, Download, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrial } from '@/hooks/useTrial';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
 import { MojoOrb } from '@/components/MojoOrb';
@@ -94,13 +95,35 @@ export default function Settings() {
     }
   };
 
+  const { resetOnboarding } = useOnboarding(user?.id);
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetOnboarding = async () => {
+    setIsResetting(true);
+    try {
+      await resetOnboarding();
+      toast({
+        title: 'Onboarding reset',
+        description: 'Restart the app to go through onboarding again'
+      });
+    } catch (error) {
+      toast({
+        title: 'Reset failed',
+        description: 'Could not reset onboarding',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background px-6 py-8">
+    <div className="min-h-screen bg-background px-6 py-8 safe-area-inset">
       <motion.button
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
+        onClick={() => navigate('/')}
+        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 pt-safe-top"
       >
         <ArrowLeft className="w-5 h-5" />
         <span className="text-sm">Back</span>
@@ -307,6 +330,32 @@ export default function Settings() {
               <span className="flex-1 text-sm font-medium text-foreground">Terms of Service</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </Link>
+          </div>
+        </motion.div>
+
+        {/* Developer/Debug Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.24 }}
+          className="mb-6"
+        >
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1">
+            Developer
+          </h2>
+          <div className="bg-muted/30 rounded-2xl border border-border/30 overflow-hidden">
+            <button
+              onClick={handleResetOnboarding}
+              disabled={isResetting}
+              className="flex items-center gap-4 p-4 w-full hover:bg-muted/50 transition-colors disabled:opacity-50"
+            >
+              <RotateCcw className={`w-5 h-5 text-amber-500 ${isResetting ? 'animate-spin' : ''}`} />
+              <div className="flex-1 text-left">
+                <p className="text-sm font-medium text-foreground">Reset Onboarding</p>
+                <p className="text-xs text-muted-foreground">Go through setup again</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
           </div>
         </motion.div>
 
