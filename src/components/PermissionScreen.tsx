@@ -7,14 +7,17 @@ interface PermissionScreenProps {
 
 export function PermissionScreen({ onStartScan }: PermissionScreenProps) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden safe-area-inset">
       <div className="absolute inset-0 bg-gradient-calm" />
+      
+      {/* Spacer */}
+      <div className="flex-1 min-h-[40px]" />
       
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 text-center max-w-md"
+        className="relative z-10 text-center max-w-md mx-auto"
       >
         {/* Icon */}
         <motion.div
@@ -45,7 +48,7 @@ export function PermissionScreen({ onStartScan }: PermissionScreenProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="space-y-4 mb-12"
+          className="space-y-4 mb-8"
         >
           <p className="text-lg text-foreground leading-relaxed">
             Nothing here is a diagnosis.
@@ -57,22 +60,26 @@ export function PermissionScreen({ onStartScan }: PermissionScreenProps) {
             This just helps us understand your current load.
           </p>
         </motion.div>
+      </motion.div>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+      {/* Spacer */}
+      <div className="flex-1 min-h-[40px]" />
+
+      {/* CTA - Fixed at bottom */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="relative z-10 max-w-md mx-auto w-full"
+      >
+        <Button
+          variant="edge"
+          size="lg"
+          onClick={onStartScan}
+          className="w-full"
         >
-          <Button
-            variant="edge"
-            size="lg"
-            onClick={onStartScan}
-            className="w-full"
-          >
-            Start Scan
-          </Button>
-        </motion.div>
+          Start Scan
+        </Button>
       </motion.div>
     </div>
   );

@@ -39,7 +39,7 @@ export function AssessmentScreen({ onComplete }: AssessmentScreenProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden safe-area-inset">
       <div className="absolute inset-0 bg-gradient-calm" />
 
       {/* Progress bar */}

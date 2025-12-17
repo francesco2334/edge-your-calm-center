@@ -42,7 +42,7 @@ export function AtlasIntroScreen({ onContinue }: MojoIntroScreenProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col px-6 py-12 relative overflow-hidden safe-area-inset">
       <div className="absolute inset-0 bg-gradient-calm" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-gradient-pulse opacity-35" />
 
