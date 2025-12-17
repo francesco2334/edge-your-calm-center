@@ -38,31 +38,66 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
     }
   }, [isOpen, userId]);
 
-  const generateSummary = (msgs: Message[]): string => {
-    // Extract key topics from user messages
-    const userMessages = msgs.filter(m => m.role === 'user').map(m => m.content.toLowerCase());
-    const topics: string[] = [];
+  const generateContextualFollowUp = (msgs: Message[]): string => {
+    const userMessages = msgs.filter(m => m.role === 'user');
+    const lastUserMsg = userMessages[userMessages.length - 1]?.content || '';
+    const lastAssistantMsg = msgs.filter(m => m.role === 'assistant').pop()?.content || '';
     
-    // Simple topic detection
-    const topicKeywords: Record<string, string[]> = {
-      'urges': ['urge', 'craving', 'want to', 'tempted', 'pull'],
-      'stress': ['stress', 'anxious', 'worried', 'overwhelmed', 'pressure'],
-      'progress': ['streak', 'days', 'progress', 'better', 'improving'],
-      'habits': ['habit', 'routine', 'pattern', 'trigger', 'behavior'],
-      'feelings': ['feel', 'feeling', 'emotion', 'mood', 'sad', 'happy'],
-      'gaming': ['game', 'gaming', 'play', 'gambling', 'bet'],
-      'work': ['work', 'job', 'busy', 'deadline', 'meeting'],
-    };
+    // Extract specific details to reference
+    const lowerMsg = lastUserMsg.toLowerCase();
     
-    for (const [topic, keywords] of Object.entries(topicKeywords)) {
-      if (userMessages.some(msg => keywords.some(kw => msg.includes(kw)))) {
-        topics.push(topic);
+    // Look for specific things to follow up on
+    const followUps: { pattern: RegExp; response: (match: RegExpMatchArray) => string }[] = [
+      { 
+        pattern: /(\d+)\s*(day|hour|week|month)s?\s*(streak|clean|sober|free)/i,
+        response: (m) => `Still going strong on that ${m[1]} ${m[2]} streak? That's real momentum.`
+      },
+      {
+        pattern: /(stress|anxious|worried|overwhelmed)\s*(about|with|over)?\s*(\w+)?/i,
+        response: (m) => m[3] ? `How's that ${m[3]} situation going? Still weighing on you?` : `How are you feeling now? Any of that stress ease up?`
+      },
+      {
+        pattern: /(urge|craving|tempted|want to)\s*(to)?\s*(\w+)?/i,
+        response: (m) => `Last time you mentioned feeling pulled. Did that pass, or is it still lingering?`
+      },
+      {
+        pattern: /(work|job|meeting|deadline|boss)/i,
+        response: () => `How'd that work situation shake out?`
+      },
+      {
+        pattern: /(game|gaming|gambling|bet|casino)/i,
+        response: () => `You mentioned gaming last time. How's that been sitting with you?`
+      },
+      {
+        pattern: /(sleep|tired|exhausted|insomnia)/i,
+        response: () => `Getting any better sleep? That can really affect everything else.`
+      },
+      {
+        pattern: /(relationship|partner|friend|family|mom|dad|brother|sister)/i,
+        response: () => `How are things going with the people in your life?`
+      },
+    ];
+    
+    for (const { pattern, response } of followUps) {
+      const match = lowerMsg.match(pattern) || lastAssistantMsg.toLowerCase().match(pattern);
+      if (match) {
+        return response(match);
       }
     }
     
-    if (topics.length === 0) return "Continuing from earlier...";
-    if (topics.length === 1) return `Picking up where we left off on ${topics[0]}...`;
-    return `Last time we talked about ${topics.slice(0, -1).join(', ')} and ${topics[topics.length - 1]}...`;
+    // Fallback: reference the general vibe
+    if (userMessages.length > 3) {
+      return `Good to see you back. What's on your mind today?`;
+    }
+    return `Hey, picking up where we left off. How are things?`;
+  };
+
+  const getTimeAgo = (date: Date): string => {
+    const mins = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return 'yesterday';
   };
 
   const loadRecentConversation = async () => {
@@ -84,16 +119,16 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
         setConversationId(data.id);
         const loadedMessages = data.messages as unknown as Message[];
         if (Array.isArray(loadedMessages) && loadedMessages.length > 0) {
-          const summary = generateSummary(loadedMessages);
+          const followUp = generateContextualFollowUp(loadedMessages);
           const timeAgo = getTimeAgo(new Date(data.updated_at));
           
-          // Add a context message at the start
+          // Add a contextual follow-up message at the end
           const contextMessage: Message = {
             role: 'assistant',
-            content: `👋 ${summary} (${timeAgo})`
+            content: `${followUp} (${timeAgo})`
           };
           
-          setMessages([contextMessage, ...loadedMessages]);
+          setMessages([...loadedMessages, contextMessage]);
           setHasConsented(true);
         }
       }
@@ -102,12 +137,6 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
     }
   };
 
-  const getTimeAgo = (date: Date): string => {
-    const mins = Math.floor((Date.now() - date.getTime()) / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    const hours = Math.floor(mins / 60);
-    return `${hours}h ago`;
-  };
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -243,8 +272,8 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
   const saveConversation = useCallback(async () => {
     if (!userId || messages.length < 2) return;
     
-    // Filter out the summary message (starts with 👋)
-    const messagesToSave = messages.filter(m => !m.content.startsWith('👋'));
+    // Filter out auto-generated context messages (end with time like "(2h ago)" or "(yesterday)")
+    const messagesToSave = messages.filter(m => !m.content.match(/\(\d+[mh] ago\)$/) && !m.content.endsWith('(yesterday)'));
     try {
       if (conversationId) {
         await supabase
