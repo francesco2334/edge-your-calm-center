@@ -145,14 +145,14 @@ export function TriggerRouting({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 400 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-[28px] border-t border-border/20"
+            className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-[28px] border-t border-border/20 safe-area-bottom"
           >
             {/* Handle */}
             <div className="flex justify-center py-3">
               <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
             </div>
 
-            <div className="px-6 pb-10">
+            <div className="px-6 pb-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>

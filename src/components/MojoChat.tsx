@@ -195,10 +195,10 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-background"
+          className="fixed inset-0 z-50 bg-background safe-area-inset"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border/30">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border/30 safe-top">
             <div className="flex items-center gap-3">
               <MojoOrb state="calm" size="sm" />
               <div>
@@ -298,7 +298,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
           </div>
 
           {/* Input */}
-          <div className="absolute bottom-0 left-0 right-0 px-5 py-4 bg-background border-t border-border/30">
+          <div className="absolute bottom-0 left-0 right-0 px-5 py-4 bg-background border-t border-border/30 safe-area-bottom">
             <div className="flex items-center gap-3">
               <input
                 ref={inputRef}
@@ -314,7 +314,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
               <button
                 onClick={sendMessage}
                 disabled={!input.trim() || isLoading}
-                className="p-3 rounded-xl bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
+                className="p-3 rounded-xl bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors flex-shrink-0"
               >
                 <Send className="w-5 h-5" />
               </button>

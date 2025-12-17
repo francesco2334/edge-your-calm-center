@@ -44,62 +44,68 @@ export function EarnConfirmModal({ isOpen, option, onConfirm, onCancel }: EarnCo
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center px-6"
-          onClick={onCancel}
-        >
+        <>
+          {/* Backdrop */}
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-xl"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{option.icon}</span>
-                <h3 className="text-lg font-semibold text-foreground">{prompt.title}</h3>
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+            onClick={onCancel}
+          />
+          
+          {/* Modal container - flex centered with safe area */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-6 safe-area-inset pointer-events-none">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-xl pointer-events-auto max-h-[85vh] overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{option.icon}</span>
+                  <h3 className="text-lg font-semibold text-foreground">{prompt.title}</h3>
+                </div>
+                <button
+                  onClick={onCancel}
+                  className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                onClick={onCancel}
-                className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            {/* Question */}
-            <p className="text-muted-foreground mb-6">{prompt.question}</p>
+              {/* Question */}
+              <p className="text-muted-foreground mb-6">{prompt.question}</p>
 
-            {/* Permission preview */}
-            <div className="bg-primary/10 rounded-xl p-4 mb-6 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">You're allowing yourself</span>
-              <span className="text-xl font-bold text-primary">+{option.tokensAllowed || option.tokensEarned} ⚡</span>
-            </div>
+              {/* Permission preview */}
+              <div className="bg-primary/10 rounded-xl p-4 mb-6 flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">You're allowing yourself</span>
+                <span className="text-xl font-bold text-primary">+{option.tokensAllowed || option.tokensEarned} ⚡</span>
+              </div>
 
-            {/* Actions */}
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={onCancel}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={onConfirm}
-                className="flex-1 gap-2 bg-primary hover:bg-primary/90"
-              >
-                <Check className="w-4 h-4" />
-                {prompt.confirmText}
-              </Button>
-            </div>
-          </motion.div>
-        </motion.div>
+              {/* Actions */}
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={onCancel}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={onConfirm}
+                  className="flex-1 gap-2 bg-primary hover:bg-primary/90"
+                >
+                  <Check className="w-4 h-4" />
+                  {prompt.confirmText}
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        </>
       )}
     </AnimatePresence>
   );

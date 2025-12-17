@@ -17,22 +17,25 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
   const percentage = (totalScore / maxScore) * 100;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden safe-area-inset">
       <div className="absolute inset-0 bg-gradient-calm" />
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-pulse opacity-30" />
+
+      {/* Spacer */}
+      <div className="flex-1 min-h-[20px]" />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 text-center max-w-md w-full"
+        className="relative z-10 text-center max-w-md w-full mx-auto"
       >
         {/* Header */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-sm uppercase tracking-widest text-muted-foreground mb-8"
+          className="text-sm uppercase tracking-widest text-muted-foreground mb-6"
         >
           Your <span className="text-primary">DopaMINE</span> State
         </motion.p>
@@ -42,7 +45,7 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="relative w-48 h-48 mx-auto mb-8"
+          className="relative w-40 h-40 mx-auto mb-6"
         >
           <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
             {/* Background ring */}
@@ -78,7 +81,7 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
-              className="text-3xl font-bold"
+              className="text-2xl font-bold"
               style={{ color: stateInfo.color }}
             >
               {stateInfo.title}
@@ -91,9 +94,9 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="dopa-card mb-6"
+          className="dopa-card mb-4"
         >
-          <p className="text-foreground leading-relaxed">
+          <p className="text-foreground leading-relaxed text-sm">
             {stateInfo.description}
           </p>
         </motion.div>
@@ -103,28 +106,32 @@ export function ResultsScreen({ answers, onContinue }: ResultsScreenProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="text-sm text-muted-foreground mb-10 italic"
+          className="text-xs text-muted-foreground mb-6 italic"
         >
           "This doesn't say anything about who you are.
           <br />
           It only reflects how much pull your system is under right now."
         </motion.p>
+      </motion.div>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.9 }}
+      {/* Spacer */}
+      <div className="flex-1 min-h-[20px]" />
+
+      {/* CTA - Fixed at bottom */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.9 }}
+        className="relative z-10 max-w-md mx-auto w-full"
+      >
+        <Button
+          variant="edge"
+          size="lg"
+          onClick={onContinue}
+          className="w-full"
         >
-          <Button
-            variant="edge"
-            size="lg"
-            onClick={onContinue}
-            className="w-full"
-          >
-            Meet Mojo
-          </Button>
-        </motion.div>
+          Meet Mojo
+        </Button>
       </motion.div>
     </div>
   );

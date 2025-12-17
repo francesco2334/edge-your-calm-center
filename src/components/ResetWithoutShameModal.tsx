@@ -54,14 +54,15 @@ export function ResetWithoutShameModal({
             className="fixed inset-0 bg-background/90 backdrop-blur-xl z-50"
           />
           
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          >
-            <div className="w-full max-w-sm bg-card rounded-[28px] border border-border/20 p-6 relative">
+          {/* Modal container - flex centered with safe area */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 safe-area-inset pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="w-full max-w-sm bg-card rounded-[28px] border border-border/20 p-6 relative pointer-events-auto max-h-[85vh] overflow-y-auto"
+            >
               {/* Close button */}
               <button
                 onClick={onClose}
@@ -136,8 +137,8 @@ export function ResetWithoutShameModal({
                   </div>
                 </button>
               </motion.div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
