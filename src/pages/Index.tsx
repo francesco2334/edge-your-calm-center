@@ -93,6 +93,7 @@ const Index = () => {
     submitMonthlySummary,
     saveMonthlyNote,
     recordActivity,
+    recordDailyActivity,
   } = useProgress();
 
   // Onboarding system - separate from trial/subscription
@@ -118,6 +119,10 @@ const Index = () => {
     cancelTimeExpiredNotification,
     scheduleStreakWarningNotification,
     cancelStreakWarning,
+    scheduleTrophyProgressNotification,
+    sendTrophyEarnedNotification,
+    scheduleDailyReminderNotification,
+    cancelDailyReminder,
     permission: notificationPermission,
   } = usePushNotifications();
 
@@ -125,10 +130,28 @@ const Index = () => {
   useEffect(() => {
     if (!hasLoggedToday && notificationPermission === 'granted') {
       scheduleStreakWarningNotification(12);
+      scheduleDailyReminderNotification(20); // 8 PM reminder
     } else if (hasLoggedToday) {
       cancelStreakWarning();
+      cancelDailyReminder();
     }
-  }, [hasLoggedToday, notificationPermission, scheduleStreakWarningNotification, cancelStreakWarning]);
+  }, [hasLoggedToday, notificationPermission, scheduleStreakWarningNotification, cancelStreakWarning, scheduleDailyReminderNotification, cancelDailyReminder]);
+
+  // Check trophy progress on mount and schedule notification if close
+  useEffect(() => {
+    if (notificationPermission === 'granted' && totalDaysActive > 0) {
+      const trophyTypes = ['bronze', 'silver', 'gold', 'platinum', 'diamond', 'master'] as const;
+      const thresholds = [60, 120, 180, 240, 300, 365];
+      
+      for (let i = 0; i < trophyTypes.length; i++) {
+        const daysRemaining = thresholds[i] - totalDaysActive;
+        if (daysRemaining > 0 && daysRemaining <= 7) {
+          scheduleTrophyProgressNotification(daysRemaining, trophyTypes[i]);
+          break;
+        }
+      }
+    }
+  }, [totalDaysActive, notificationPermission, scheduleTrophyProgressNotification]);
 
   // Determine initial screen based on onboarding, auth, and subscription status
   // SINGLE SOURCE OF TRUTH for routing
@@ -166,13 +189,29 @@ const Index = () => {
   };
 
   // Handle daily pull logging - awards +3 tokens once per day
-  const handlePullSelect = (pullId: string) => {
+  const handlePullSelect = async (pullId: string) => {
     const awarded = logDailyPull(pullId);
     setCurrentTrigger(pullId);
     
     // Cancel streak warning since user logged
     if (awarded) {
       cancelStreakWarning();
+      cancelDailyReminder();
+      
+      // Record daily activity and check for trophy progress
+      const { newTrophies, nextTrophy } = recordDailyActivity();
+      
+      // Send notifications for any newly earned trophies
+      if (newTrophies.length > 0 && notificationPermission === 'granted') {
+        for (const trophy of newTrophies) {
+          await sendTrophyEarnedNotification(trophy.name, trophy.icon);
+        }
+      }
+      
+      // Schedule trophy progress notification if close to next trophy
+      if (nextTrophy && nextTrophy.daysRemaining <= 7 && notificationPermission === 'granted') {
+        scheduleTrophyProgressNotification(nextTrophy.daysRemaining, nextTrophy.name);
+      }
     }
     
     // Show trigger routing (helps based on what pulled them)
