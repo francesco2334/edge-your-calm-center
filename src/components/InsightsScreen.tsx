@@ -23,6 +23,7 @@ interface InsightsScreenProps {
   // Progress Engine props
   monthlyScores: MonthlyScore[];
   trophies: Trophy[];
+  totalDaysActive: number;
   hasWeeklyReflection: boolean;
   hasMonthlySummary: boolean;
   monthlyNote?: MonthlyNote;
@@ -46,6 +47,7 @@ export function InsightsScreen({
   monthlyNotes,
   monthlySummaries,
   trophies,
+  totalDaysActive,
   hasWeeklyReflection,
   hasMonthlySummary,
   monthlyNote,
@@ -54,7 +56,6 @@ export function InsightsScreen({
   onSaveMonthlyNote,
 }: InsightsScreenProps) {
   const currentMonth = getMonthKey();
-  const currentMonthTrophies = trophies.filter(t => t.month === currentMonth);
   const currentMonthData = monthlyScores.find(s => s.month === currentMonth);
   
   // Convert token transactions to ChargeTransaction format for compatibility
@@ -268,14 +269,14 @@ export function InsightsScreen({
           />
         </motion.div>
 
-        {/* Trophy Case */}
+        {/* Trophy Case - Based on total days active */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
           className="dopa-card mb-6"
         >
-          <TrophyCase earnedTrophies={currentMonthTrophies} month={currentMonth} />
+          <TrophyCase totalDaysActive={totalDaysActive} earnedTrophies={trophies} />
         </motion.div>
 
         {/* Journey Timeline */}
@@ -289,7 +290,6 @@ export function InsightsScreen({
             monthlyNotes={monthlyNotes}
             monthlySummaries={monthlySummaries}
             monthlyScores={monthlyScores}
-            trophies={trophies}
           />
         </motion.div>
 

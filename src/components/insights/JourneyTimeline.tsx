@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, Calendar, TrendingUp, TrendingDown, Minus, Trophy, BookOpen, Lightbulb } from 'lucide-react';
-import type { MonthlyNote, MonthlySummary, MonthlyScore, Trophy as TrophyType } from '@/lib/progress-data';
+import { ChevronDown, ChevronUp, Calendar, TrendingUp, TrendingDown, Minus, BookOpen, Lightbulb } from 'lucide-react';
+import type { MonthlyNote, MonthlySummary, MonthlyScore } from '@/lib/progress-data';
 import { getMonthLabel } from '@/lib/progress-data';
 
 interface JourneyTimelineProps {
   monthlyNotes: MonthlyNote[];
   monthlySummaries: MonthlySummary[];
   monthlyScores: MonthlyScore[];
-  trophies: TrophyType[];
 }
 
 interface MonthData {
@@ -18,10 +17,9 @@ interface MonthData {
   score?: MonthlyScore;
   note?: MonthlyNote;
   summary?: MonthlySummary;
-  trophies: TrophyType[];
 }
 
-export function JourneyTimeline({ monthlyNotes, monthlySummaries, monthlyScores, trophies }: JourneyTimelineProps) {
+export function JourneyTimeline({ monthlyNotes, monthlySummaries, monthlyScores }: JourneyTimelineProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Combine all data by month and sort chronologically (newest first)
@@ -33,7 +31,7 @@ export function JourneyTimeline({ monthlyNotes, monthlySummaries, monthlyScores,
   const monthsData: MonthData[] = Array.from(allMonths)
     .sort((a, b) => b.localeCompare(a)) // Newest first
     .map(month => {
-      const [year, monthNum] = month.split('-');
+      const [year] = month.split('-');
       return {
         month,
         label: getMonthLabel(month),
@@ -41,7 +39,6 @@ export function JourneyTimeline({ monthlyNotes, monthlySummaries, monthlyScores,
         score: monthlyScores.find(s => s.month === month),
         note: monthlyNotes.find(n => n.month === month),
         summary: monthlySummaries.find(s => s.month === month),
-        trophies: trophies.filter(t => t.month === month),
       };
     })
     .filter(m => m.note || m.summary || (m.score && m.score.score > 0)); // Only show months with activity
@@ -128,22 +125,6 @@ export function JourneyTimeline({ monthlyNotes, monthlySummaries, monthlyScores,
                       <span>{monthData.score.activities} activities</span>
                       <span>{monthData.score.learnCards} cards</span>
                       <span>{monthData.score.streakDays} streak days</span>
-                    </div>
-                  )}
-
-                  {/* Trophies */}
-                  {monthData.trophies.length > 0 && (
-                    <div className="flex gap-1 mb-3">
-                      {monthData.trophies.map(trophy => (
-                        <div
-                          key={trophy.id}
-                          className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 border border-primary/20"
-                          title={trophy.description}
-                        >
-                          <span className="text-sm">{trophy.icon}</span>
-                          <span className="text-[10px] text-primary font-medium">{trophy.name}</span>
-                        </div>
-                      ))}
                     </div>
                   )}
 

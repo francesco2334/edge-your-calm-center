@@ -53,50 +53,51 @@ export interface MonthlyScore {
 
 export interface Trophy {
   id: string;
-  type: 'consistency' | 'streak' | 'reflection' | 'growth' | 'learner' | 'master';
+  type: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master';
   name: string;
   icon: string;
   description: string;
   earnedAt: Date;
-  month: string;
+  daysRequired: number;
 }
 
+// Trophy system: 6 trophies unlocked over 1 year (each 60 days of daily activity)
 export const TROPHY_DEFINITIONS = {
-  consistency: {
-    name: 'Consistency',
-    icon: '🏆',
-    description: 'Checked in most days this month',
-    threshold: 20, // days
+  bronze: {
+    name: 'Bronze',
+    icon: '🥉',
+    description: '60 days of daily activity',
+    threshold: 60,
   },
-  streak: {
-    name: 'Streak Master',
-    icon: '🔥',
-    description: 'Maintained a 7+ day streak',
-    threshold: 7,
+  silver: {
+    name: 'Silver',
+    icon: '🥈',
+    description: '120 days of daily activity',
+    threshold: 120,
   },
-  reflection: {
-    name: 'Deep Thinker',
-    icon: '🧠',
-    description: 'Completed all weekly reflections',
-    threshold: 4, // weeks
+  gold: {
+    name: 'Gold',
+    icon: '🥇',
+    description: '180 days of daily activity',
+    threshold: 180,
   },
-  growth: {
-    name: 'Rising Star',
-    icon: '📈',
-    description: 'Best month so far',
-    threshold: 0, // dynamic
+  platinum: {
+    name: 'Platinum',
+    icon: '💎',
+    description: '240 days of daily activity',
+    threshold: 240,
   },
-  learner: {
-    name: 'Knowledge Seeker',
-    icon: '📚',
-    description: 'Engaged deeply with Learn content',
-    threshold: 30, // cards viewed
+  diamond: {
+    name: 'Diamond',
+    icon: '💠',
+    description: '300 days of daily activity',
+    threshold: 300,
   },
   master: {
-    name: 'Self-Mastery',
-    icon: '✨',
-    description: 'Perfect month - all trophies earned',
-    threshold: 4, // other trophies
+    name: 'Master',
+    icon: '👑',
+    description: '365 days of daily activity',
+    threshold: 365,
   },
 };
 
