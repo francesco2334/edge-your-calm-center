@@ -38,16 +38,42 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
     }
   }, [isOpen, userId]);
 
+  const generateSummary = (msgs: Message[]): string => {
+    // Extract key topics from user messages
+    const userMessages = msgs.filter(m => m.role === 'user').map(m => m.content.toLowerCase());
+    const topics: string[] = [];
+    
+    // Simple topic detection
+    const topicKeywords: Record<string, string[]> = {
+      'urges': ['urge', 'craving', 'want to', 'tempted', 'pull'],
+      'stress': ['stress', 'anxious', 'worried', 'overwhelmed', 'pressure'],
+      'progress': ['streak', 'days', 'progress', 'better', 'improving'],
+      'habits': ['habit', 'routine', 'pattern', 'trigger', 'behavior'],
+      'feelings': ['feel', 'feeling', 'emotion', 'mood', 'sad', 'happy'],
+      'gaming': ['game', 'gaming', 'play', 'gambling', 'bet'],
+      'work': ['work', 'job', 'busy', 'deadline', 'meeting'],
+    };
+    
+    for (const [topic, keywords] of Object.entries(topicKeywords)) {
+      if (userMessages.some(msg => keywords.some(kw => msg.includes(kw)))) {
+        topics.push(topic);
+      }
+    }
+    
+    if (topics.length === 0) return "Continuing from earlier...";
+    if (topics.length === 1) return `Picking up where we left off on ${topics[0]}...`;
+    return `Last time we talked about ${topics.slice(0, -1).join(', ')} and ${topics[topics.length - 1]}...`;
+  };
+
   const loadRecentConversation = async () => {
     if (!userId) return;
     
     try {
-      // Get today's conversation or most recent within 24 hours
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       
       const { data, error } = await supabase
         .from('mojo_conversations')
-        .select('id, messages')
+        .select('id, messages, updated_at')
         .eq('user_id', userId)
         .gte('updated_at', twentyFourHoursAgo)
         .order('updated_at', { ascending: false })
@@ -58,14 +84,29 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
         setConversationId(data.id);
         const loadedMessages = data.messages as unknown as Message[];
         if (Array.isArray(loadedMessages) && loadedMessages.length > 0) {
-          setMessages(loadedMessages);
+          const summary = generateSummary(loadedMessages);
+          const timeAgo = getTimeAgo(new Date(data.updated_at));
+          
+          // Add a context message at the start
+          const contextMessage: Message = {
+            role: 'assistant',
+            content: `👋 ${summary} (${timeAgo})`
+          };
+          
+          setMessages([contextMessage, ...loadedMessages]);
           setHasConsented(true);
         }
       }
     } catch (error) {
-      // No recent conversation, that's fine
       console.log('No recent conversation found');
     }
+  };
+
+  const getTimeAgo = (date: Date): string => {
+    const mins = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    return `${hours}h ago`;
   };
 
   useEffect(() => {
@@ -202,23 +243,23 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
   const saveConversation = useCallback(async () => {
     if (!userId || messages.length < 2) return;
     
+    // Filter out the summary message (starts with 👋)
+    const messagesToSave = messages.filter(m => !m.content.startsWith('👋'));
     try {
       if (conversationId) {
-        // Update existing conversation
         await supabase
           .from('mojo_conversations')
           .update({ 
-            messages: messages as unknown as any,
+            messages: messagesToSave as unknown as any,
             updated_at: new Date().toISOString()
           })
           .eq('id', conversationId);
       } else {
-        // Create new conversation
         const { data } = await supabase
           .from('mojo_conversations')
           .insert({ 
             user_id: userId,
-            messages: messages as unknown as any
+            messages: messagesToSave as unknown as any
           })
           .select('id')
           .single();
@@ -228,9 +269,8 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
         }
       }
 
-      // Also analyze insights
       await supabase.functions.invoke('analyze-insights', {
-        body: { messages },
+        body: { messages: messagesToSave },
       });
     } catch (error) {
       console.error('Failed to save conversation:', error);
