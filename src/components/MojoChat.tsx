@@ -26,9 +26,47 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasConsented, setHasConsented] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Load recent conversation when chat opens
+  useEffect(() => {
+    if (isOpen && userId) {
+      loadRecentConversation();
+    }
+  }, [isOpen, userId]);
+
+  const loadRecentConversation = async () => {
+    if (!userId) return;
+    
+    try {
+      // Get today's conversation or most recent within 24 hours
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      
+      const { data, error } = await supabase
+        .from('mojo_conversations')
+        .select('id, messages')
+        .eq('user_id', userId)
+        .gte('updated_at', twentyFourHoursAgo)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (data && !error) {
+        setConversationId(data.id);
+        const loadedMessages = data.messages as unknown as Message[];
+        if (Array.isArray(loadedMessages) && loadedMessages.length > 0) {
+          setMessages(loadedMessages);
+          setHasConsented(true);
+        }
+      }
+    } catch (error) {
+      // No recent conversation, that's fine
+      console.log('No recent conversation found');
+    }
+  };
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -165,13 +203,39 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
     if (!userId || messages.length < 2) return;
     
     try {
+      if (conversationId) {
+        // Update existing conversation
+        await supabase
+          .from('mojo_conversations')
+          .update({ 
+            messages: messages as unknown as any,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', conversationId);
+      } else {
+        // Create new conversation
+        const { data } = await supabase
+          .from('mojo_conversations')
+          .insert({ 
+            user_id: userId,
+            messages: messages as unknown as any
+          })
+          .select('id')
+          .single();
+        
+        if (data) {
+          setConversationId(data.id);
+        }
+      }
+
+      // Also analyze insights
       await supabase.functions.invoke('analyze-insights', {
         body: { messages },
       });
     } catch (error) {
-      console.error('Failed to save conversation insights:', error);
+      console.error('Failed to save conversation:', error);
     }
-  }, [userId, messages]);
+  }, [userId, messages, conversationId]);
 
   // Save when closing
   const handleClose = useCallback(() => {
@@ -180,7 +244,6 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
     }
     onClose();
   }, [messages, saveConversation, onClose]);
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
