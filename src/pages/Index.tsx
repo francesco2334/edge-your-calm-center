@@ -309,8 +309,8 @@ const Index = () => {
     );
   }
 
-  // Trial expired - show subscription screen
-  if (trialAccepted && !trialActive) {
+  // Subscription expired - show subscription screen
+  if (subscriptionStatus === 'expired') {
     return (
       <TrialExpiredScreen 
         onSubscribe={() => {
@@ -326,7 +326,7 @@ const Index = () => {
   // Onboarding screens
   if (currentScreen !== 'main') {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background safe-area-inset">
         {currentScreen === 'welcome' && (
           <WelcomeScreen onContinue={() => setCurrentScreen('permission')} />
         )}
@@ -339,16 +339,37 @@ const Index = () => {
         {currentScreen === 'results' && (
           <ResultsScreen 
             answers={assessmentAnswers} 
-            onContinue={() => setCurrentScreen('trial')} 
+            onContinue={() => {
+              // Mark onboarding as complete and show auth gate
+              completeOnboarding();
+              setCurrentScreen('authgate');
+            }} 
           />
         )}
-        {currentScreen === 'trial' && (
-          <TrialScreen 
-            onAccept={() => {
+        {currentScreen === 'authgate' && (
+          <AuthGateScreen 
+            onContinue={() => {
+              // Continue as guest
+              completeAuthGate();
+              setCurrentScreen('subscription');
+            }}
+            onSignedIn={() => {
+              // Signed in with Apple
+              completeAuthGate();
+              setCurrentScreen('subscription');
+            }}
+          />
+        )}
+        {currentScreen === 'subscription' && (
+          <SubscriptionScreen 
+            onSubscribed={() => {
               startTrial();
               setCurrentScreen('atlas');
             }}
-            daysRemaining={7}
+            onSkip={() => {
+              // Skip trial, continue to app
+              setCurrentScreen('atlas');
+            }}
           />
         )}
         {currentScreen === 'atlas' && (
@@ -396,7 +417,7 @@ const Index = () => {
           points={points}
           streak={streak}
           hasLoggedToday={hasLoggedToday}
-          trialDaysRemaining={trialActive ? daysRemaining : undefined}
+          trialDaysRemaining={subscriptionStatus === 'trial' ? trialDaysRemaining : undefined}
           currentTrigger={currentTrigger}
           onOpenExchange={() => setActiveTab('exchange')}
           onOpenMojoChat={() => setShowMojoChat(true)}
