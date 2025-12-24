@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
-import { Clock, Sparkles } from 'lucide-react';
+import { Clock, Sparkles, RotateCcw } from 'lucide-react';
 
 interface TrialExpiredScreenProps {
   onSubscribe: () => void;
+  onResetTrial?: () => void;
 }
 
-export function TrialExpiredScreen({ onSubscribe }: TrialExpiredScreenProps) {
+export function TrialExpiredScreen({ onSubscribe, onResetTrial }: TrialExpiredScreenProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       {/* Background */}
@@ -29,11 +30,21 @@ export function TrialExpiredScreen({ onSubscribe }: TrialExpiredScreenProps) {
 
           <button
             onClick={onSubscribe}
-            className="w-full max-w-xs py-4 rounded-2xl bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-lg shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mx-auto"
+            className="w-full max-w-xs py-4 rounded-2xl bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold text-lg shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mx-auto mb-4"
           >
             <Sparkles className="w-5 h-5" />
             Continue with Premium
           </button>
+
+          {onResetTrial && (
+            <button
+              onClick={onResetTrial}
+              className="w-full max-w-xs py-3 rounded-xl bg-muted/50 text-muted-foreground font-medium text-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mx-auto"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Restart Trial (Dev)
+            </button>
+          )}
         </motion.div>
       </div>
     </div>

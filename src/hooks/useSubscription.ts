@@ -105,6 +105,20 @@ export function useSubscription(userId?: string | null) {
     });
   }, []);
 
+  // Reset trial (for development/testing)
+  const resetTrial = useCallback(() => {
+    localStorage.removeItem(TRIAL_START_KEY);
+    localStorage.removeItem(SUBSCRIPTION_KEY);
+    
+    setState({
+      status: 'none',
+      trialDaysRemaining: TRIAL_DAYS,
+      isSubscribed: false,
+      productId: null,
+      expiresAt: null,
+    });
+  }, []);
+
   /**
    * Purchase subscription via App Store
    * This is a placeholder that will be replaced with actual StoreKit integration
@@ -219,6 +233,7 @@ export function useSubscription(userId?: string | null) {
     isLoaded,
     isPurchasing,
     startTrial,
+    resetTrial,
     purchase,
     restorePurchases,
     PRODUCT_IDS,

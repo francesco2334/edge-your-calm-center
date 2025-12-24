@@ -111,6 +111,7 @@ const Index = () => {
     trialDaysRemaining, 
     isLoaded: subscriptionLoaded,
     startTrial,
+    resetTrial,
   } = useSubscription(user?.id);
 
   // Push notifications - real local notifications on native
@@ -358,6 +359,10 @@ const Index = () => {
             title: "Coming soon",
             description: "Premium subscriptions launching soon!",
           });
+        }}
+        onResetTrial={() => {
+          resetTrial();
+          startTrial();
         }}
       />
     );
