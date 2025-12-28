@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { X } from 'lucide-react';
 import { MojoOrb } from '../MojoOrb';
+import { useHaptics } from '@/hooks/useHaptics';
 
 interface GravityDropProps {
   onComplete: () => void;
@@ -22,6 +23,7 @@ const generateRandomPosition = (containerWidth: number, containerHeight: number)
 };
 
 export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
+  const { notifySuccess, tapMedium, selectionChanged } = useHaptics();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [round, setRound] = useState(0);
@@ -31,6 +33,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
   const [showPop, setShowPop] = useState(false);
   const [showComplete, setShowComplete] = useState(false);
   const [mojoState, setMojoState] = useState<'calm' | 'regulating' | 'steady'>('calm');
+  const wasCloseRef = useRef(false);
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -81,6 +84,14 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
     const newProximity = Math.max(0, 1 - distance / 150);
     setProximity(newProximity);
     
+    // Haptic feedback when getting close
+    if (newProximity > 0.7 && !wasCloseRef.current) {
+      wasCloseRef.current = true;
+      selectionChanged();
+    } else if (newProximity < 0.5) {
+      wasCloseRef.current = false;
+    }
+    
     // Update Mojo state based on proximity
     if (newProximity > 0.8) {
       setMojoState('steady');
@@ -94,12 +105,13 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
     if (distance < 25) {
       handleSuccess();
     }
-  }, [targetPos, isSettled, x, y]);
+  }, [targetPos, isSettled, x, y, selectionChanged]);
 
   const handleSuccess = useCallback(() => {
     if (isSettled) return;
     setIsSettled(true);
     setShowPop(true);
+    notifySuccess(); // Haptic success feedback
     
     // Pop animation duration
     setTimeout(() => {
@@ -122,7 +134,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         y.set(containerSize.height / 2 - 40);
       }
     }, 600);
-  }, [isSettled, round, totalRounds, containerSize, x, y]);
+  }, [isSettled, round, totalRounds, containerSize, x, y, notifySuccess, tapMedium]);
 
   const handleDrag = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (isSettled) return;
