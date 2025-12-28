@@ -813,8 +813,13 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
+                  {msg.role === 'assistant' && (
+                    <div className="flex-shrink-0 mr-2 mt-1">
+                      <MojoOrb state="calm" size="sm" />
+                    </div>
+                  )}
                   <div
-                    className={`max-w-[85%] px-4 py-3 rounded-2xl ${
+                    className={`max-w-[80%] px-4 py-3 rounded-2xl ${
                       msg.role === 'user'
                         ? 'bg-primary text-primary-foreground rounded-br-sm'
                         : 'bg-muted/50 text-foreground rounded-bl-sm'
@@ -830,6 +835,9 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                   animate={{ opacity: 1 }}
                   className="flex justify-start"
                 >
+                  <div className="flex-shrink-0 mr-2 mt-1">
+                    <MojoOrb state="thinking" size="sm" />
+                  </div>
                   <div className="bg-muted/50 px-4 py-3 rounded-2xl rounded-bl-sm">
                     <div className="flex gap-1">
                       <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" />

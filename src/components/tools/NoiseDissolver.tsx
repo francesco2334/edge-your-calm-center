@@ -31,10 +31,81 @@ const ALL_MESSAGES = [
   "Inhale peace, exhale worry",
 ];
 
-// Shuffle and pick random messages
-const getRandomMessages = (count: number): string[] => {
-  const shuffled = [...ALL_MESSAGES].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+// Storage key for affirmation preferences
+const AFFIRMATION_PREFS_KEY = 'mojo_affirmation_resonance';
+
+// Get stored affirmation weights (how often each was shown during completion)
+const getAffirmationWeights = (): Record<string, number> => {
+  try {
+    const stored = localStorage.getItem(AFFIRMATION_PREFS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+};
+
+// Save affirmation weights
+const saveAffirmationWeights = (weights: Record<string, number>) => {
+  try {
+    localStorage.setItem(AFFIRMATION_PREFS_KEY, JSON.stringify(weights));
+  } catch {
+    // Silently fail if localStorage is unavailable
+  }
+};
+
+// Track completion with these affirmations
+const trackAffirmationResonance = (messages: string[]) => {
+  const weights = getAffirmationWeights();
+  messages.forEach(msg => {
+    weights[msg] = (weights[msg] || 0) + 1;
+  });
+  saveAffirmationWeights(weights);
+};
+
+// Weighted random selection - messages that resonated more appear more often
+const getWeightedRandomMessages = (count: number): string[] => {
+  const weights = getAffirmationWeights();
+  const hasHistory = Object.keys(weights).length > 0;
+  
+  if (!hasHistory) {
+    // No history, use pure random
+    const shuffled = [...ALL_MESSAGES].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+  }
+  
+  // Create weighted pool - resonant messages get more entries
+  const weightedPool: string[] = [];
+  
+  ALL_MESSAGES.forEach(msg => {
+    const weight = weights[msg] || 0;
+    // Base weight of 1, plus bonus for resonance
+    // Messages with higher resonance get 1-4 extra entries
+    const entries = 1 + Math.min(4, Math.floor(weight / 2));
+    for (let i = 0; i < entries; i++) {
+      weightedPool.push(msg);
+    }
+  });
+  
+  // Shuffle the weighted pool
+  const shuffled = weightedPool.sort(() => Math.random() - 0.5);
+  
+  // Pick unique messages
+  const selected: string[] = [];
+  for (const msg of shuffled) {
+    if (!selected.includes(msg)) {
+      selected.push(msg);
+    }
+    if (selected.length >= count) break;
+  }
+  
+  // Fill remaining slots with random messages if needed
+  if (selected.length < count) {
+    const remaining = ALL_MESSAGES.filter(m => !selected.includes(m));
+    const shuffledRemaining = remaining.sort(() => Math.random() - 0.5);
+    selected.push(...shuffledRemaining.slice(0, count - selected.length));
+  }
+  
+  return selected;
 };
 
 // Message positions and styles
@@ -58,8 +129,15 @@ export function NoiseDissolver({ onComplete, onCancel }: NoiseDissolverProps) {
   
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Randomize messages on mount
-  const randomMessages = useMemo(() => getRandomMessages(7), []);
+  // Get weighted random messages on mount (resonant ones appear more)
+  const randomMessages = useMemo(() => getWeightedRandomMessages(7), []);
+  
+  // Track resonance when game completes
+  useEffect(() => {
+    if (isComplete) {
+      trackAffirmationResonance(randomMessages);
+    }
+  }, [isComplete, randomMessages]);
 
   // Initialize canvas with noise
   useEffect(() => {
