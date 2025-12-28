@@ -36,10 +36,10 @@ const WAVE_ZONE_SIZE = 18; // Generous zone for relaxed gameplay
 
 export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
   function UrgeSurfing({ onComplete, onCancel }, ref) {
-    const [phase, setPhase] = useState<'intro' | 'active' | 'complete'>('intro');
+    const [phase, setPhase] = useState<'intro' | 'active' | 'complete' | 'lost'>('intro');
     const [timeElapsed, setTimeElapsed] = useState(0);
-    const [surferY, setSurferY] = useState(50); // 0-100, user controlled position
-    const [waveY, setWaveY] = useState(50); // 0-100, where the wave currently is
+    const [surferY, setSurferY] = useState(50);
+    const [waveY, setWaveY] = useState(50);
     const [currentWaveIndex, setCurrentWaveIndex] = useState(0);
     const [wavesRidden, setWavesRidden] = useState(0);
     const [currentQuote, setCurrentQuote] = useState(QUOTES[0]);
@@ -47,9 +47,14 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
     const [status, setStatus] = useState<'riding' | 'sinking' | 'falling'>('riding');
     const [combo, setCombo] = useState(0);
     const [showWarning, setShowWarning] = useState(false);
-    const [offWaveTime, setOffWaveTime] = useState(0); // Track how long off wave
+    const [offWaveTime, setOffWaveTime] = useState(0);
+    const [warnings, setWarnings] = useState(0);
+    const [waveIntensity, setWaveIntensity] = useState(0); // 0-1 for wave shape morphing
     const containerRef = useRef<HTMLDivElement>(null);
     const lastHapticRef = useRef(0);
+    const lastWarningRef = useRef(0);
+    
+    const MAX_WARNINGS = 8;
 
     const startGame = () => {
       setPhase('active');
@@ -82,35 +87,36 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
       return () => clearInterval(timer);
     }, [phase]);
 
-    // Wave movement - slow, gentle, relaxing waves
+    // Wave movement + intensity based on difficulty
     useEffect(() => {
       if (phase !== 'active') return;
       
       const waveTimer = setInterval(() => {
         const time = Date.now() / 1000;
-        const progress = timeElapsed / GAME_DURATION; // 0 to 1
+        const progress = timeElapsed / GAME_DURATION;
         
-        // Very slow, gentle wave motion - like breathing
-        const baseSpeed = 0.15; // Super slow base speed
-        const speedIncrease = progress * 0.1; // Slight speed increase over time
+        // Update wave intensity for visual morphing
+        setWaveIntensity(progress);
+        
+        // Speed increases with progress
+        const baseSpeed = 0.15;
+        const speedIncrease = progress * 0.15;
         const speed = baseSpeed + speedIncrease;
         
-        // Gentle amplitude that slowly increases
-        const baseAmplitude = 10 + progress * 8; // Start small, grow gently
+        // Amplitude grows with difficulty
+        const baseAmplitude = 10 + progress * 12;
         
-        // Single smooth sine wave - calming motion
         const primaryWave = Math.sin(time * speed) * baseAmplitude;
-        // Very subtle secondary wave for slight variation
-        const subtleVariation = Math.sin(time * speed * 0.5) * 3;
+        const subtleVariation = Math.sin(time * speed * 0.5) * (3 + progress * 4);
         
         const newWaveY = 50 + primaryWave + subtleVariation;
-        setWaveY(Math.max(30, Math.min(70, newWaveY)));
-      }, 100); // Slower update rate for smoother feel
+        setWaveY(Math.max(25, Math.min(75, newWaveY)));
+      }, 100);
       
       return () => clearInterval(waveTimer);
     }, [phase, timeElapsed]);
 
-    // Check if surfer is matching the wave + escalating haptic feedback
+    // Check if surfer is matching the wave + warnings system
     useEffect(() => {
       if (phase !== 'active') return;
       
@@ -125,7 +131,7 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
           setCombo((c) => c + 1);
           setOffWaveTime(0);
         } else {
-          // Off the wave - track time and escalate haptics
+          // Off the wave
           setOffWaveTime((prev) => prev + 1);
           setCombo(0);
           
@@ -133,12 +139,25 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
           setStatus(isBelow ? 'sinking' : 'falling');
           setShowWarning(true);
           
-          // Escalating haptic feedback based on how long off wave
-          const hapticInterval = Math.max(300, 1000 - (offWaveTime * 50)); // Slower, gentler feedback
+          // Add warning every 1.5 seconds off wave
+          if (now - lastWarningRef.current > 1500) {
+            lastWarningRef.current = now;
+            setWarnings((w) => {
+              const newWarnings = w + 1;
+              if (newWarnings >= MAX_WARNINGS) {
+                setPhase('lost');
+                haptics.notifyError();
+              } else {
+                haptics.notifyWarning();
+              }
+              return newWarnings;
+            });
+          }
+          
+          // Escalating haptic feedback
+          const hapticInterval = Math.max(300, 1000 - (offWaveTime * 50));
           if (now - lastHapticRef.current > hapticInterval) {
             lastHapticRef.current = now;
-            
-            // Intensity increases the longer you're off
             if (offWaveTime < 5) {
               haptics.selectionChanged();
             } else if (offWaveTime < 10) {
@@ -369,12 +388,12 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
               <div className="absolute inset-x-0 top-6 h-4 bg-gradient-to-b from-cyan-300/40 to-transparent" />
             </div>
             
-            {/* Main wave surface with dynamic shape */}
+            {/* Main wave surface - shape morphs with intensity */}
             <svg 
               className="absolute top-0 left-0 w-[200%] h-32"
               viewBox="0 0 1440 120" 
               preserveAspectRatio="none"
-              style={{ animation: 'wave-scroll 12s linear infinite' }}
+              style={{ animation: `wave-scroll ${12 - waveIntensity * 4}s linear infinite` }}
             >
               <defs>
                 <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -388,28 +407,44 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
                 </linearGradient>
               </defs>
               
-              {/* Foam/crest at top */}
-              <path
-                fill="url(#foamGradient)"
-                d="M0,25 Q60,15 120,25 T240,25 T360,25 T480,25 T600,25 T720,25 T840,25 T960,25 T1080,25 T1200,25 T1320,25 T1440,25 L1440,35 Q1380,30 1320,35 T1200,35 T1080,35 T960,35 T840,35 T720,35 T600,35 T480,35 T360,35 T240,35 T120,35 T0,35 Z"
-              />
+              {/* Dynamic wave shape - amplitude increases with intensity */}
+              {(() => {
+                const amp = 8 + waveIntensity * 15; // Wave height grows
+                const freq = 1 + waveIntensity * 0.5; // More frequent peaks
+                return (
+                  <>
+                    {/* Foam/crest - more turbulent at high intensity */}
+                    <path
+                      fill="url(#foamGradient)"
+                      d={`M0,${25 - amp * 0.3} Q${60 / freq},${15 - amp * 0.5} ${120 / freq},${25 - amp * 0.3} T${240 / freq},${25 - amp * 0.2} T${360 / freq},${25 - amp * 0.4} T${480 / freq},${25 - amp * 0.3} T${600 / freq},${25 - amp * 0.5} T${720 / freq},${25 - amp * 0.2} T${840 / freq},${25 - amp * 0.4} T${960 / freq},${25 - amp * 0.3} T${1080 / freq},${25 - amp * 0.5} T${1200 / freq},${25 - amp * 0.2} T${1320 / freq},${25 - amp * 0.4} T1440,${25 - amp * 0.3} L1440,40 L0,40 Z`}
+                    />
+                    {/* Main wave body - choppier at high intensity */}
+                    <path
+                      fill="url(#waveGradient)"
+                      d={`M0,${30 - amp * 0.2} Q80,${20 - amp * 0.6} 160,${35 - amp * 0.1} T320,${30 - amp * 0.4} T480,${35 + amp * 0.2} T640,${25 - amp * 0.5} T800,${35 - amp * 0.1} T960,${30 - amp * 0.3} T1120,${35 + amp * 0.1} T1280,${25 - amp * 0.4} T1440,${30 - amp * 0.2} L1440,120 L0,120 Z`}
+                    />
+                  </>
+                );
+              })()}
               
-              {/* Main wave body */}
-              <path
-                fill="url(#waveGradient)"
-                d="M0,30 Q80,20 160,35 T320,30 T480,35 T640,25 T800,35 T960,30 T1120,35 T1280,25 T1440,30 L1440,120 L0,120 Z"
-              />
-              
-              {/* Foam bubbles on crest */}
-              <circle cx="80" cy="28" r="4" fill="white" fillOpacity="0.8" />
-              <circle cx="200" cy="30" r="3" fill="white" fillOpacity="0.7" />
-              <circle cx="350" cy="27" r="5" fill="white" fillOpacity="0.75" />
-              <circle cx="520" cy="32" r="3" fill="white" fillOpacity="0.7" />
-              <circle cx="680" cy="26" r="4" fill="white" fillOpacity="0.8" />
-              <circle cx="850" cy="30" r="3" fill="white" fillOpacity="0.7" />
-              <circle cx="1000" cy="28" r="4" fill="white" fillOpacity="0.75" />
-              <circle cx="1150" cy="31" r="3" fill="white" fillOpacity="0.7" />
-              <circle cx="1300" cy="27" r="4" fill="white" fillOpacity="0.8" />
+              {/* Foam bubbles - more at high intensity */}
+              <circle cx="80" cy={28 - waveIntensity * 5} r={4 + waveIntensity * 2} fill="white" fillOpacity="0.8" />
+              <circle cx="200" cy={30 - waveIntensity * 4} r={3 + waveIntensity * 1} fill="white" fillOpacity="0.7" />
+              <circle cx="350" cy={27 - waveIntensity * 6} r={5 + waveIntensity * 2} fill="white" fillOpacity="0.75" />
+              <circle cx="520" cy={32 - waveIntensity * 3} r={3 + waveIntensity * 1} fill="white" fillOpacity="0.7" />
+              <circle cx="680" cy={26 - waveIntensity * 5} r={4 + waveIntensity * 2} fill="white" fillOpacity="0.8" />
+              <circle cx="850" cy={30 - waveIntensity * 4} r={3 + waveIntensity * 1} fill="white" fillOpacity="0.7" />
+              <circle cx="1000" cy={28 - waveIntensity * 5} r={4 + waveIntensity * 2} fill="white" fillOpacity="0.75" />
+              <circle cx="1150" cy={31 - waveIntensity * 3} r={3 + waveIntensity * 1} fill="white" fillOpacity="0.7" />
+              <circle cx="1300" cy={27 - waveIntensity * 6} r={4 + waveIntensity * 2} fill="white" fillOpacity="0.8" />
+              {waveIntensity > 0.3 && (
+                <>
+                  <circle cx="150" cy={25 - waveIntensity * 5} r={3} fill="white" fillOpacity="0.6" />
+                  <circle cx="450" cy={28 - waveIntensity * 4} r={2} fill="white" fillOpacity="0.5" />
+                  <circle cx="750" cy={24 - waveIntensity * 6} r={3} fill="white" fillOpacity="0.6" />
+                  <circle cx="1050" cy={29 - waveIntensity * 3} r={2} fill="white" fillOpacity="0.5" />
+                </>
+              )}
             </svg>
             
             {/* Secondary wave layer for depth */}
@@ -478,7 +513,18 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
               Exit
             </button>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* Warnings indicator */}
+              <div className="flex items-center gap-1 bg-black/30 backdrop-blur px-3 py-2 rounded-full">
+                {Array.from({ length: MAX_WARNINGS }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      i < warnings ? 'bg-red-500' : 'bg-white/30'
+                    }`}
+                  />
+                ))}
+              </div>
               <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur px-3 py-2 rounded-full">
                 <Waves className="w-4 h-4 text-cyan-300" />
                 <span className="text-white text-sm font-bold">{wavesRidden}</span>
@@ -513,8 +559,78 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
       );
     }
 
-    // Complete phase
-    const isNight = true;
+    // Lost phase
+    if (phase === 'lost') {
+      return (
+        <div ref={ref} className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-blue-950 to-slate-900" />
+          
+          {/* Underwater bubbles */}
+          {Array.from({ length: 12 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-3 h-3 bg-white/20 rounded-full"
+              style={{
+                left: `${(i * 29) % 100}%`,
+                bottom: `${10 + (i * 7) % 30}%`,
+              }}
+              animate={{ y: [-20, -100], opacity: [0.5, 0] }}
+              transition={{ duration: 3, repeat: Infinity, delay: i * 0.3 }}
+            />
+          ))}
+          
+          <div className="relative z-10 text-center">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, rotate: 180 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              className="mb-6"
+            >
+              <div className="text-8xl mb-4" style={{ transform: 'rotate(180deg)' }}>
+                🏄
+              </div>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl font-bold text-white mb-2"
+            >
+              Wiped Out! 🌊
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-blue-200 text-lg mb-4"
+            >
+              You rode {wavesRidden} waves before losing balance
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-white/60 text-sm mb-8"
+            >
+              Stay on the wave to avoid warnings
+            </motion.p>
+
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              onClick={() => onComplete(wavesRidden)}
+              className="w-full max-w-xs py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg shadow-xl active:scale-[0.98] transition-transform"
+            >
+              Try Again 🏄
+            </motion.button>
+          </div>
+        </div>
+      );
+    }
+
+    // Complete phase (won)
     return (
       <div ref={ref} className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900" />
