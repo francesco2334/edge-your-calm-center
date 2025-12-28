@@ -1,6 +1,6 @@
 import { useState, forwardRef } from 'react';
 import { motion } from 'framer-motion';
-import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker, UrgeSurfing, BodyScan } from './tools';
+import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker, UrgeSurfing, BodyScan, CalmDown } from './tools';
 import { GameStartScreen } from './GameStartScreen';
 
 interface GamesScreenProps {
@@ -8,7 +8,7 @@ interface GamesScreenProps {
   onGameFail: (gameId: string, reason: string) => void;
 }
 
-type GameId = 'standoff' | 'nameIt' | 'bluff' | 'sync' | 'reaction' | 'surfing' | 'bodyscan';
+type GameId = 'standoff' | 'nameIt' | 'bluff' | 'sync' | 'reaction' | 'surfing' | 'bodyscan' | 'calmdown';
 type ActiveGame = { id: GameId; started: boolean } | null;
 
 const GAMES: {
@@ -98,6 +98,17 @@ const GAMES: {
     gradient: 'from-violet-600/40 via-purple-700/30 to-background',
     reward: '+1 token, +15 pts',
     duration: '2-3min',
+  },
+  {
+    id: 'calmdown',
+    name: 'Calm Down',
+    tagline: 'Release stress. Find peace.',
+    instruction: 'Follow guided prompts to progressively relax your body and mind.',
+    whyItWorks: 'Progressive relaxation activates your parasympathetic system, reducing cortisol and calming the mind.',
+    icon: '🌿',
+    gradient: 'from-emerald-600/40 via-teal-700/30 to-background',
+    reward: '+1 token, +30 pts',
+    duration: '30s',
   },
 ];
 
@@ -195,6 +206,13 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
             <BodyScan 
               onComplete={(areas) => handleGameComplete('bodyscan', `${areas} areas`)}
               onCancel={() => handleGameFail('bodyscan', 'Early exit')}
+            />
+          );
+        case 'calmdown':
+          return (
+            <CalmDown 
+              onComplete={(level) => handleGameComplete('calmdown', `Relaxation: ${level}/10`)}
+              onCancel={() => handleGameFail('calmdown', 'Early exit')}
             />
           );
         default:
