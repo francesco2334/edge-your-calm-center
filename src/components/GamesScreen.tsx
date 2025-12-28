@@ -1,6 +1,6 @@
 import { useState, forwardRef } from 'react';
 import { motion } from 'framer-motion';
-import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker, UrgeSurfing, BodyScan, CalmDown } from './tools';
+import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker, UrgeSurfing, BodyScan, CalmDown, GravityDrop, NoiseDissolver } from './tools';
 import { GameStartScreen } from './GameStartScreen';
 
 interface GamesScreenProps {
@@ -8,7 +8,7 @@ interface GamesScreenProps {
   onGameFail: (gameId: string, reason: string) => void;
 }
 
-type GameId = 'standoff' | 'nameIt' | 'bluff' | 'sync' | 'reaction' | 'surfing' | 'bodyscan' | 'calmdown';
+type GameId = 'standoff' | 'nameIt' | 'bluff' | 'sync' | 'reaction' | 'surfing' | 'bodyscan' | 'calmdown' | 'gravitydrop' | 'noisedissolver';
 type ActiveGame = { id: GameId; started: boolean } | null;
 
 const GAMES: {
@@ -109,6 +109,28 @@ const GAMES: {
     gradient: 'from-emerald-600/40 via-teal-700/30 to-background',
     reward: '+1 token, +30 pts',
     duration: '30s',
+  },
+  {
+    id: 'gravitydrop',
+    name: 'Gravity Drop',
+    tagline: 'Settle into stillness.',
+    instruction: 'Tap gently to increase gravity. Bring the floating object to rest with as few taps as possible.',
+    whyItWorks: 'Encourages slower, intentional input. The visceral feeling of "settling" mirrors calming the mind.',
+    icon: '🪨',
+    gradient: 'from-slate-600/40 via-zinc-700/30 to-background',
+    reward: '+1 token, +25 pts',
+    duration: '30-60s',
+  },
+  {
+    id: 'noisedissolver',
+    name: 'Noise Dissolver',
+    tagline: 'Patience reveals clarity.',
+    instruction: 'Swipe slowly across the screen to dissolve layers of noise. Fast swipes do almost nothing.',
+    whyItWorks: 'Trains patience. Visually mirrors the transition from stress to calm. Best after late-night stimulation.',
+    icon: '✨',
+    gradient: 'from-violet-600/40 via-indigo-700/30 to-background',
+    reward: '+1 token, +35 pts',
+    duration: '45-90s',
   },
 ];
 
@@ -213,6 +235,20 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
             <CalmDown 
               onComplete={(level) => handleGameComplete('calmdown', `Relaxation: ${level}/10`)}
               onCancel={() => handleGameFail('calmdown', 'Early exit')}
+            />
+          );
+        case 'gravitydrop':
+          return (
+            <GravityDrop 
+              onComplete={() => handleGameComplete('gravitydrop', 'Settled')}
+              onCancel={() => handleGameFail('gravitydrop', 'Early exit')}
+            />
+          );
+        case 'noisedissolver':
+          return (
+            <NoiseDissolver 
+              onComplete={() => handleGameComplete('noisedissolver', 'Dissolved')}
+              onCancel={() => handleGameFail('noisedissolver', 'Early exit')}
             />
           );
         default:
