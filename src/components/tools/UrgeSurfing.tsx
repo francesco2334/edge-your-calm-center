@@ -2,6 +2,8 @@ import { useState, useEffect, forwardRef, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Waves, Star, AlertTriangle } from 'lucide-react';
 import { haptics } from '@/hooks/useHaptics';
+import { MojoCompanion } from '../MojoCompanion';
+import { MojoOrb } from '../MojoOrb';
 
 interface UrgeSurfingProps {
   onComplete: (wavesRidden: number) => void;
@@ -239,12 +241,16 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
               animate={{ opacity: 1, scale: 1 }}
               className="flex justify-center mb-8"
             >
+              {/* Mojo on surfboard */}
               <motion.div
                 animate={{ y: [0, -10, 0], rotate: [-3, 3, -3] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="text-7xl"
+                className="relative"
               >
-                🏄
+                <MojoCompanion mood="surfing" size="lg" message="Let's ride!" showMessage />
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-4xl">
+                  🏄
+                </div>
               </motion.div>
             </motion.div>
 
@@ -477,7 +483,7 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
             />
           </motion.div>
 
-          {/* SURFER */}
+          {/* SURFER - Mojo on surfboard */}
           <motion.div
             className="absolute left-1/2 -translate-x-1/2 z-20 transition-transform"
             style={{ top: `${surferY}%` }}
@@ -488,7 +494,7 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
                 scale: status === 'riding' ? 1 : 0.9,
               }}
               transition={{ duration: status === 'riding' ? 1 : 0.3, repeat: status === 'riding' ? Infinity : 0 }}
-              className={`text-6xl transition-all ${
+              className={`relative transition-all ${
                 status === 'sinking' ? 'opacity-70' : 
                 status === 'falling' ? 'opacity-70' : ''
               }`}
@@ -498,7 +504,16 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
                   : 'drop-shadow(0 4px 12px rgba(239,68,68,0.5))'
               }}
             >
-              🏄
+              {/* Mojo companion on surfboard */}
+              <MojoCompanion 
+                mood={status === 'riding' ? 'cheering' : 'worried'} 
+                size="md"
+                message={status === 'riding' ? (combo > 10 ? "Amazing!" : combo > 5 ? "Yes!" : "") : "Whoa!"}
+                showMessage={combo > 5 || status !== 'riding'}
+              />
+              {/* Surfboard underneath Mojo */}
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-16 h-4 bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 rounded-full shadow-lg" 
+                   style={{ transform: 'translateX(-50%) perspective(100px) rotateX(20deg)' }} />
             </motion.div>
           </motion.div>
 
@@ -596,9 +611,7 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
               animate={{ scale: 1, opacity: 1, rotate: 0 }}
               className="mb-6"
             >
-              <div className="text-8xl mb-4" style={{ transform: 'rotate(180deg)' }}>
-                🏄
-              </div>
+              <MojoCompanion mood="worried" size="lg" message="We can try again!" showMessage />
             </motion.div>
 
             <motion.h2
@@ -666,13 +679,12 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
             className="mb-6"
           >
             <motion.div
-              animate={{ y: [0, -10, 0], rotate: [-3, 3, -3] }}
+              animate={{ y: [0, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="text-8xl mb-4"
             >
-              🏄
+              <MojoCompanion mood="celebrating" size="lg" message="Amazing surf!" showMessage />
             </motion.div>
-            <div className="flex justify-center gap-1">
+            <div className="flex justify-center gap-1 mt-4">
               {Array.from({ length: Math.min(5, wavesRidden) }).map((_, i) => (
                 <motion.div
                   key={i}

@@ -1,6 +1,7 @@
 import { useState, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { MojoOrb } from '../MojoOrb';
+import { MojoCompanion } from '../MojoCompanion';
 
 interface PredictionRealityProps {
   onComplete: (prediction: number, reality: number) => void;
@@ -75,7 +76,7 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
               transition={{ delay: 0.1 }}
               className="flex justify-center mb-8"
             >
-              <MojoOrb state="calm" size="md" />
+              <MojoCompanion mood="thinking" size="md" message="How good will it feel?" showMessage />
             </motion.div>
 
             <motion.div
@@ -125,7 +126,7 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
               animate={{ scale: 1, opacity: 1 }}
               className="mb-8"
             >
-              <MojoOrb state="calm" size="lg" />
+              <MojoCompanion mood="encouraging" size="lg" message="Go try it out!" showMessage />
             </motion.div>
 
             <motion.p
@@ -196,7 +197,7 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
               transition={{ delay: 0.1 }}
               className="flex justify-center mb-8"
             >
-              <MojoOrb state="regulating" size="md" />
+              <MojoCompanion mood="thinking" size="md" message="Be honest..." showMessage />
             </motion.div>
 
             <div className="space-y-3">
@@ -239,7 +240,12 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
             animate={{ scale: 1, opacity: 1 }}
             className="mb-8"
           >
-            <MojoOrb state="steady" size="lg" />
+            <MojoCompanion 
+              mood={gap === 0 ? 'celebrating' : gap > 0 ? 'encouraging' : 'cheering'} 
+              size="lg" 
+              message={gap === 0 ? "Perfect!" : gap > 0 ? "Interesting..." : "Nice surprise!"}
+              showMessage
+            />
           </motion.div>
 
           <motion.div
