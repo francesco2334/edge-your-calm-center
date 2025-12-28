@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Lock, Sparkles } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { MojoCompanion } from './MojoCompanion';
 
 interface WellnessBarProps {
   icon: LucideIcon;
@@ -60,8 +61,18 @@ export function WellnessBar({
   const [localValue, setLocalValue] = useState(value);
   const [isDragging, setIsDragging] = useState(false);
   const [showPoints, setShowPoints] = useState(false);
+  const [showMojoCelebration, setShowMojoCelebration] = useState(false);
   const colors = colorClasses[color];
   const progress = (localValue / maxValue) * 100;
+
+  // Celebration messages based on wellness type
+  const celebrationMessages: Record<string, string[]> = {
+    blue: ["Stay hydrated! 💧", "Water champion! 🌊", "Your body thanks you! ✨"],
+    green: ["Healthy choice! 🥗", "Fueling greatness! 💪", "Nutritious win! 🌟"],
+    orange: ["Beast mode! 🔥", "Crushing it! 💥", "Unstoppable! ⚡"],
+  };
+
+  const [celebrationMessage, setCelebrationMessage] = useState('');
 
   useEffect(() => {
     setLocalValue(value);
@@ -86,8 +97,15 @@ export function WellnessBar({
   const handleLockClick = () => {
     if (localValue > 0 && !isLocked) {
       setShowPoints(true);
+      // Pick random celebration message
+      const messages = celebrationMessages[color];
+      setCelebrationMessage(messages[Math.floor(Math.random() * messages.length)]);
+      setShowMojoCelebration(true);
       onLock();
-      setTimeout(() => setShowPoints(false), 1500);
+      setTimeout(() => {
+        setShowPoints(false);
+        setShowMojoCelebration(false);
+      }, 2500);
     }
   };
 
@@ -110,6 +128,25 @@ export function WellnessBar({
             animate={{ opacity: 1 }}
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"
           />
+        )}
+      </AnimatePresence>
+
+      {/* Mojo Celebration */}
+      <AnimatePresence>
+        {showMojoCelebration && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0, x: 50 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.5, x: 30 }}
+            className="absolute -right-2 -top-8 z-20"
+          >
+            <MojoCompanion
+              mood="celebrating"
+              size="sm"
+              message={celebrationMessage}
+              showMessage={true}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 
