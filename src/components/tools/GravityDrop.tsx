@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, PanInfo } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 import { X } from 'lucide-react';
 import { MojoOrb } from '../MojoOrb';
 import { useHaptics } from '@/hooks/useHaptics';
@@ -30,7 +30,6 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
   const [round, setRound] = useState(0);
   const [totalRounds] = useState(5);
   const [targetPos, setTargetPos] = useState<Position>({ x: 0, y: 0 });
-  const [ballPos, setBallPos] = useState<Position>({ x: 0, y: 0 });
   const [isSettled, setIsSettled] = useState(false);
   const [isExcited, setIsExcited] = useState(false);
   const [showPop, setShowPop] = useState(false);
@@ -38,6 +37,11 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
   const [mojoState, setMojoState] = useState<'calm' | 'regulating' | 'steady'>('calm');
   const [proximity, setProximity] = useState(0);
   const wasCloseRef = useRef(false);
+  
+  // Use motion values for smooth dragging
+  const dragX = useMotionValue(0);
+  const dragY = useMotionValue(0);
+  const [initialPos, setInitialPos] = useState<Position>({ x: 0, y: 0 });
 
   // Initialize container size and positions
   useEffect(() => {
@@ -56,7 +60,9 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         // Center the ball initially
         const centerX = width / 2 - 40;
         const centerY = height / 2 - 40;
-        setBallPos({ x: centerX, y: centerY });
+        setInitialPos({ x: centerX, y: centerY });
+        dragX.set(0);
+        dragY.set(0);
         
         setIsReady(true);
       }
@@ -67,45 +73,55 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Check proximity whenever ball position changes
+  // Check proximity on drag
   useEffect(() => {
     if (!isReady || isSettled) return;
     
-    const ballCenterX = ballPos.x + 40;
-    const ballCenterY = ballPos.y + 40;
-    const targetCenterX = targetPos.x + 40;
-    const targetCenterY = targetPos.y + 40;
+    const checkProximity = () => {
+      const ballCenterX = initialPos.x + dragX.get() + 40;
+      const ballCenterY = initialPos.y + dragY.get() + 40;
+      const targetCenterX = targetPos.x + 40;
+      const targetCenterY = targetPos.y + 40;
+      
+      const distance = Math.sqrt(
+        Math.pow(ballCenterX - targetCenterX, 2) + 
+        Math.pow(ballCenterY - targetCenterY, 2)
+      );
+      
+      const newProximity = Math.max(0, 1 - distance / 150);
+      setProximity(newProximity);
+      
+      // Haptic feedback when getting close
+      if (newProximity > 0.7 && !wasCloseRef.current) {
+        wasCloseRef.current = true;
+        selectionChanged();
+      } else if (newProximity < 0.5) {
+        wasCloseRef.current = false;
+      }
+      
+      // Update Mojo state based on proximity
+      if (newProximity > 0.8) {
+        setMojoState('steady');
+      } else if (newProximity > 0.3) {
+        setMojoState('regulating');
+      } else {
+        setMojoState('calm');
+      }
+      
+      // Check if in target
+      if (distance < 30 && !isSettled) {
+        handleSuccess();
+      }
+    };
     
-    const distance = Math.sqrt(
-      Math.pow(ballCenterX - targetCenterX, 2) + 
-      Math.pow(ballCenterY - targetCenterY, 2)
-    );
+    const unsubX = dragX.on('change', checkProximity);
+    const unsubY = dragY.on('change', checkProximity);
     
-    const newProximity = Math.max(0, 1 - distance / 150);
-    setProximity(newProximity);
-    
-    // Haptic feedback when getting close
-    if (newProximity > 0.7 && !wasCloseRef.current) {
-      wasCloseRef.current = true;
-      selectionChanged();
-    } else if (newProximity < 0.5) {
-      wasCloseRef.current = false;
-    }
-    
-    // Update Mojo state based on proximity
-    if (newProximity > 0.8) {
-      setMojoState('steady');
-    } else if (newProximity > 0.3) {
-      setMojoState('regulating');
-    } else {
-      setMojoState('calm');
-    }
-    
-    // Check if in target
-    if (distance < 30) {
-      handleSuccess();
-    }
-  }, [ballPos, targetPos, isReady, isSettled, selectionChanged]);
+    return () => {
+      unsubX();
+      unsubY();
+    };
+  }, [initialPos, targetPos, isReady, isSettled, selectionChanged, dragX, dragY]);
 
   const handleSuccess = useCallback(() => {
     if (isSettled) return;
@@ -137,24 +153,15 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
           setTargetPos(newTarget);
           
           // Reset ball to center
-          setBallPos({
-            x: containerSize.width / 2 - 40,
-            y: containerSize.height / 2 - 40,
-          });
+          const centerX = containerSize.width / 2 - 40;
+          const centerY = containerSize.height / 2 - 40;
+          setInitialPos({ x: centerX, y: centerY });
+          dragX.set(0);
+          dragY.set(0);
         }
       }, 500);
     }, 600);
-  }, [isSettled, round, totalRounds, containerSize, notifySuccess]);
-
-  const handleDrag = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (isSettled) return;
-    
-    setBallPos(prev => {
-      const newX = Math.max(10, Math.min(containerSize.width - 90, prev.x + info.delta.x));
-      const newY = Math.max(10, Math.min(containerSize.height - 90, prev.y + info.delta.y));
-      return { x: newX, y: newY };
-    });
-  }, [isSettled, containerSize]);
+  }, [isSettled, round, totalRounds, containerSize, notifySuccess, dragX, dragY]);
 
   const handleComplete = useCallback(() => {
     onComplete();
@@ -324,8 +331,10 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         <motion.div
           className="absolute z-20 cursor-grab active:cursor-grabbing"
           style={{ 
-            left: ballPos.x,
-            top: ballPos.y,
+            left: initialPos.x,
+            top: initialPos.y,
+            x: dragX,
+            y: dragY,
             width: 80,
             height: 80,
           }}
@@ -333,7 +342,6 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
           dragMomentum={false}
           dragElastic={0}
           dragConstraints={containerRef}
-          onDrag={handleDrag}
           whileDrag={{ scale: 1.1 }}
           animate={isExcited ? {
             scale: [1, 1.3, 1.2, 1.4, 1.2],
