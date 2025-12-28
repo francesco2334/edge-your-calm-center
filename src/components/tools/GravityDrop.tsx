@@ -460,13 +460,13 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-background/90 backdrop-blur-sm"
+          className="absolute inset-0 z-30 flex items-center justify-center bg-background/90 backdrop-blur-sm"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-col items-center"
+            className="flex flex-col items-center text-center"
           >
             <motion.div
               className="mb-6"
