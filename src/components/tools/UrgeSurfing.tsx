@@ -32,6 +32,7 @@ const QUOTES = [
 
 const GAME_DURATION = 60;
 const WAVE_INTERVAL = 10;
+const WAVE_ZONE_SIZE = 12; // Tighter zone near wave line
 
 export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
   function UrgeSurfing({ onComplete, onCancel }, ref) {
@@ -46,7 +47,9 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
     const [status, setStatus] = useState<'riding' | 'sinking' | 'falling'>('riding');
     const [combo, setCombo] = useState(0);
     const [showWarning, setShowWarning] = useState(false);
+    const [offWaveTime, setOffWaveTime] = useState(0); // Track how long off wave
     const containerRef = useRef<HTMLDivElement>(null);
+    const lastHapticRef = useRef(0);
 
     const startGame = () => {
       setPhase('active');
@@ -79,48 +82,77 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
       return () => clearInterval(timer);
     }, [phase]);
 
-    // Wave movement - smooth sine wave pattern
+    // Wave movement - dynamic height changes with varying speed and patterns
     useEffect(() => {
       if (phase !== 'active') return;
+      
+      // Create wave pattern parameters that change over time
       const waveTimer = setInterval(() => {
         const time = Date.now() / 1000;
-        // Wave oscillates between 30-70% with varying speed
-        const baseWave = 50 + Math.sin(time * 0.5) * 20;
-        const secondaryWave = Math.sin(time * 0.3) * 10;
-        setWaveY(baseWave + secondaryWave);
+        const progress = timeElapsed / GAME_DURATION; // 0 to 1
+        
+        // Increase complexity as game progresses
+        const baseAmplitude = 15 + progress * 10; // Wave height increases
+        const speedMultiplier = 0.4 + progress * 0.3; // Speed increases
+        
+        // Multiple wave patterns combined - creates unpredictable movement
+        const primaryWave = Math.sin(time * speedMultiplier) * baseAmplitude;
+        const secondaryWave = Math.sin(time * speedMultiplier * 1.7 + 1) * (baseAmplitude * 0.5);
+        const jitter = Math.sin(time * 2.5) * (progress * 5); // Small fast variations
+        
+        // Random height shifts every few seconds
+        const randomShift = Math.sin(time * 0.15) * 8;
+        
+        const newWaveY = 50 + primaryWave + secondaryWave + jitter + randomShift;
+        setWaveY(Math.max(25, Math.min(75, newWaveY)));
       }, 50);
       return () => clearInterval(waveTimer);
-    }, [phase]);
+    }, [phase, timeElapsed]);
 
-    // Check if surfer is matching the wave
+    // Check if surfer is matching the wave + escalating haptic feedback
     useEffect(() => {
       if (phase !== 'active') return;
       
       const checkTimer = setInterval(() => {
         const diff = Math.abs(surferY - waveY);
+        const now = Date.now();
         
-        if (diff <= 15) {
+        if (diff <= WAVE_ZONE_SIZE) {
           // Riding the wave perfectly
           setStatus('riding');
           setShowWarning(false);
           setCombo((c) => c + 1);
-        } else if (surferY > waveY + 15) {
-          // Below the wave - sinking
-          setStatus('sinking');
-          setShowWarning(true);
+          setOffWaveTime(0);
+        } else {
+          // Off the wave - track time and escalate haptics
+          setOffWaveTime((prev) => prev + 1);
           setCombo(0);
-          haptics.selectionChanged();
-        } else if (surferY < waveY - 15) {
-          // Above the wave - falling
-          setStatus('falling');
+          
+          const isBelow = surferY > waveY + WAVE_ZONE_SIZE;
+          setStatus(isBelow ? 'sinking' : 'falling');
           setShowWarning(true);
-          setCombo(0);
-          haptics.selectionChanged();
+          
+          // Escalating haptic feedback based on how long off wave
+          const hapticInterval = Math.max(100, 500 - (offWaveTime * 50)); // Gets faster
+          if (now - lastHapticRef.current > hapticInterval) {
+            lastHapticRef.current = now;
+            
+            // Intensity increases the longer you're off
+            if (offWaveTime < 5) {
+              haptics.selectionChanged();
+            } else if (offWaveTime < 10) {
+              haptics.tapLight();
+            } else if (offWaveTime < 15) {
+              haptics.tapMedium();
+            } else {
+              haptics.tapHeavy();
+            }
+          }
         }
       }, 100);
       
       return () => clearInterval(checkTimer);
-    }, [phase, surferY, waveY]);
+    }, [phase, surferY, waveY, offWaveTime]);
 
     // Wave progression
     useEffect(() => {
@@ -324,17 +356,21 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
             )}
           </AnimatePresence>
 
-          {/* WAVE TARGET ZONE - shows where the wave is */}
+          {/* WAVE TARGET ZONE - tighter band following wave line */}
           <motion.div
-            className="absolute left-0 right-0 h-24 pointer-events-none z-10"
-            style={{ top: `${waveY - 12}%` }}
+            className="absolute left-0 right-0 pointer-events-none z-10"
+            style={{ 
+              top: `${waveY - (WAVE_ZONE_SIZE / 2)}%`,
+              height: `${WAVE_ZONE_SIZE}%`
+            }}
+            animate={{ top: `${waveY - (WAVE_ZONE_SIZE / 2)}%` }}
+            transition={{ type: 'tween', duration: 0.1 }}
           >
-            {/* Wave zone indicator */}
-            <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/30 via-cyan-400/50 to-cyan-400/30 border-y-2 border-cyan-300/50" />
-            <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-cyan-300/70" />
+            {/* Wave zone indicator - tight band */}
+            <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/20 via-cyan-400/40 to-cyan-400/20 border-y border-cyan-300/60" />
+            <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-cyan-300/80" />
           </motion.div>
 
-          {/* OCEAN - SVG Waves */}
           <div className="absolute bottom-0 left-0 right-0" style={{ height: '45%' }}>
             {/* Deep ocean base */}
             <div className="absolute inset-0 bg-gradient-to-t from-blue-900 via-blue-700 to-blue-500" />
