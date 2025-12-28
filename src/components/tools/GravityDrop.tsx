@@ -14,11 +14,22 @@ interface Position {
   y: number;
 }
 
-const generateRandomPosition = (containerWidth: number, containerHeight: number): Position => {
-  const padding = 120;
-  const orbSize = 80;
-  const x = padding + Math.random() * (containerWidth - padding * 2 - orbSize);
-  const y = padding + Math.random() * (containerHeight - padding * 2 - orbSize);
+// Difficulty settings per round
+const getDifficultySettings = (round: number) => {
+  const settings = [
+    { size: 80, moves: false, evades: false, catchRadius: 30 },      // Round 1: Easy
+    { size: 70, moves: false, evades: false, catchRadius: 28 },      // Round 2: Smaller
+    { size: 60, moves: true, evades: false, catchRadius: 25 },       // Round 3: Moving
+    { size: 55, moves: true, evades: true, catchRadius: 22 },        // Round 4: Evading
+    { size: 50, moves: true, evades: true, catchRadius: 20 },        // Round 5: Hard
+  ];
+  return settings[Math.min(round, settings.length - 1)];
+};
+
+const generateRandomPosition = (containerWidth: number, containerHeight: number, size: number): Position => {
+  const padding = 100;
+  const x = padding + Math.random() * (containerWidth - padding * 2 - size);
+  const y = padding + Math.random() * (containerHeight - padding * 2 - size);
   return { x, y };
 };
 
@@ -37,11 +48,15 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
   const [mojoState, setMojoState] = useState<'calm' | 'regulating' | 'steady'>('calm');
   const [proximity, setProximity] = useState(0);
   const wasCloseRef = useRef(false);
+  const moveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const evadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Use motion values for smooth dragging
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
   const [initialPos, setInitialPos] = useState<Position>({ x: 0, y: 0 });
+  
+  const difficulty = getDifficultySettings(round);
 
   // Initialize container size and positions
   useEffect(() => {
@@ -54,7 +69,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         setContainerSize({ width, height });
         
         // Set initial target position
-        const target = generateRandomPosition(width, height);
+        const target = generateRandomPosition(width, height, difficulty.size);
         setTargetPos(target);
         
         // Center the ball initially
@@ -68,10 +83,78 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
       }
     };
     
-    // Small delay to ensure container is rendered
     const timer = setTimeout(initGame, 100);
     return () => clearTimeout(timer);
   }, []);
+
+  // Target movement for later rounds
+  useEffect(() => {
+    if (!isReady || isSettled || !difficulty.moves) {
+      if (moveIntervalRef.current) {
+        clearInterval(moveIntervalRef.current);
+        moveIntervalRef.current = null;
+      }
+      return;
+    }
+    
+    moveIntervalRef.current = setInterval(() => {
+      if (!isSettled) {
+        setTargetPos(prev => {
+          const moveAmount = 15 + round * 5;
+          const newX = Math.max(80, Math.min(
+            containerSize.width - 80 - difficulty.size,
+            prev.x + (Math.random() - 0.5) * moveAmount * 2
+          ));
+          const newY = Math.max(80, Math.min(
+            containerSize.height - 80 - difficulty.size,
+            prev.y + (Math.random() - 0.5) * moveAmount * 2
+          ));
+          return { x: newX, y: newY };
+        });
+      }
+    }, 800 - round * 100);
+    
+    return () => {
+      if (moveIntervalRef.current) {
+        clearInterval(moveIntervalRef.current);
+      }
+    };
+  }, [isReady, isSettled, difficulty.moves, containerSize, round]);
+
+  // Evade behavior - run away from Mojo when close
+  const evadeFromMojo = useCallback((mojoX: number, mojoY: number) => {
+    if (!difficulty.evades || isSettled) return;
+    
+    const targetCenterX = targetPos.x + difficulty.size / 2;
+    const targetCenterY = targetPos.y + difficulty.size / 2;
+    const mojoCenterX = mojoX + 40;
+    const mojoCenterY = mojoY + 40;
+    
+    const dx = targetCenterX - mojoCenterX;
+    const dy = targetCenterY - mojoCenterY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Evade when Mojo gets within 120px
+    if (distance < 120 && distance > 0) {
+      if (evadeTimeoutRef.current) return; // Already evading
+      
+      evadeTimeoutRef.current = setTimeout(() => {
+        // Move away from Mojo
+        const evadeDistance = 60 + round * 15;
+        const angle = Math.atan2(dy, dx);
+        
+        let newX = targetPos.x + Math.cos(angle) * evadeDistance;
+        let newY = targetPos.y + Math.sin(angle) * evadeDistance;
+        
+        // Keep within bounds
+        newX = Math.max(60, Math.min(containerSize.width - 60 - difficulty.size, newX));
+        newY = Math.max(100, Math.min(containerSize.height - 100 - difficulty.size, newY));
+        
+        setTargetPos({ x: newX, y: newY });
+        evadeTimeoutRef.current = null;
+      }, 150);
+    }
+  }, [difficulty.evades, difficulty.size, isSettled, targetPos, containerSize, round]);
 
   // Check proximity on drag
   useEffect(() => {
@@ -80,18 +163,20 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
     const checkProximity = () => {
       const ballCenterX = initialPos.x + dragX.get() + 40;
       const ballCenterY = initialPos.y + dragY.get() + 40;
-      const targetCenterX = targetPos.x + 40;
-      const targetCenterY = targetPos.y + 40;
+      const targetCenterX = targetPos.x + difficulty.size / 2;
+      const targetCenterY = targetPos.y + difficulty.size / 2;
       
       const distance = Math.sqrt(
         Math.pow(ballCenterX - targetCenterX, 2) + 
         Math.pow(ballCenterY - targetCenterY, 2)
       );
       
+      // Trigger evasion
+      evadeFromMojo(initialPos.x + dragX.get(), initialPos.y + dragY.get());
+      
       const newProximity = Math.max(0, 1 - distance / 150);
       setProximity(newProximity);
       
-      // Haptic feedback when getting close
       if (newProximity > 0.7 && !wasCloseRef.current) {
         wasCloseRef.current = true;
         selectionChanged();
@@ -99,7 +184,6 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         wasCloseRef.current = false;
       }
       
-      // Update Mojo state based on proximity
       if (newProximity > 0.8) {
         setMojoState('steady');
       } else if (newProximity > 0.3) {
@@ -108,8 +192,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         setMojoState('calm');
       }
       
-      // Check if in target
-      if (distance < 30 && !isSettled) {
+      if (distance < difficulty.catchRadius && !isSettled) {
         handleSuccess();
       }
     };
@@ -121,7 +204,15 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
       unsubX();
       unsubY();
     };
-  }, [initialPos, targetPos, isReady, isSettled, selectionChanged, dragX, dragY]);
+  }, [initialPos, targetPos, isReady, isSettled, selectionChanged, dragX, dragY, difficulty, evadeFromMojo]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (moveIntervalRef.current) clearInterval(moveIntervalRef.current);
+      if (evadeTimeoutRef.current) clearTimeout(evadeTimeoutRef.current);
+    };
+  }, []);
 
   const handleSuccess = useCallback(() => {
     if (isSettled) return;
@@ -129,12 +220,15 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
     setIsExcited(true);
     notifySuccess();
     
-    // Excited phase, then pop
+    if (moveIntervalRef.current) {
+      clearInterval(moveIntervalRef.current);
+      moveIntervalRef.current = null;
+    }
+    
     setTimeout(() => {
       setIsExcited(false);
       setShowPop(true);
       
-      // Pop animation duration
       setTimeout(() => {
         setShowPop(false);
         wasCloseRef.current = false;
@@ -142,17 +236,17 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         if (round + 1 >= totalRounds) {
           setTimeout(() => setShowComplete(true), 300);
         } else {
-          // Next round
-          setRound(prev => prev + 1);
+          const nextRound = round + 1;
+          const nextDifficulty = getDifficultySettings(nextRound);
+          
+          setRound(nextRound);
           setIsSettled(false);
           setMojoState('calm');
           setProximity(0);
           
-          // New target position
-          const newTarget = generateRandomPosition(containerSize.width, containerSize.height);
+          const newTarget = generateRandomPosition(containerSize.width, containerSize.height, nextDifficulty.size);
           setTargetPos(newTarget);
           
-          // Reset ball to center
           const centerX = containerSize.width / 2 - 40;
           const centerY = containerSize.height / 2 - 40;
           setInitialPos({ x: centerX, y: centerY });
@@ -225,7 +319,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         animate={{ opacity: 0.7 }}
         transition={{ delay: 0.5 }}
       >
-        Drag Mojo into the ring
+        {difficulty.evades ? "Catch the ring!" : difficulty.moves ? "Follow the ring" : "Drag Mojo into the ring"}
       </motion.p>
 
       {/* Target ring */}
@@ -235,15 +329,23 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
           style={{ 
             left: targetPos.x, 
             top: targetPos.y,
-            width: 80,
-            height: 80,
+            width: difficulty.size,
+            height: difficulty.size,
           }}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ 
             scale: showPop ? 1.5 : 1, 
             opacity: showPop ? 0 : 1,
+            left: targetPos.x,
+            top: targetPos.y,
           }}
-          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+          transition={{ 
+            type: 'spring', 
+            stiffness: 200, 
+            damping: 20,
+            left: { type: 'spring', stiffness: 300, damping: 25 },
+            top: { type: 'spring', stiffness: 300, damping: 25 },
+          }}
         >
           {/* Outer ring */}
           <motion.div
@@ -290,8 +392,8 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         <motion.div
           className="absolute z-25 pointer-events-none"
           style={{ 
-            left: targetPos.x + 40, 
-            top: targetPos.y + 40,
+            left: targetPos.x + difficulty.size / 2, 
+            top: targetPos.y + difficulty.size / 2,
           }}
           initial={{ scale: 0.5, opacity: 1 }}
           animate={{ scale: 2.5, opacity: 0 }}
@@ -307,8 +409,8 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
           key={i}
           className="absolute z-25 w-2 h-2 rounded-full bg-emerald-400 pointer-events-none"
           style={{
-            left: targetPos.x + 40,
-            top: targetPos.y + 40,
+            left: targetPos.x + difficulty.size / 2,
+            top: targetPos.y + difficulty.size / 2,
           }}
           initial={{ 
             x: 0, 
