@@ -21,17 +21,115 @@ interface MojoChatProps {
 
 const MAX_MESSAGE_LENGTH = 2000;
 
+type MojoEmote = 'wave' | 'dance' | 'spin' | 'blush' | 'sleepy' | null;
+
 export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasConsented, setHasConsented] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [currentEmote, setCurrentEmote] = useState<MojoEmote>(null);
+  const [showEmotes, setShowEmotes] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Load recent conversation when chat opens
+  const triggerEmote = (emote: MojoEmote) => {
+    setCurrentEmote(emote);
+    setTimeout(() => setCurrentEmote(null), 2000);
+  };
+
+  const EMOTES = [
+    { id: 'wave' as const, icon: '👋', label: 'Wave' },
+    { id: 'dance' as const, icon: '💃', label: 'Dance' },
+    { id: 'spin' as const, icon: '🌀', label: 'Spin' },
+    { id: 'blush' as const, icon: '😊', label: 'Blush' },
+    { id: 'sleepy' as const, icon: '😴', label: 'Sleepy' },
+  ];
+
+  // Emoting Mojo component with animations
+  const EmotingMojo = ({ emote }: { emote: MojoEmote }) => {
+    const getEmoteAnimation = (): { [key: string]: number | number[] } => {
+      switch (emote) {
+        case 'wave':
+          return { rotate: [0, -15, 15, -15, 15, 0] };
+        case 'dance':
+          return { y: [0, -10, 0, -10, 0], x: [-5, 5, -5, 5, 0] };
+        case 'spin':
+          return { rotate: [0, 360] };
+        case 'blush':
+          return { scale: [1, 1.1, 1] };
+        case 'sleepy':
+          return { y: [0, 5, 0], scale: [1, 0.95, 1] };
+        default:
+          return {};
+      }
+    };
+
+    return (
+      <div className="relative inline-block">
+        <motion.div animate={getEmoteAnimation()}>
+          <MojoOrb state={emote === 'sleepy' ? 'calm' : emote === 'blush' ? 'steady' : 'calm'} size="lg" />
+        </motion.div>
+        
+        {/* Emote effects */}
+        <AnimatePresence>
+          {emote === 'blush' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute top-1/2 -translate-y-1/2 left-1/4 right-1/4 flex justify-between pointer-events-none"
+            >
+              <div className="w-4 h-3 rounded-full bg-pink-400/60" />
+              <div className="w-4 h-3 rounded-full bg-pink-400/60" />
+            </motion.div>
+          )}
+          {emote === 'sleepy' && (
+            <motion.div
+              initial={{ opacity: 0, y: 0 }}
+              animate={{ opacity: [0, 1, 0], y: -30, x: 20 }}
+              transition={{ duration: 1.5, repeat: 1 }}
+              className="absolute top-0 right-0 text-2xl pointer-events-none"
+            >
+              💤
+            </motion.div>
+          )}
+          {emote === 'wave' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute -right-4 top-1/3 text-2xl pointer-events-none"
+            >
+              👋
+            </motion.div>
+          )}
+          {emote === 'dance' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none"
+            >
+              {['✨', '🎵', '✨'].map((s, i) => (
+                <motion.span
+                  key={i}
+                  animate={{ y: [0, -8, 0], opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 0.5, delay: i * 0.15, repeat: 2 }}
+                  className="text-sm"
+                >
+                  {s}
+                </motion.span>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
   useEffect(() => {
     if (isOpen && userId) {
       loadRecentConversation();
@@ -361,7 +459,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center pt-8"
               >
-                <MojoOrb state="calm" size="lg" />
+                <EmotingMojo emote={currentEmote} />
                 <p className="text-muted-foreground mt-6 text-sm font-medium">
                   Before we chat
                 </p>
@@ -381,13 +479,52 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center pt-8"
               >
-                <MojoOrb state="calm" size="lg" />
+                <EmotingMojo emote={currentEmote} />
                 <p className="text-muted-foreground mt-6 text-sm">
                   Hey, I'm Mojo. What's pulling at you today?
                 </p>
                 <p className="text-muted-foreground/60 mt-2 text-xs max-w-xs mx-auto">
                   I help with everyday attention habits — not medical or mental health advice.
                 </p>
+                
+                {/* Emote buttons */}
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="mt-6"
+                >
+                  <button
+                    onClick={() => setShowEmotes(!showEmotes)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showEmotes ? 'Hide emotes ▲' : 'Make Mojo do stuff ▼'}
+                  </button>
+                  
+                  <AnimatePresence>
+                    {showEmotes && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="flex justify-center gap-2 mt-3 flex-wrap"
+                      >
+                        {EMOTES.map((emote) => (
+                          <motion.button
+                            key={emote.id}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => triggerEmote(emote.id)}
+                            className="flex flex-col items-center gap-1 p-2 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors min-w-[50px]"
+                          >
+                            <span className="text-lg">{emote.icon}</span>
+                            <span className="text-[10px] text-muted-foreground">{emote.label}</span>
+                          </motion.button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               </motion.div>
             ) : null}
 
