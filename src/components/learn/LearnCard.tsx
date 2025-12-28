@@ -4,6 +4,7 @@ import { Heart, Share2, MoreHorizontal, EyeOff, Flag, Clock, Volume2, VolumeX, L
 import { type LearnCard as LearnCardData, getTopicById } from '@/lib/learn-data';
 import { getReadingTime } from '@/hooks/useLearnProgress';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { MojoTeacher } from '../MojoTeacher';
 
 interface LearnCardProps {
   card: LearnCardData;
@@ -52,6 +53,11 @@ export function LearnCardComponent({ card, isLiked, onLike, onShare, onHide }: L
 
       {/* Content section - bottom 40% */}
       <div className="relative flex-1 bg-background px-6 pt-4 pb-24 overflow-y-auto">
+        {/* Mojo Teacher floating beside content */}
+        <div className="absolute right-16 top-3 z-10">
+          <MojoTeacher />
+        </div>
+
         {/* Topic badge + reading time */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
