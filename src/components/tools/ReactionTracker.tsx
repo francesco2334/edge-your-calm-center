@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MojoOrb } from '../MojoOrb';
+import { MojoCompanion } from '../MojoCompanion';
 import { REAL_WORLD_COMPARISONS, getReactionTier, getPercentile, type ReactionLeaderboard } from '@/lib/reaction-data';
 import { haptics } from '@/hooks/useHaptics';
 
@@ -202,7 +203,7 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
               transition={{ delay: 0.1 }}
               className="flex justify-center mb-6"
             >
-              <MojoOrb state="calm" size="lg" />
+              <MojoCompanion mood="encouraging" size="lg" message="Ready to test your reflexes?" showMessage />
             </motion.div>
 
             {/* Personal stats */}
@@ -317,13 +318,18 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
           </AnimatePresence>
           
           <div className="relative z-10 text-center">
-            {/* Mojo stays in center as reference */}
+            {/* Mojo companion stays in center as reference */}
             <div className="relative mb-8">
               <motion.div
                 animate={{ scale: hasFlickers ? 0.9 : 1, opacity: hasFlickers ? 0.5 : 1 }}
                 transition={{ duration: 0.2 }}
               >
-                <MojoOrb state={hasFlickers ? 'under-load' : 'calm'} size="lg" />
+                <MojoCompanion 
+                  mood={hasFlickers ? 'cheering' : 'thinking'} 
+                  size="lg"
+                  message={hasFlickers ? "Tap them!" : "Focus..."}
+                  showMessage={hasFlickers}
+                />
               </motion.div>
             </div>
 
@@ -408,7 +414,12 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
             animate={{ scale: 1, opacity: 1 }}
             className="mb-6"
           >
-            <MojoOrb state="steady" size="lg" />
+            <MojoCompanion 
+              mood={isNewBest ? 'celebrating' : 'cheering'} 
+              size="lg"
+              message={isNewBest ? "New record!" : "Great job!"}
+              showMessage
+            />
           </motion.div>
 
           {/* Taps result */}

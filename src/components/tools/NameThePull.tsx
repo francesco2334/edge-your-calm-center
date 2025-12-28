@@ -1,6 +1,7 @@
 import { useState, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MojoOrb } from '../MojoOrb';
+import { MojoCompanion } from '../MojoCompanion';
 import { Check, X } from 'lucide-react';
 import { haptics } from '@/hooks/useHaptics';
 
@@ -267,7 +268,7 @@ export const NameThePull = forwardRef<HTMLDivElement, NameThePullProps>(
               transition={{ delay: 0.1 }}
               className="flex justify-center mb-8"
             >
-              <MojoOrb state="under-load" size="md" />
+              <MojoCompanion mood="thinking" size="md" message="What's underneath?" showMessage />
             </motion.div>
 
             <div className="space-y-3">
@@ -430,7 +431,7 @@ export const NameThePull = forwardRef<HTMLDivElement, NameThePullProps>(
               animate={{ scale: 1, opacity: 1 }}
               className="mb-8"
             >
-              <MojoOrb state="regulating" size="lg" />
+              <MojoCompanion mood="encouraging" size="lg" message="You named it!" showMessage />
             </motion.div>
 
             <motion.p
@@ -499,7 +500,7 @@ export const NameThePull = forwardRef<HTMLDivElement, NameThePullProps>(
             animate={{ scale: 1, opacity: 1 }}
             className="mb-8"
           >
-            <MojoOrb state="steady" size="lg" />
+            <MojoCompanion mood="celebrating" size="lg" message="Well done!" showMessage />
           </motion.div>
 
           <motion.p

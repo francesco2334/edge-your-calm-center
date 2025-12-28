@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Check, X, Trophy, BookOpen } from 'lucide-react';
 import { haptics } from '@/hooks/useHaptics';
 import { LEARN_CARDS, LEARN_TOPICS, LearnCard } from '@/lib/learn-data';
+import { MojoCompanion } from '../MojoCompanion';
 
 interface BodyScanProps {
   onComplete: (correctAnswers: number) => void;
@@ -124,9 +125,12 @@ export const BodyScan = forwardRef<HTMLDivElement, BodyScanProps>(
               transition={{ delay: 0.1 }}
               className="flex justify-center mb-10"
             >
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-violet-500/30 via-purple-500/20 to-pink-500/30 flex items-center justify-center">
-                <Brain className="w-16 h-16 text-violet-400" />
-              </div>
+              <MojoCompanion 
+                mood="thinking" 
+                size="lg" 
+                message="Let's test your knowledge!" 
+                showMessage 
+              />
             </motion.div>
 
             <motion.div
@@ -346,9 +350,12 @@ export const BodyScan = forwardRef<HTMLDivElement, BodyScanProps>(
             animate={{ scale: 1, opacity: 1 }}
             className="mb-6"
           >
-            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-violet-500/40 via-purple-500/30 to-pink-500/40 flex items-center justify-center mx-auto border border-violet-400/30">
-              <Trophy className="w-14 h-14 text-violet-400" />
-            </div>
+            <MojoCompanion 
+              mood={percentage >= 60 ? 'celebrating' : 'encouraging'} 
+              size="lg"
+              message={percentage >= 80 ? "You're amazing!" : percentage >= 60 ? "Great job!" : "Keep learning!"}
+              showMessage
+            />
           </motion.div>
 
           <motion.h2
