@@ -90,59 +90,96 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           }}
         />
 
-        {/* EVE-style minimal eyes - just two simple ovals */}
+        {/* EVE-style minimal eyes */}
         {size !== 'sm' && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <motion.div 
               className="flex gap-[18%]"
               style={{ marginTop: '-5%' }}
               animate={
-                state === 'steady' ? { rotate: [0, 2, 0, -2, 0] } :
                 state === 'under-load' ? { y: [0, 1, 0] } : {}
               }
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              {/* Left eye - simple glowing oval */}
-              <motion.div
-                className="bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)]"
-                style={{ 
-                  width: size === 'lg' ? '18px' : '10px', 
-                  height: size === 'lg' ? '22px' : '12px',
-                }}
-                animate={
-                  state === 'calm' ? { scaleY: [1, 0.15, 1], scaleX: [1, 1.1, 1] } : 
-                  state === 'steady' ? { scaleY: [1, 0.1, 1] } :
-                  state === 'under-load' ? { scaleY: 0.6, rotate: -8 } :
-                  {}
-                }
-                transition={{ 
-                  duration: state === 'under-load' ? 0.3 : 0.15,
-                  repeat: state === 'under-load' ? 0 : Infinity,
-                  repeatDelay: 3.5,
-                  ease: 'easeInOut'
-                }}
-              />
-              
-              {/* Right eye - simple glowing oval */}
-              <motion.div
-                className="bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)]"
-                style={{ 
-                  width: size === 'lg' ? '18px' : '10px', 
-                  height: size === 'lg' ? '22px' : '12px',
-                }}
-                animate={
-                  state === 'calm' ? { scaleY: [1, 0.15, 1], scaleX: [1, 1.1, 1] } : 
-                  state === 'steady' ? { scaleY: [1, 0.1, 1] } :
-                  state === 'under-load' ? { scaleY: 0.6, rotate: 8 } :
-                  {}
-                }
-                transition={{ 
-                  duration: state === 'under-load' ? 0.3 : 0.15,
-                  repeat: state === 'under-load' ? 0 : Infinity,
-                  repeatDelay: 3.5,
-                  ease: 'easeInOut'
-                }}
-              />
+              {state === 'steady' ? (
+                // Happy squint eyes ^_^ 
+                <>
+                  <svg 
+                    width={size === 'lg' ? '20' : '12'} 
+                    height={size === 'lg' ? '14' : '8'} 
+                    viewBox="0 0 20 14"
+                    className="drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]"
+                  >
+                    <motion.path
+                      d="M2 12 Q10 2 18 12"
+                      stroke="white"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      fill="none"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </svg>
+                  <svg 
+                    width={size === 'lg' ? '20' : '12'} 
+                    height={size === 'lg' ? '14' : '8'} 
+                    viewBox="0 0 20 14"
+                    className="drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]"
+                  >
+                    <motion.path
+                      d="M2 12 Q10 2 18 12"
+                      stroke="white"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      fill="none"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </svg>
+                </>
+              ) : (
+                // Normal oval eyes for other states
+                <>
+                  <motion.div
+                    className="bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+                    style={{ 
+                      width: size === 'lg' ? '18px' : '10px', 
+                      height: size === 'lg' ? '22px' : '12px',
+                    }}
+                    animate={
+                      state === 'calm' ? { scaleY: [1, 0.15, 1], scaleX: [1, 1.1, 1] } : 
+                      state === 'under-load' ? { scaleY: 0.6, rotate: -8 } :
+                      {}
+                    }
+                    transition={{ 
+                      duration: state === 'under-load' ? 0.3 : 0.15,
+                      repeat: state === 'under-load' ? 0 : Infinity,
+                      repeatDelay: 3.5,
+                      ease: 'easeInOut'
+                    }}
+                  />
+                  <motion.div
+                    className="bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+                    style={{ 
+                      width: size === 'lg' ? '18px' : '10px', 
+                      height: size === 'lg' ? '22px' : '12px',
+                    }}
+                    animate={
+                      state === 'calm' ? { scaleY: [1, 0.15, 1], scaleX: [1, 1.1, 1] } : 
+                      state === 'under-load' ? { scaleY: 0.6, rotate: 8 } :
+                      {}
+                    }
+                    transition={{ 
+                      duration: state === 'under-load' ? 0.3 : 0.15,
+                      repeat: state === 'under-load' ? 0 : Infinity,
+                      repeatDelay: 3.5,
+                      ease: 'easeInOut'
+                    }}
+                  />
+                </>
+              )}
             </motion.div>
           </div>
         )}
