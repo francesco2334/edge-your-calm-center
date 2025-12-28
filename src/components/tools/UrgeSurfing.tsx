@@ -383,9 +383,20 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
             animate={{ top: `${waveY - 10}%` }}
             transition={{ type: 'tween', duration: 0.8, ease: 'easeInOut' }}
           >
-            {/* Wave crest / target zone indicator */}
-            <div className="absolute top-0 left-0 right-0 h-16 z-20">
-              <div className="absolute inset-x-0 top-6 h-4 bg-gradient-to-b from-cyan-300/40 to-transparent" />
+            {/* Wave crest / target zone indicator - green when riding, red when off */}
+            <div className="absolute top-0 left-0 right-0 h-16 z-20 transition-all duration-300">
+              <div 
+                className={`absolute inset-x-0 top-4 h-8 transition-all duration-300 ${
+                  status === 'riding' 
+                    ? 'bg-gradient-to-b from-green-400/50 via-green-400/30 to-transparent shadow-[0_0_20px_rgba(74,222,128,0.4)]' 
+                    : 'bg-gradient-to-b from-red-500/50 via-red-500/30 to-transparent shadow-[0_0_20px_rgba(239,68,68,0.4)]'
+                }`} 
+              />
+              <div 
+                className={`absolute inset-x-4 top-7 h-1 rounded-full transition-all duration-300 ${
+                  status === 'riding' ? 'bg-green-400/80' : 'bg-red-500/80'
+                }`}
+              />
             </div>
             
             {/* Main wave surface - shape morphs with intensity */}
