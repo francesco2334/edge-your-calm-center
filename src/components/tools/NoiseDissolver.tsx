@@ -181,6 +181,37 @@ export function NoiseDissolver({ onComplete, onCancel }: NoiseDissolverProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-violet-900/60 via-indigo-900/50 to-slate-900" />
         <div className="absolute inset-0 bg-gradient-to-tl from-purple-800/30 via-transparent to-teal-900/30" />
         
+        {/* Positive messages hidden behind the noise */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <p className="absolute top-[15%] left-[10%] text-2xl font-light text-white/40 rotate-[-8deg]">
+            You are enough
+          </p>
+          <p className="absolute top-[25%] right-[15%] text-xl font-light text-violet-300/50 rotate-[5deg]">
+            Peace lives within you
+          </p>
+          <p className="absolute top-[40%] left-[20%] text-3xl font-light text-teal-300/40 rotate-[-3deg]">
+            Breathe
+          </p>
+          <p className="absolute top-[50%] right-[10%] text-lg font-light text-white/35 rotate-[8deg]">
+            This moment is yours
+          </p>
+          <p className="absolute top-[60%] left-[15%] text-xl font-light text-purple-300/45 rotate-[4deg]">
+            Let go of what weighs you down
+          </p>
+          <p className="absolute top-[70%] right-[20%] text-2xl font-light text-white/40 rotate-[-6deg]">
+            You are safe
+          </p>
+          <p className="absolute top-[80%] left-[25%] text-lg font-light text-teal-300/50 rotate-[2deg]">
+            Calm is your nature
+          </p>
+          <p className="absolute top-[35%] left-[50%] -translate-x-1/2 text-4xl font-light text-white/30">
+            ✨
+          </p>
+          <p className="absolute top-[65%] left-[40%] text-3xl font-light text-violet-300/35">
+            💫
+          </p>
+        </div>
+        
         {/* Soft light orbs */}
         <motion.div
           className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-violet-500/20 blur-3xl"
