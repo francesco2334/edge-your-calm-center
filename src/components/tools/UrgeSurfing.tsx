@@ -32,7 +32,7 @@ const QUOTES = [
 
 const GAME_DURATION = 60;
 const WAVE_INTERVAL = 10;
-const WAVE_ZONE_SIZE = 12; // Tighter zone near wave line
+const WAVE_ZONE_SIZE = 18; // Generous zone for relaxed gameplay
 
 export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
   function UrgeSurfing({ onComplete, onCancel }, ref) {
@@ -82,30 +82,31 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
       return () => clearInterval(timer);
     }, [phase]);
 
-    // Wave movement - dynamic height changes with varying speed and patterns
+    // Wave movement - slow, gentle, relaxing waves
     useEffect(() => {
       if (phase !== 'active') return;
       
-      // Create wave pattern parameters that change over time
       const waveTimer = setInterval(() => {
         const time = Date.now() / 1000;
         const progress = timeElapsed / GAME_DURATION; // 0 to 1
         
-        // Increase complexity as game progresses
-        const baseAmplitude = 15 + progress * 10; // Wave height increases
-        const speedMultiplier = 0.4 + progress * 0.3; // Speed increases
+        // Very slow, gentle wave motion - like breathing
+        const baseSpeed = 0.15; // Super slow base speed
+        const speedIncrease = progress * 0.1; // Slight speed increase over time
+        const speed = baseSpeed + speedIncrease;
         
-        // Multiple wave patterns combined - creates unpredictable movement
-        const primaryWave = Math.sin(time * speedMultiplier) * baseAmplitude;
-        const secondaryWave = Math.sin(time * speedMultiplier * 1.7 + 1) * (baseAmplitude * 0.5);
-        const jitter = Math.sin(time * 2.5) * (progress * 5); // Small fast variations
+        // Gentle amplitude that slowly increases
+        const baseAmplitude = 10 + progress * 8; // Start small, grow gently
         
-        // Random height shifts every few seconds
-        const randomShift = Math.sin(time * 0.15) * 8;
+        // Single smooth sine wave - calming motion
+        const primaryWave = Math.sin(time * speed) * baseAmplitude;
+        // Very subtle secondary wave for slight variation
+        const subtleVariation = Math.sin(time * speed * 0.5) * 3;
         
-        const newWaveY = 50 + primaryWave + secondaryWave + jitter + randomShift;
-        setWaveY(Math.max(25, Math.min(75, newWaveY)));
-      }, 50);
+        const newWaveY = 50 + primaryWave + subtleVariation;
+        setWaveY(Math.max(30, Math.min(70, newWaveY)));
+      }, 100); // Slower update rate for smoother feel
+      
       return () => clearInterval(waveTimer);
     }, [phase, timeElapsed]);
 
@@ -133,7 +134,7 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
           setShowWarning(true);
           
           // Escalating haptic feedback based on how long off wave
-          const hapticInterval = Math.max(100, 500 - (offWaveTime * 50)); // Gets faster
+          const hapticInterval = Math.max(300, 1000 - (offWaveTime * 50)); // Slower, gentler feedback
           if (now - lastHapticRef.current > hapticInterval) {
             lastHapticRef.current = now;
             
@@ -356,19 +357,18 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
             )}
           </AnimatePresence>
 
-          {/* WAVE TARGET ZONE - tighter band following wave line */}
+          {/* WAVE TARGET ZONE - gentle band following wave line */}
           <motion.div
             className="absolute left-0 right-0 pointer-events-none z-10"
             style={{ 
-              top: `${waveY - (WAVE_ZONE_SIZE / 2)}%`,
               height: `${WAVE_ZONE_SIZE}%`
             }}
             animate={{ top: `${waveY - (WAVE_ZONE_SIZE / 2)}%` }}
-            transition={{ type: 'tween', duration: 0.1 }}
+            transition={{ type: 'tween', duration: 0.8, ease: 'easeInOut' }}
           >
-            {/* Wave zone indicator - tight band */}
-            <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/20 via-cyan-400/40 to-cyan-400/20 border-y border-cyan-300/60" />
-            <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-cyan-300/80" />
+            {/* Wave zone indicator - relaxed band */}
+            <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/15 via-cyan-400/30 to-cyan-400/15 border-y border-cyan-300/40" />
+            <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-cyan-300/60" />
           </motion.div>
 
           <div className="absolute bottom-0 left-0 right-0" style={{ height: '45%' }}>
