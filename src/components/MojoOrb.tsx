@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 type MojoState = 'calm' | 'regulating' | 'under-load' | 'steady';
@@ -46,6 +46,18 @@ const stateStyles: Record<MojoState, {
 export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
   function MojoOrb({ state, selectedPull, size = 'md' }, ref) {
     const styles = stateStyles[state];
+    const [prevState, setPrevState] = useState(state);
+    const [justBecameHappy, setJustBecameHappy] = useState(false);
+    
+    // Detect transition to steady state
+    useEffect(() => {
+      if (state === 'steady' && prevState !== 'steady') {
+        setJustBecameHappy(true);
+        const timer = setTimeout(() => setJustBecameHappy(false), 600);
+        return () => clearTimeout(timer);
+      }
+      setPrevState(state);
+    }, [state, prevState]);
     
     // Calculate lean direction based on selected pull
     const leanX = selectedPull && selectedPull !== 'none' ? 3 : 0;
@@ -55,10 +67,14 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
         ref={ref}
         className={`${sizeClasses[size]} relative`}
         animate={{
-          scale: styles.scale,
+          scale: justBecameHappy ? [styles.scale, styles.scale * 1.15, styles.scale * 0.95, styles.scale * 1.05, styles.scale] : styles.scale,
+          y: justBecameHappy ? [0, -8, 2, -4, 0] : 0,
           x: leanX,
         }}
-        transition={{
+        transition={justBecameHappy ? {
+          duration: 0.5,
+          ease: [0.36, 0, 0.66, -0.56],
+        } : {
           type: 'spring',
           stiffness: 180,
           damping: 18,
