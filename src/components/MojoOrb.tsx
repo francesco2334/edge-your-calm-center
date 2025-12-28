@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
-type MojoState = 'calm' | 'regulating' | 'under-load' | 'steady';
+type MojoState = 'calm' | 'regulating' | 'under-load' | 'steady' | 'thinking';
 
 interface MojoOrbProps {
   state: MojoState;
@@ -39,6 +39,11 @@ const stateStyles: Record<MojoState, {
   steady: {
     gradient: 'from-emerald-500/75 via-emerald-400/55 to-primary/45',
     glow: '0 0 52px hsl(142 70% 45% / 0.4)',
+    scale: 1,
+  },
+  thinking: {
+    gradient: 'from-violet-500/75 via-primary/60 to-accent/45',
+    glow: '0 0 44px hsl(var(--primary) / 0.35)',
     scale: 1,
   },
 };
@@ -94,28 +99,32 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
             } : state === 'under-load' ? {
               x: [-2, 2, -2],
               scale: [1.05, 1.1, 1.05],
+            } : state === 'thinking' ? {
+              scale: [1, 1.04, 1],
+              rotate: [0, 2, -2, 0],
             } : {
               scale: [1, 1.05, 1],
               opacity: [0.85, 1, 0.85],
             }
           }
           transition={{
-            duration: state === 'calm' ? 4 : state === 'regulating' ? 2 : 2.5,
+            duration: state === 'calm' ? 4 : state === 'thinking' ? 1.5 : state === 'regulating' ? 2 : 2.5,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
         />
 
-        {/* EVE-style minimal eyes */}
+        {/* Eyes */}
         {size !== 'sm' && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <motion.div 
               className="flex gap-[18%]"
               style={{ marginTop: '-5%' }}
               animate={
-                state === 'under-load' ? { y: [0, 1, 0] } : {}
+                state === 'under-load' ? { y: [0, 1, 0] } : 
+                state === 'thinking' ? { y: [0, -2, 0] } : {}
               }
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{ duration: state === 'thinking' ? 1 : 2, repeat: Infinity, ease: 'easeInOut' }}
             >
               {state === 'steady' ? (
                 // Happy squint eyes ^_^ 
@@ -154,6 +163,50 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
                       transition={{ duration: 0.3 }}
                     />
                   </svg>
+                </>
+              ) : state === 'thinking' ? (
+                // Thinking face - eyes looking up and to the side
+                <>
+                  <motion.div
+                    className="bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)] relative overflow-hidden"
+                    style={{ 
+                      width: size === 'lg' ? '18px' : '10px', 
+                      height: size === 'lg' ? '22px' : '12px',
+                    }}
+                  >
+                    <motion.div
+                      className="absolute bg-primary/60 rounded-full"
+                      style={{
+                        width: size === 'lg' ? '8px' : '5px',
+                        height: size === 'lg' ? '8px' : '5px',
+                      }}
+                      animate={{ 
+                        x: [3, 5, 3],
+                        y: [-2, -3, -2],
+                      }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                  </motion.div>
+                  <motion.div
+                    className="bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)] relative overflow-hidden"
+                    style={{ 
+                      width: size === 'lg' ? '18px' : '10px', 
+                      height: size === 'lg' ? '22px' : '12px',
+                    }}
+                  >
+                    <motion.div
+                      className="absolute bg-primary/60 rounded-full"
+                      style={{
+                        width: size === 'lg' ? '8px' : '5px',
+                        height: size === 'lg' ? '8px' : '5px',
+                      }}
+                      animate={{ 
+                        x: [3, 5, 3],
+                        y: [-2, -3, -2],
+                      }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                  </motion.div>
                 </>
               ) : (
                 // Normal oval eyes for other states
@@ -200,14 +253,40 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           </div>
         )}
 
+        {/* Thinking dots */}
+        {state === 'thinking' && size !== 'sm' && (
+          <motion.div 
+            className="absolute -top-2 -right-2 flex gap-0.5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="w-1.5 h-1.5 bg-white/70 rounded-full"
+                animate={{ 
+                  y: [0, -4, 0],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{ 
+                  duration: 0.6, 
+                  repeat: Infinity, 
+                  delay: i * 0.15,
+                  ease: 'easeInOut'
+                }}
+              />
+            ))}
+          </motion.div>
+        )}
+
         {/* Inner highlight - depth and shine */}
         <motion.div
           className="absolute inset-[12%] rounded-full bg-gradient-to-br from-white/20 via-white/8 to-transparent pointer-events-none"
           animate={{
-            opacity: state === 'steady' ? [0.2, 0.35, 0.2] : [0.15, 0.28, 0.15],
+            opacity: state === 'steady' ? [0.2, 0.35, 0.2] : state === 'thinking' ? [0.25, 0.4, 0.25] : [0.15, 0.28, 0.15],
           }}
           transition={{
-            duration: 2.8,
+            duration: state === 'thinking' ? 1.5 : 2.8,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
