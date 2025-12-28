@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -6,6 +6,47 @@ interface NoiseDissolverProps {
   onComplete: () => void;
   onCancel: () => void;
 }
+
+// Pool of positive affirmations
+const ALL_MESSAGES = [
+  "You are enough",
+  "Peace lives within you",
+  "Breathe",
+  "This moment is yours",
+  "Let go of what weighs you down",
+  "You are safe",
+  "Calm is your nature",
+  "You are worthy of peace",
+  "Stillness is strength",
+  "Trust your journey",
+  "Release the tension",
+  "You are exactly where you need to be",
+  "Embrace this quiet",
+  "Your mind is clearing",
+  "Serenity awaits",
+  "Be gentle with yourself",
+  "This too shall pass",
+  "You are resilient",
+  "Find your center",
+  "Inhale peace, exhale worry",
+];
+
+// Shuffle and pick random messages
+const getRandomMessages = (count: number): string[] => {
+  const shuffled = [...ALL_MESSAGES].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+};
+
+// Message positions and styles
+const MESSAGE_CONFIGS = [
+  { top: '15%', left: '10%', right: undefined, size: 'text-2xl', color: 'text-white/40', rotate: -8 },
+  { top: '25%', left: undefined, right: '15%', size: 'text-xl', color: 'text-violet-300/50', rotate: 5 },
+  { top: '40%', left: '20%', right: undefined, size: 'text-3xl', color: 'text-teal-300/40', rotate: -3 },
+  { top: '50%', left: undefined, right: '10%', size: 'text-lg', color: 'text-white/35', rotate: 8 },
+  { top: '60%', left: '15%', right: undefined, size: 'text-xl', color: 'text-purple-300/45', rotate: 4 },
+  { top: '70%', left: undefined, right: '20%', size: 'text-2xl', color: 'text-white/40', rotate: -6 },
+  { top: '80%', left: '25%', right: undefined, size: 'text-lg', color: 'text-teal-300/50', rotate: 2 },
+];
 
 export function NoiseDissolver({ onComplete, onCancel }: NoiseDissolverProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -16,6 +57,9 @@ export function NoiseDissolver({ onComplete, onCancel }: NoiseDissolverProps) {
   const [showIntroText, setShowIntroText] = useState(true);
   
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Randomize messages on mount
+  const randomMessages = useMemo(() => getRandomMessages(7), []);
 
   // Initialize canvas with noise
   useEffect(() => {
@@ -181,35 +225,64 @@ export function NoiseDissolver({ onComplete, onCancel }: NoiseDissolverProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-violet-900/60 via-indigo-900/50 to-slate-900" />
         <div className="absolute inset-0 bg-gradient-to-tl from-purple-800/30 via-transparent to-teal-900/30" />
         
-        {/* Positive messages hidden behind the noise */}
+        {/* Positive messages hidden behind the noise - randomized each play */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <p className="absolute top-[15%] left-[10%] text-2xl font-light text-white/40 rotate-[-8deg]">
-            You are enough
-          </p>
-          <p className="absolute top-[25%] right-[15%] text-xl font-light text-violet-300/50 rotate-[5deg]">
-            Peace lives within you
-          </p>
-          <p className="absolute top-[40%] left-[20%] text-3xl font-light text-teal-300/40 rotate-[-3deg]">
-            Breathe
-          </p>
-          <p className="absolute top-[50%] right-[10%] text-lg font-light text-white/35 rotate-[8deg]">
-            This moment is yours
-          </p>
-          <p className="absolute top-[60%] left-[15%] text-xl font-light text-purple-300/45 rotate-[4deg]">
-            Let go of what weighs you down
-          </p>
-          <p className="absolute top-[70%] right-[20%] text-2xl font-light text-white/40 rotate-[-6deg]">
-            You are safe
-          </p>
-          <p className="absolute top-[80%] left-[25%] text-lg font-light text-teal-300/50 rotate-[2deg]">
-            Calm is your nature
-          </p>
-          <p className="absolute top-[35%] left-[50%] -translate-x-1/2 text-4xl font-light text-white/30">
+          {randomMessages.map((message, index) => {
+            const config = MESSAGE_CONFIGS[index];
+            const floatDuration = 4 + (index % 3) * 2;
+            const floatDelay = index * 0.5;
+            
+            return (
+              <motion.p
+                key={index}
+                className={`absolute ${config.size} font-light ${config.color}`}
+                style={{
+                  top: config.top,
+                  left: config.left,
+                  right: config.right,
+                  rotate: `${config.rotate}deg`,
+                }}
+                animate={{
+                  y: [0, -8, 0, 6, 0],
+                  x: [0, 4, 0, -4, 0],
+                  opacity: [0.4, 0.6, 0.4],
+                }}
+                transition={{
+                  duration: floatDuration,
+                  delay: floatDelay,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              >
+                {message}
+              </motion.p>
+            );
+          })}
+          
+          {/* Floating sparkles */}
+          <motion.p
+            className="absolute top-[35%] left-[50%] -translate-x-1/2 text-4xl font-light text-white/30"
+            animate={{
+              y: [0, -12, 0],
+              scale: [1, 1.1, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+          >
             ✨
-          </p>
-          <p className="absolute top-[65%] left-[40%] text-3xl font-light text-violet-300/35">
+          </motion.p>
+          <motion.p
+            className="absolute top-[65%] left-[40%] text-3xl font-light text-violet-300/35"
+            animate={{
+              y: [0, 10, 0],
+              x: [0, -6, 0],
+              scale: [1, 1.15, 1],
+              opacity: [0.35, 0.55, 0.35],
+            }}
+            transition={{ duration: 6, delay: 1, repeat: Infinity, ease: 'easeInOut' }}
+          >
             💫
-          </p>
+          </motion.p>
         </div>
         
         {/* Soft light orbs */}
