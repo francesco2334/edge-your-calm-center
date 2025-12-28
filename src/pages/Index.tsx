@@ -8,12 +8,12 @@ import { AuthGateScreen } from '@/components/AuthGateScreen';
 import { SubscriptionScreen } from '@/components/SubscriptionScreen';
 import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { HomeScreen } from '@/components/HomeScreen';
+import { ResetScreen } from '@/components/ResetScreen';
+import { ActScreen } from '@/components/ActScreen';
+import { ProgressScreen } from '@/components/ProgressScreen';
 import { GamesScreen } from '@/components/GamesScreen';
-import { ExchangeScreen } from '@/components/ExchangeScreen';
-import { InsightsScreen } from '@/components/InsightsScreen';
-import { ProductivityScreen } from '@/components/ProductivityScreen';
 import { LearnFeed } from '@/components/LearnFeed';
-import { BottomNav } from '@/components/BottomNav';
+import { FlowNav } from '@/components/FlowNav';
 import { QuickStopModal } from '@/components/QuickStopModal';
 import { MojoChat, type MojoTool } from '@/components/MojoChat';
 import { ResetWithoutShameModal } from '@/components/ResetWithoutShameModal';
@@ -30,9 +30,9 @@ import { useDailyQuestion } from '@/hooks/useDailyQuestion';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
+import type { FlowStage } from '@/lib/credit-data';
 
 type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'authgate' | 'subscription' | 'atlas' | 'main';
-type MainTab = 'home' | 'learn' | 'games' | 'productivity' | 'insights' | 'exchange';
 type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
 type FailureContext = 'game-loss' | 'streak-break' | 'relapse' | null;
 
@@ -40,7 +40,7 @@ const Index = () => {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<AppScreen | null>(null);
-  const [activeTab, setActiveTab] = useState<MainTab>('home');
+  const [activeStage, setActiveStage] = useState<FlowStage>('reset'); // Reset is now the primary stage
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [showQuickStop, setShowQuickStop] = useState(false);
   const [showMojoChat, setShowMojoChat] = useState(false);
@@ -54,29 +54,29 @@ const Index = () => {
   // Daily question hook
   const { hasAnsweredToday } = useDailyQuestion();
   
-  // NEW: Clean token economy system
+  // Token economy system (internally still "tokens" but displayed as "credits")
   const { 
-    tokens,
+    tokens: credits, // Rename for UI
     points,
     streak,
     stats,
     activeSession,
     hasLoggedToday,
     isLoaded: economyLoaded,
-    tokenTransactions,
-    learnCardsTowardsToken,
-    LEARN_CARDS_PER_TOKEN,
-    MINUTES_PER_TOKEN,
+    tokenTransactions: creditTransactions,
+    learnCardsTowardsToken: learnCardsTowardsCredit,
+    LEARN_CARDS_PER_TOKEN: LEARN_CARDS_PER_CREDIT,
+    MINUTES_PER_TOKEN: MINUTES_PER_CREDIT,
     logDailyPull,
     recordLearnCard,
     recordGameComplete,
     recordGameFail,
-    spendTokens,
+    spendTokens: spendCredits,
     endSession,
     exitSessionEarly,
-    logProductivity,
-    productivityLogsToday,
-    productivityLogsRemaining,
+    logProductivity: logAction,
+    productivityLogsToday: actionsToday,
+    productivityLogsRemaining: actionsRemaining,
   } = useTokenEconomy(user?.id ?? null);
 
   // Progress Engine (for reflections, trophies - separate from economy)
@@ -96,7 +96,7 @@ const Index = () => {
     recordDailyActivity,
   } = useProgress();
 
-  // Onboarding system - separate from trial/subscription
+  // Onboarding system
   const { 
     onboardingCompleted, 
     authGateSeen, 
@@ -114,7 +114,7 @@ const Index = () => {
     resetTrial,
   } = useSubscription(user?.id);
 
-  // Push notifications - real local notifications on native
+  // Push notifications
   const { 
     scheduleTimeExpiredNotification, 
     cancelTimeExpiredNotification,
@@ -131,14 +131,14 @@ const Index = () => {
   useEffect(() => {
     if (!hasLoggedToday && notificationPermission === 'granted') {
       scheduleStreakWarningNotification(12);
-      scheduleDailyReminderNotification(20); // 8 PM reminder
+      scheduleDailyReminderNotification(20);
     } else if (hasLoggedToday) {
       cancelStreakWarning();
       cancelDailyReminder();
     }
   }, [hasLoggedToday, notificationPermission, scheduleStreakWarningNotification, cancelStreakWarning, scheduleDailyReminderNotification, cancelDailyReminder]);
 
-  // Check trophy progress on mount and schedule notification if close
+  // Check trophy progress on mount
   useEffect(() => {
     if (notificationPermission === 'granted' && totalDaysActive > 0) {
       const trophyTypes = ['bronze', 'silver', 'gold', 'platinum', 'diamond', 'master'] as const;
@@ -154,28 +154,24 @@ const Index = () => {
     }
   }, [totalDaysActive, notificationPermission, scheduleTrophyProgressNotification]);
 
-  // Determine initial screen based on onboarding, auth, and subscription status
-  // SINGLE SOURCE OF TRUTH for routing
+  // Determine initial screen
   useEffect(() => {
     if (authLoading || !economyLoaded || !onboardingLoaded || !subscriptionLoaded) return;
     
-    // Priority 1: Not completed onboarding yet → show onboarding flow
     if (!onboardingCompleted) {
       setCurrentScreen('welcome');
       return;
     }
 
-    // Priority 2: Completed onboarding but hasn't seen auth gate → show auth gate
     if (!authGateSeen) {
       setCurrentScreen('authgate');
       return;
     }
 
-    // Priority 3: User is authenticated or guest, go to main app
     setCurrentScreen('main');
   }, [user, authLoading, economyLoaded, onboardingLoaded, subscriptionLoaded, onboardingCompleted, authGateSeen]);
 
-  // Show loading state while data loads
+  // Show loading state
   if (authLoading || !economyLoaded || !onboardingLoaded || !subscriptionLoaded || currentScreen === null) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center safe-area-inset">
@@ -189,65 +185,57 @@ const Index = () => {
     setCurrentScreen('results');
   };
 
-  // Handle daily pull logging - awards +3 tokens once per day
+  // Handle daily pull logging
   const handlePullSelect = async (pullId: string) => {
     const awarded = logDailyPull(pullId);
     setCurrentTrigger(pullId);
     
-    // Cancel streak warning since user logged
     if (awarded) {
       cancelStreakWarning();
       cancelDailyReminder();
       
-      // Record daily activity and check for trophy progress
       const { newTrophies, nextTrophy } = recordDailyActivity();
       
-      // Send notifications for any newly earned trophies
       if (newTrophies.length > 0 && notificationPermission === 'granted') {
         for (const trophy of newTrophies) {
           await sendTrophyEarnedNotification(trophy.name, trophy.icon);
         }
       }
       
-      // Schedule trophy progress notification if close to next trophy
       if (nextTrophy && nextTrophy.daysRemaining <= 7 && notificationPermission === 'granted') {
         scheduleTrophyProgressNotification(nextTrophy.daysRemaining, nextTrophy.name);
       }
     }
     
-    // Show trigger routing (helps based on what pulled them)
     if (pullId !== 'none') {
       setShowTriggerRouting(true);
     }
     
-    // Show daily question if not answered
     if (!hasAnsweredToday) {
       setTimeout(() => setShowDailyQuestion(true), 500);
     }
   };
 
-  // Handle relapse-type pulls
   const handleRelapseLogged = () => {
     setFailureContext('relapse');
   };
 
-  // Handle game completion - awards +1 token + points
   const handleGameComplete = (gameId: string, details: string) => {
     recordGameComplete(gameId as any, details);
     recordActivity('game', details, 10);
   };
 
-  // Handle game failure/early exit - deducts points ONLY, never tokens
   const handleGameFail = (gameId: string, reason: string) => {
     recordGameFail(gameId as any, reason);
     setFailureContext('game-loss');
   };
 
-  // Handle quick tool completion
   const handleQuickToolComplete = (gameId: string, details: string) => {
     recordGameComplete(gameId as any, details);
     recordActivity('tool_used', details);
     setActiveQuickTool(null);
+    // Return to reset stage after completing a tool
+    setActiveStage('reset');
   };
 
   const handleWeeklyReflection = (prompts: any) => {
@@ -278,27 +266,35 @@ const Index = () => {
     setActiveQuickTool(toolMap[tool]);
   };
 
-  const handleTabChange = (tab: MainTab) => {
-    setActiveTab(tab);
+  const handleStageChange = (stage: FlowStage) => {
+    setActiveStage(stage);
   };
 
-  // Handle spending tokens for time
-  const handleSpendTokens = async (tokenCount: number, activity: string) => {
-    const session = await spendTokens(tokenCount, activity);
+  // Handle reset tool selection
+  const handleStartReset = (type: 'quick' | 'sync' | 'name' | 'standoff') => {
+    const toolMap: Record<string, QuickTool> = {
+      quick: 'pause',
+      sync: 'breathing',
+      name: 'name',
+      standoff: 'pause',
+    };
+    setActiveQuickTool(toolMap[type]);
+  };
+
+  // Handle spending credits for time
+  const handleSpendCredits = async (creditCount: number, activity: string) => {
+    const session = await spendCredits(creditCount, activity);
     if (session) {
-      // Schedule real local notification for when time expires
       scheduleTimeExpiredNotification(activity, session.expiresAt);
-      setActiveTab('home'); // Go back to home, show timer
+      setActiveStage('reset');
     }
   };
 
-  // Handle session end
   const handleSessionEnd = () => {
     setShowTimeExpired(true);
     endSession();
   };
 
-  // Handle early exit - cancel the scheduled notification
   const handleExitEarly = () => {
     cancelTimeExpiredNotification();
     exitSessionEarly();
@@ -350,7 +346,7 @@ const Index = () => {
     );
   }
 
-  // Subscription expired - show subscription screen
+  // Subscription expired
   if (subscriptionStatus === 'expired') {
     return (
       <TrialExpiredScreen 
@@ -385,7 +381,6 @@ const Index = () => {
           <ResultsScreen 
             answers={assessmentAnswers} 
             onContinue={() => {
-              // Mark onboarding as complete and show auth gate
               completeOnboarding();
               setCurrentScreen('authgate');
             }} 
@@ -394,12 +389,10 @@ const Index = () => {
         {currentScreen === 'authgate' && (
           <AuthGateScreen 
             onContinue={() => {
-              // Continue as guest
               completeAuthGate();
               setCurrentScreen('subscription');
             }}
             onSignedIn={() => {
-              // Signed in with Apple
               completeAuthGate();
               setCurrentScreen('subscription');
             }}
@@ -412,7 +405,6 @@ const Index = () => {
               setCurrentScreen('atlas');
             }}
             onSkip={() => {
-              // Skip trial, continue to app
               setCurrentScreen('atlas');
             }}
           />
@@ -424,27 +416,28 @@ const Index = () => {
     );
   }
 
-  // Learn tab - TikTok style fullscreen swipe feed
-  if (activeTab === 'learn') {
+  // Learn stage - TikTok style fullscreen swipe feed
+  if (activeStage === 'learn') {
     return (
       <div className="min-h-screen bg-background">
         <LearnFeed 
-          onClose={() => setActiveTab('home')}
+          onClose={() => setActiveStage('reset')}
           onCardViewed={() => {
             recordLearnCard();
             recordActivity('learn', 'Card viewed', 2);
           }}
           onCardSaved={() => recordActivity('learn', 'Card saved', 5)}
         />
-        <BottomNav
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
+        <FlowNav
+          activeStage={activeStage}
+          onStageChange={handleStageChange}
+          hasLoggedToday={hasLoggedToday}
         />
       </div>
     );
   }
 
-  // Main app with bottom nav
+  // Main app with flow-based navigation
   return (
     <div className="min-h-screen bg-background">
       {/* Active time session banner */}
@@ -456,47 +449,46 @@ const Index = () => {
         />
       )}
 
-      {activeTab === 'home' && (
+      {/* Flow stages - New navigation structure */}
+      {activeStage === 'log' && (
         <HomeScreen 
-          tokens={tokens}
+          credits={credits}
           points={points}
           streak={streak}
           hasLoggedToday={hasLoggedToday}
           trialDaysRemaining={subscriptionStatus === 'trial' ? trialDaysRemaining : undefined}
           currentTrigger={currentTrigger}
-          onOpenExchange={() => setActiveTab('exchange')}
+          onOpenReset={() => setActiveStage('reset')}
           onOpenMojoChat={() => setShowMojoChat(true)}
           onOpenQuickStop={() => setShowQuickStop(true)}
           onPullSelect={handlePullSelect}
           onRelapseLogged={handleRelapseLogged}
         />
       )}
-      
-      {activeTab === 'exchange' && (
-        <ExchangeScreen
-          tokens={tokens}
-          minutesPerToken={MINUTES_PER_TOKEN}
-          onSpendTokens={handleSpendTokens}
-          onBack={() => setActiveTab('home')}
+
+      {activeStage === 'reset' && (
+        <ResetScreen
+          onStartReset={handleStartReset}
+          onOpenMojo={() => setShowMojoChat(true)}
         />
       )}
 
-      {activeTab === 'games' && (
-        <GamesScreen
-          onGameComplete={handleGameComplete}
-          onGameFail={handleGameFail}
+      {activeStage === 'act' && (
+        <ActScreen
+          actionsToday={actionsToday}
+          actionsRemaining={actionsRemaining}
+          onLogAction={logAction}
         />
       )}
       
-      {activeTab === 'insights' && (
-        <InsightsScreen
+      {activeStage === 'progress' && (
+        <ProgressScreen
           answers={assessmentAnswers}
-          tokens={tokens}
+          credits={credits}
           points={points}
           streak={streak}
           stats={stats}
-          tokenTransactions={tokenTransactions}
-          onBack={() => setActiveTab('home')}
+          creditTransactions={creditTransactions}
           userId={user?.id}
           monthlyScores={monthlyScores}
           monthlyNotes={monthlyNotes}
@@ -518,21 +510,12 @@ const Index = () => {
         />
       )}
 
-      {activeTab === 'productivity' && (
-        <ProductivityScreen
-          logsToday={productivityLogsToday}
-          logsRemaining={productivityLogsRemaining}
-          onLogProductivity={logProductivity}
-        />
-      )}
-
-      {/* Bottom Navigation */}
-      {activeTab !== 'exchange' && (
-        <BottomNav
-          activeTab={activeTab as 'home' | 'learn' | 'games' | 'productivity' | 'insights'}
-          onTabChange={handleTabChange}
-        />
-      )}
+      {/* Flow-based Navigation */}
+      <FlowNav
+        activeStage={activeStage}
+        onStageChange={handleStageChange}
+        hasLoggedToday={hasLoggedToday}
+      />
 
       {/* Quick Stop Modal */}
       <QuickStopModal
@@ -544,7 +527,7 @@ const Index = () => {
         }}
         onLogPull={() => {
           setShowQuickStop(false);
-          // This will be handled by HomeScreen
+          setActiveStage('log');
         }}
       />
 
@@ -556,20 +539,20 @@ const Index = () => {
         userId={user?.id}
       />
 
-      {/* Trigger Routing - shows relevant content after logging */}
+      {/* Trigger Routing */}
       <TriggerRouting
         isOpen={showTriggerRouting}
         onClose={() => setShowTriggerRouting(false)}
         trigger={currentTrigger}
-        onLearnCard={() => setActiveTab('learn')}
+        onLearnCard={() => setActiveStage('learn')}
         onGame={(gameId) => {
-          setActiveTab('games');
-          // TODO: Auto-start specific game
+          // Games are now accessed through reset tools
+          setActiveStage('reset');
         }}
         onMojo={() => setShowMojoChat(true)}
       />
 
-      {/* Reset Without Shame Modal - Failure Protocol */}
+      {/* Reset Without Shame Modal */}
       <ResetWithoutShameModal
         isOpen={failureContext !== null}
         onClose={() => setFailureContext(null)}
