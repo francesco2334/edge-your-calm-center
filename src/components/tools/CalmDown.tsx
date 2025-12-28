@@ -7,144 +7,127 @@ interface CalmDownProps {
   onCancel: () => void;
 }
 
-const CALM_STEPS = [
-  { 
-    instruction: 'Close your eyes and take a deep breath',
-    duration: 5,
-    color: 'from-emerald-500/30',
-    icon: '🌿'
-  },
-  { 
-    instruction: 'Let your shoulders drop and relax',
-    duration: 6,
-    color: 'from-teal-500/30',
-    icon: '🍃'
-  },
-  { 
-    instruction: 'Unclench your jaw, soften your face',
-    duration: 5,
-    color: 'from-cyan-500/30',
-    icon: '💧'
-  },
-  { 
-    instruction: 'Feel the tension leaving your body',
-    duration: 6,
-    color: 'from-sky-500/30',
-    icon: '🌸'
-  },
-  { 
-    instruction: 'You are calm. You are in control.',
-    duration: 5,
-    color: 'from-violet-500/30',
-    icon: '✨'
-  },
+const CALMING_TIPS = [
+  "Take 3 slow, deep breaths",
+  "Unclench your jaw right now",
+  "Drop your shoulders away from your ears",
+  "Feel your feet touching the ground",
+  "Name 5 things you can see",
+  "This feeling will pass",
+  "You are safe in this moment",
+  "Breathe in calm, breathe out tension",
+  "Place your hand on your heart",
+  "Imagine a warm light surrounding you",
+  "You've handled hard things before",
+  "Let go of what you can't control",
+  "One breath at a time",
+  "Your thoughts are not facts",
+  "This moment is temporary",
 ];
 
+interface FallingLeaf {
+  id: number;
+  x: number;
+  delay: number;
+  duration: number;
+  rotation: number;
+  tip: string;
+  size: number;
+}
+
 export function CalmDown({ onComplete, onCancel }: CalmDownProps) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [stepProgress, setStepProgress] = useState(0);
+  const [leaves, setLeaves] = useState<FallingLeaf[]>([]);
+  const [clickedLeaves, setClickedLeaves] = useState<Set<number>>(new Set());
+  const [revealedTip, setRevealedTip] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [relaxationLevel, setRelaxationLevel] = useState(5);
-  const [particles, setParticles] = useState<{ id: number; x: number; y: number; delay: number }[]>([]);
+  const [collectedCount, setCollectedCount] = useState(0);
 
-  // Generate floating particles
-  useEffect(() => {
-    const newParticles = Array.from({ length: 15 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 3,
-    }));
-    setParticles(newParticles);
-  }, [currentStep]);
+  const LEAVES_TO_COLLECT = 5;
 
-  // Progress through steps
+  // Spawn leaves continuously
   useEffect(() => {
     if (isComplete) return;
 
-    const step = CALM_STEPS[currentStep];
-    const intervalMs = 100;
-    const totalIntervals = (step.duration * 1000) / intervalMs;
-    let count = 0;
+    const usedTips = new Set<number>();
+    
+    const spawnLeaf = () => {
+      let tipIndex: number;
+      do {
+        tipIndex = Math.floor(Math.random() * CALMING_TIPS.length);
+      } while (usedTips.has(tipIndex) && usedTips.size < CALMING_TIPS.length);
+      
+      usedTips.add(tipIndex);
+      if (usedTips.size >= CALMING_TIPS.length) usedTips.clear();
 
-    const interval = setInterval(() => {
-      count++;
-      setStepProgress((count / totalIntervals) * 100);
+      const newLeaf: FallingLeaf = {
+        id: Date.now() + Math.random(),
+        x: 10 + Math.random() * 80,
+        delay: 0,
+        duration: 6 + Math.random() * 4,
+        rotation: Math.random() * 360,
+        tip: CALMING_TIPS[tipIndex],
+        size: 40 + Math.random() * 20,
+      };
 
-      if (count >= totalIntervals) {
-        if (currentStep < CALM_STEPS.length - 1) {
-          setCurrentStep(prev => prev + 1);
-          setStepProgress(0);
-        } else {
-          setIsComplete(true);
-        }
-      }
-    }, intervalMs);
+      setLeaves(prev => [...prev.slice(-8), newLeaf]);
+    };
 
+    // Initial leaves
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => spawnLeaf(), i * 800);
+    }
+
+    const interval = setInterval(spawnLeaf, 2000);
     return () => clearInterval(interval);
-  }, [currentStep, isComplete]);
+  }, [isComplete]);
+
+  const handleLeafClick = useCallback((leaf: FallingLeaf) => {
+    if (clickedLeaves.has(leaf.id)) return;
+
+    setClickedLeaves(prev => new Set(prev).add(leaf.id));
+    setRevealedTip(leaf.tip);
+    setCollectedCount(prev => {
+      const newCount = prev + 1;
+      if (newCount >= LEAVES_TO_COLLECT) {
+        setTimeout(() => setIsComplete(true), 2000);
+      }
+      return newCount;
+    });
+
+    // Hide tip after 2.5 seconds
+    setTimeout(() => setRevealedTip(null), 2500);
+  }, [clickedLeaves]);
 
   const handleComplete = useCallback(() => {
     onComplete(relaxationLevel);
   }, [onComplete, relaxationLevel]);
-
-  const step = CALM_STEPS[currentStep];
-  const overallProgress = ((currentStep + stepProgress / 100) / CALM_STEPS.length) * 100;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-emerald-950/90 via-background to-background"
     >
-      {/* Animated gradient background */}
-      <motion.div 
-        className={`absolute inset-0 bg-gradient-to-br ${step.color} via-background to-background`}
-        animate={{ 
-          background: [
-            `linear-gradient(135deg, ${step.color} 0%, transparent 50%, transparent 100%)`,
-          ]
-        }}
-        transition={{ duration: 1 }}
-      />
-
-      {/* Floating particles */}
+      {/* Ambient particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {particles.map((particle) => (
+        {Array.from({ length: 20 }).map((_, i) => (
           <motion.div
-            key={particle.id}
-            className="absolute w-2 h-2 rounded-full bg-primary/20"
-            style={{ left: `${particle.x}%`, top: `${particle.y}%` }}
+            key={i}
+            className="absolute w-1 h-1 rounded-full bg-emerald-400/20"
+            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
             animate={{
-              y: [-20, -100, -20],
-              opacity: [0, 0.6, 0],
-              scale: [0.5, 1.2, 0.5],
+              y: [-10, -30, -10],
+              opacity: [0.2, 0.5, 0.2],
             }}
             transition={{
-              duration: 4 + Math.random() * 2,
+              duration: 3 + Math.random() * 2,
               repeat: Infinity,
-              delay: particle.delay,
-              ease: 'easeInOut',
+              delay: Math.random() * 2,
             }}
           />
         ))}
-      </div>
-
-      {/* Central breathing orb */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <motion.div
-          className="w-64 h-64 rounded-full bg-gradient-radial from-primary/10 via-primary/5 to-transparent"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.3, 0.6, 0.3],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
       </div>
 
       {/* Close button */}
@@ -153,151 +136,168 @@ export function CalmDown({ onComplete, onCancel }: CalmDownProps) {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
         onClick={onCancel}
-        className="absolute top-12 right-5 w-10 h-10 rounded-full bg-background/20 backdrop-blur-sm flex items-center justify-center border border-border/20 z-10"
+        className="absolute top-12 right-5 w-10 h-10 rounded-full bg-background/20 backdrop-blur-sm flex items-center justify-center border border-border/20 z-20"
       >
         <X className="w-5 h-5 text-muted-foreground" />
       </motion.button>
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center px-8 text-center max-w-sm">
-        <AnimatePresence mode="wait">
-          {!isComplete ? (
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, y: 20, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.9 }}
-              transition={{ duration: 0.5 }}
-              className="flex flex-col items-center"
-            >
-              {/* Step icon with glow */}
+      {/* Header */}
+      {!isComplete && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-20 left-0 right-0 text-center z-10 px-8"
+        >
+          <h2 className="text-xl font-medium text-foreground mb-2">
+            Catch the falling leaves
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Tap each leaf for calming wisdom
+          </p>
+          <div className="flex items-center justify-center gap-2 mt-4">
+            {Array.from({ length: LEAVES_TO_COLLECT }).map((_, i) => (
               <motion.div
-                className="relative mb-8"
+                key={i}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  i < collectedCount ? 'bg-emerald-500' : 'bg-muted-foreground/20'
+                }`}
+                animate={i < collectedCount ? { scale: [1, 1.3, 1] } : {}}
+              />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Falling leaves */}
+      <AnimatePresence>
+        {!isComplete && leaves.map((leaf) => {
+          const isClicked = clickedLeaves.has(leaf.id);
+          
+          return (
+            <motion.button
+              key={leaf.id}
+              initial={{ y: -100, x: `${leaf.x}vw`, rotate: 0, opacity: 0 }}
+              animate={{
+                y: isClicked ? undefined : '110vh',
+                rotate: isClicked ? 0 : leaf.rotation + 720,
+                opacity: isClicked ? 0 : 1,
+                scale: isClicked ? 1.5 : 1,
+              }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{
+                y: { duration: leaf.duration, ease: 'linear' },
+                rotate: { duration: leaf.duration, ease: 'linear' },
+                opacity: { duration: isClicked ? 0.3 : 0.5 },
+                scale: { duration: 0.2 },
+              }}
+              onClick={() => handleLeafClick(leaf)}
+              disabled={isClicked}
+              className="absolute top-0 z-10 cursor-pointer"
+              style={{ left: 0 }}
+            >
+              <motion.div
                 animate={{
-                  scale: [1, 1.1, 1],
+                  x: [0, 20, -20, 10, 0],
                 }}
                 transition={{
-                  duration: 3,
+                  duration: 4,
                   repeat: Infinity,
                   ease: 'easeInOut',
                 }}
               >
-                <div className="absolute inset-0 blur-2xl bg-primary/20 rounded-full scale-150" />
-                <span className="relative text-7xl">{step.icon}</span>
+                <Leaf 
+                  className="text-emerald-400 drop-shadow-lg" 
+                  style={{ width: leaf.size, height: leaf.size }}
+                />
               </motion.div>
+            </motion.button>
+          );
+        })}
+      </AnimatePresence>
 
-              {/* Instruction */}
-              <motion.p
-                className="text-2xl font-medium text-foreground leading-relaxed mb-8"
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                {step.instruction}
-              </motion.p>
+      {/* Revealed tip popup */}
+      <AnimatePresence>
+        {revealedTip && !isComplete && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: -20 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none"
+          >
+            <div className="bg-emerald-900/90 backdrop-blur-md border border-emerald-500/30 rounded-2xl px-8 py-6 max-w-xs text-center shadow-2xl">
+              <Leaf className="w-8 h-8 text-emerald-400 mx-auto mb-3" />
+              <p className="text-lg font-medium text-emerald-50">
+                {revealedTip}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              {/* Step indicator dots */}
-              <div className="flex items-center gap-2 mb-6">
-                {CALM_STEPS.map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      i < currentStep 
-                        ? 'bg-primary w-2' 
-                        : i === currentStep 
-                          ? 'bg-primary w-6' 
-                          : 'bg-muted-foreground/30'
+      {/* Completion screen */}
+      <AnimatePresence>
+        {isComplete && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative z-10 flex flex-col items-center px-8 text-center max-w-sm"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: [0, 1.5, 1] }}
+              transition={{ duration: 0.6, ease: 'backOut' }}
+              className="relative mb-6"
+            >
+              <Sparkles className="w-16 h-16 text-emerald-400" />
+              <motion.div
+                className="absolute inset-0 blur-xl bg-emerald-400/30"
+                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </motion.div>
+
+            <h2 className="text-3xl font-bold text-foreground mb-2">
+              Beautiful work
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              You collected {LEAVES_TO_COLLECT} moments of calm
+            </p>
+
+            <div className="mb-8">
+              <p className="text-sm text-muted-foreground mb-4">
+                How calm do you feel now?
+              </p>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
+                  <motion.button
+                    key={level}
+                    onClick={() => setRelaxationLevel(level)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
+                      level <= relaxationLevel
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-muted-foreground/10 text-muted-foreground'
                     }`}
-                    animate={i === currentStep ? { scale: [1, 1.2, 1] } : {}}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  />
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {level}
+                  </motion.button>
                 ))}
               </div>
+            </div>
 
-              {/* Step progress bar */}
-              <div className="w-48 h-1 bg-muted-foreground/10 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-primary/60 rounded-full"
-                  style={{ width: `${stepProgress}%` }}
-                />
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center"
+            <motion.button
+              onClick={handleComplete}
+              className="px-8 py-4 rounded-full bg-emerald-500 text-white font-semibold text-lg flex items-center gap-2"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              {/* Celebration burst */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: [0, 1.5, 1] }}
-                transition={{ duration: 0.6, ease: 'backOut' }}
-                className="relative mb-6"
-              >
-                <Sparkles className="w-16 h-16 text-primary" />
-                <motion.div
-                  className="absolute inset-0 blur-xl bg-primary/30"
-                  animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              </motion.div>
-
-              <h2 className="text-3xl font-bold text-foreground mb-2">
-                You did it
-              </h2>
-              <p className="text-muted-foreground mb-8">
-                Your calm is your superpower
-              </p>
-
-              {/* Relaxation rating */}
-              <div className="mb-8">
-                <p className="text-sm text-muted-foreground mb-4">
-                  How relaxed do you feel now?
-                </p>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
-                    <motion.button
-                      key={level}
-                      onClick={() => setRelaxationLevel(level)}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
-                        level <= relaxationLevel
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted-foreground/10 text-muted-foreground'
-                      }`}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {level}
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-
-              <motion.button
-                onClick={handleComplete}
-                className="px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold text-lg flex items-center gap-2"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Leaf className="w-5 h-5" />
-                Claim Calm
-              </motion.button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Overall progress bar at bottom */}
-      {!isComplete && (
-        <div className="absolute bottom-20 left-8 right-8">
-          <div className="w-full h-1.5 bg-muted-foreground/10 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-primary rounded-full"
-              style={{ width: `${overallProgress}%` }}
-            />
-          </div>
-        </div>
-      )}
+              <Leaf className="w-5 h-5" />
+              Claim Calm
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
