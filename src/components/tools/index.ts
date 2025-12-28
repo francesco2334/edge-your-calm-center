@@ -1,5 +1,7 @@
 export { PauseLadder } from './PauseLadder';
 export { CalmDown } from './CalmDown';
+export { GravityDrop } from './GravityDrop';
+export { NoiseDissolver } from './NoiseDissolver';
 export { NameThePull } from './NameThePull';
 export { PredictionReality } from './PredictionReality';
 export { BreathingSync } from './BreathingSync';
