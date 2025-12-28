@@ -90,11 +90,125 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           }}
         />
 
+        {/* Cute face - eyes and mouth */}
+        {size !== 'sm' && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="relative" style={{ width: '60%', height: '40%', marginTop: '10%' }}>
+              {/* Eyes */}
+              <motion.div
+                className="absolute flex justify-between w-full"
+                style={{ top: '0%' }}
+              >
+                {/* Left eye */}
+                <motion.div
+                  className="relative"
+                  style={{ width: '28%' }}
+                  animate={
+                    state === 'calm' ? { scaleY: [1, 0.1, 1] } : 
+                    state === 'steady' ? { scaleY: [1, 0.2, 1] } : {}
+                  }
+                  transition={{ 
+                    duration: state === 'calm' ? 4 : 3,
+                    repeat: Infinity,
+                    repeatDelay: state === 'calm' ? 3 : 2,
+                    ease: 'easeInOut'
+                  }}
+                >
+                  <div className="w-full aspect-[1/1.2] bg-white/90 rounded-full shadow-sm" />
+                  <motion.div 
+                    className="absolute bg-gray-800 rounded-full"
+                    style={{ width: '50%', height: '50%', top: '30%', left: '25%' }}
+                    animate={
+                      state === 'under-load' ? { x: [-1, 1, -1] } : {}
+                    }
+                    transition={{ duration: 0.5, repeat: Infinity }}
+                  />
+                </motion.div>
+                
+                {/* Right eye */}
+                <motion.div
+                  className="relative"
+                  style={{ width: '28%' }}
+                  animate={
+                    state === 'calm' ? { scaleY: [1, 0.1, 1] } : 
+                    state === 'steady' ? { scaleY: [1, 0.2, 1] } : {}
+                  }
+                  transition={{ 
+                    duration: state === 'calm' ? 4 : 3,
+                    repeat: Infinity,
+                    repeatDelay: state === 'calm' ? 3 : 2,
+                    ease: 'easeInOut'
+                  }}
+                >
+                  <div className="w-full aspect-[1/1.2] bg-white/90 rounded-full shadow-sm" />
+                  <motion.div 
+                    className="absolute bg-gray-800 rounded-full"
+                    style={{ width: '50%', height: '50%', top: '30%', left: '25%' }}
+                    animate={
+                      state === 'under-load' ? { x: [-1, 1, -1] } : {}
+                    }
+                    transition={{ duration: 0.5, repeat: Infinity }}
+                  />
+                </motion.div>
+              </motion.div>
+
+              {/* Mouth */}
+              <motion.div
+                className="absolute left-1/2 -translate-x-1/2"
+                style={{ bottom: '-10%', width: '40%' }}
+                animate={
+                  state === 'steady' ? { scaleX: [1, 1.1, 1] } : 
+                  state === 'under-load' ? { scaleY: [1, 0.8, 1] } : {}
+                }
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                {state === 'steady' ? (
+                  // Happy smile
+                  <svg viewBox="0 0 24 12" className="w-full">
+                    <path
+                      d="M2 2 Q12 14 22 2"
+                      stroke="white"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      fill="none"
+                      opacity="0.9"
+                    />
+                  </svg>
+                ) : state === 'under-load' ? (
+                  // Worried mouth
+                  <svg viewBox="0 0 24 12" className="w-full">
+                    <path
+                      d="M4 8 Q12 4 20 8"
+                      stroke="white"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      fill="none"
+                      opacity="0.85"
+                    />
+                  </svg>
+                ) : (
+                  // Neutral/calm smile
+                  <svg viewBox="0 0 24 12" className="w-full">
+                    <path
+                      d="M4 5 Q12 10 20 5"
+                      stroke="white"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      fill="none"
+                      opacity="0.9"
+                    />
+                  </svg>
+                )}
+              </motion.div>
+            </div>
+          </div>
+        )}
+
         {/* Inner highlight - depth and shine */}
         <motion.div
-          className="absolute inset-[12%] rounded-full bg-gradient-to-br from-white/30 via-white/12 to-transparent"
+          className="absolute inset-[12%] rounded-full bg-gradient-to-br from-white/20 via-white/8 to-transparent pointer-events-none"
           animate={{
-            opacity: state === 'steady' ? [0.3, 0.5, 0.3] : [0.22, 0.38, 0.22],
+            opacity: state === 'steady' ? [0.2, 0.35, 0.2] : [0.15, 0.28, 0.15],
           }}
           transition={{
             duration: 2.8,
