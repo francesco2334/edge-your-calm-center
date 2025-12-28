@@ -8,21 +8,21 @@ interface CalmDownProps {
 }
 
 const CALMING_TIPS = [
-  "Take 3 slow, deep breaths",
-  "Unclench your jaw right now",
-  "Drop your shoulders away from your ears",
-  "Feel your feet touching the ground",
-  "Name 5 things you can see",
-  "This feeling will pass",
-  "You are safe in this moment",
-  "Breathe in calm, breathe out tension",
-  "Place your hand on your heart",
-  "Imagine a warm light surrounding you",
-  "You've handled hard things before",
-  "Let go of what you can't control",
-  "One breath at a time",
-  "Your thoughts are not facts",
-  "This moment is temporary",
+  "This feeling is temporary. It will pass.",
+  "You are not your thoughts.",
+  "Peace is always one breath away.",
+  "The storm will end. You will remain.",
+  "Strength isn't forcing calm — it's allowing it.",
+  "You've survived 100% of your hardest days.",
+  "Stillness is not weakness. It's wisdom.",
+  "The urge is loud, but you are louder.",
+  "Nothing external can fill an internal void.",
+  "Your worth isn't measured by your productivity.",
+  "Rest is not a reward. It's a requirement.",
+  "You don't have to have it all figured out today.",
+  "Progress isn't always visible. Trust the process.",
+  "What you resist, persists. Let it flow through.",
+  "You are exactly where you need to be right now.",
 ];
 
 interface FallingLeaf {
