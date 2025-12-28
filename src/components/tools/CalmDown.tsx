@@ -240,7 +240,7 @@ export function CalmDown({ onComplete, onCancel }: CalmDownProps) {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative z-10 flex flex-col items-center px-8 text-center max-w-sm"
+            className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center"
           >
             <motion.div
               initial={{ scale: 0 }}
