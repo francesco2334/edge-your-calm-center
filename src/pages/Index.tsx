@@ -485,6 +485,8 @@ const Index = () => {
         <GamesScreen
           onGameComplete={handleGameComplete}
           onGameFail={handleGameFail}
+          hasLoggedToday={hasLoggedToday}
+          onLogPull={() => setActiveTab('home')}
         />
       )}
       
