@@ -90,117 +90,60 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           }}
         />
 
-        {/* Cute face - eyes and mouth */}
+        {/* EVE-style minimal eyes - just two simple ovals */}
         {size !== 'sm' && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="relative" style={{ width: '60%', height: '40%', marginTop: '10%' }}>
-              {/* Eyes */}
+            <motion.div 
+              className="flex gap-[18%]"
+              style={{ marginTop: '-5%' }}
+              animate={
+                state === 'steady' ? { rotate: [0, 2, 0, -2, 0] } :
+                state === 'under-load' ? { y: [0, 1, 0] } : {}
+              }
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              {/* Left eye - simple glowing oval */}
               <motion.div
-                className="absolute flex justify-between w-full"
-                style={{ top: '0%' }}
-              >
-                {/* Left eye */}
-                <motion.div
-                  className="relative"
-                  style={{ width: '28%' }}
-                  animate={
-                    state === 'calm' ? { scaleY: [1, 0.1, 1] } : 
-                    state === 'steady' ? { scaleY: [1, 0.2, 1] } : {}
-                  }
-                  transition={{ 
-                    duration: state === 'calm' ? 4 : 3,
-                    repeat: Infinity,
-                    repeatDelay: state === 'calm' ? 3 : 2,
-                    ease: 'easeInOut'
-                  }}
-                >
-                  <div className="w-full aspect-[1/1.2] bg-white/90 rounded-full shadow-sm" />
-                  <motion.div 
-                    className="absolute bg-gray-800 rounded-full"
-                    style={{ width: '50%', height: '50%', top: '30%', left: '25%' }}
-                    animate={
-                      state === 'under-load' ? { x: [-1, 1, -1] } : {}
-                    }
-                    transition={{ duration: 0.5, repeat: Infinity }}
-                  />
-                </motion.div>
-                
-                {/* Right eye */}
-                <motion.div
-                  className="relative"
-                  style={{ width: '28%' }}
-                  animate={
-                    state === 'calm' ? { scaleY: [1, 0.1, 1] } : 
-                    state === 'steady' ? { scaleY: [1, 0.2, 1] } : {}
-                  }
-                  transition={{ 
-                    duration: state === 'calm' ? 4 : 3,
-                    repeat: Infinity,
-                    repeatDelay: state === 'calm' ? 3 : 2,
-                    ease: 'easeInOut'
-                  }}
-                >
-                  <div className="w-full aspect-[1/1.2] bg-white/90 rounded-full shadow-sm" />
-                  <motion.div 
-                    className="absolute bg-gray-800 rounded-full"
-                    style={{ width: '50%', height: '50%', top: '30%', left: '25%' }}
-                    animate={
-                      state === 'under-load' ? { x: [-1, 1, -1] } : {}
-                    }
-                    transition={{ duration: 0.5, repeat: Infinity }}
-                  />
-                </motion.div>
-              </motion.div>
-
-              {/* Mouth */}
-              <motion.div
-                className="absolute left-1/2 -translate-x-1/2"
-                style={{ bottom: '-10%', width: '40%' }}
+                className="bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+                style={{ 
+                  width: size === 'lg' ? '18px' : '10px', 
+                  height: size === 'lg' ? '22px' : '12px',
+                }}
                 animate={
-                  state === 'steady' ? { scaleX: [1, 1.1, 1] } : 
-                  state === 'under-load' ? { scaleY: [1, 0.8, 1] } : {}
+                  state === 'calm' ? { scaleY: [1, 0.15, 1], scaleX: [1, 1.1, 1] } : 
+                  state === 'steady' ? { scaleY: [1, 0.1, 1] } :
+                  state === 'under-load' ? { scaleY: 0.6, rotate: -8 } :
+                  {}
                 }
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                {state === 'steady' ? (
-                  // Happy smile
-                  <svg viewBox="0 0 24 12" className="w-full">
-                    <path
-                      d="M2 2 Q12 14 22 2"
-                      stroke="white"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      fill="none"
-                      opacity="0.9"
-                    />
-                  </svg>
-                ) : state === 'under-load' ? (
-                  // Worried mouth
-                  <svg viewBox="0 0 24 12" className="w-full">
-                    <path
-                      d="M4 8 Q12 4 20 8"
-                      stroke="white"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      fill="none"
-                      opacity="0.85"
-                    />
-                  </svg>
-                ) : (
-                  // Neutral/calm smile
-                  <svg viewBox="0 0 24 12" className="w-full">
-                    <path
-                      d="M4 5 Q12 10 20 5"
-                      stroke="white"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      fill="none"
-                      opacity="0.9"
-                    />
-                  </svg>
-                )}
-              </motion.div>
-            </div>
+                transition={{ 
+                  duration: state === 'under-load' ? 0.3 : 0.15,
+                  repeat: state === 'under-load' ? 0 : Infinity,
+                  repeatDelay: 3.5,
+                  ease: 'easeInOut'
+                }}
+              />
+              
+              {/* Right eye - simple glowing oval */}
+              <motion.div
+                className="bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+                style={{ 
+                  width: size === 'lg' ? '18px' : '10px', 
+                  height: size === 'lg' ? '22px' : '12px',
+                }}
+                animate={
+                  state === 'calm' ? { scaleY: [1, 0.15, 1], scaleX: [1, 1.1, 1] } : 
+                  state === 'steady' ? { scaleY: [1, 0.1, 1] } :
+                  state === 'under-load' ? { scaleY: 0.6, rotate: 8 } :
+                  {}
+                }
+                transition={{ 
+                  duration: state === 'under-load' ? 0.3 : 0.15,
+                  repeat: state === 'under-load' ? 0 : Infinity,
+                  repeatDelay: 3.5,
+                  ease: 'easeInOut'
+                }}
+              />
+            </motion.div>
           </div>
         )}
 
