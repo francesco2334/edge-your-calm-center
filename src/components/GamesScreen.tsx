@@ -2,10 +2,13 @@ import { useState, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker, UrgeSurfing, BodyScan, CalmDown, GravityDrop, NoiseDissolver } from './tools';
 import { GameStartScreen } from './GameStartScreen';
+import { DailyPullGate } from './DailyPullGate';
 
 interface GamesScreenProps {
   onGameComplete: (gameId: string, details: string) => void;
   onGameFail: (gameId: string, reason: string) => void;
+  hasLoggedToday: boolean;
+  onLogPull: () => void;
 }
 
 type GameId = 'standoff' | 'nameIt' | 'bluff' | 'sync' | 'reaction' | 'surfing' | 'bodyscan' | 'calmdown' | 'gravitydrop' | 'noisedissolver';
@@ -135,8 +138,13 @@ const GAMES: {
 ];
 
 export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
-  function GamesScreen({ onGameComplete, onGameFail }, ref) {
+  function GamesScreen({ onGameComplete, onGameFail, hasLoggedToday, onLogPull }, ref) {
     const [activeGame, setActiveGame] = useState<ActiveGame>(null);
+
+    // Gate: Must log daily pull before accessing games
+    if (!hasLoggedToday) {
+      return <DailyPullGate onLogPull={onLogPull} />;
+    }
 
     const handleGameComplete = (gameId: GameId, details: string) => {
       onGameComplete(gameId, details);
