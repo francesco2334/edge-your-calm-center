@@ -90,14 +90,14 @@ const GAMES: {
   },
   {
     id: 'bodyscan',
-    name: 'Body Scan',
-    tagline: 'Ground yourself now.',
-    instruction: 'Move attention through 6 body areas. Notice sensations without judgment.',
-    whyItWorks: 'Body awareness interrupts the urge-action loop by anchoring you in the present.',
-    icon: '🧘',
-    gradient: 'from-emerald-600/40 via-green-700/30 to-background',
+    name: 'Brain Quiz',
+    tagline: 'Test your knowledge.',
+    instruction: 'Answer questions based on the Learn cards to see how much you\'ve absorbed.',
+    whyItWorks: 'Active recall strengthens memory and reinforces what you\'ve learned.',
+    icon: '🧠',
+    gradient: 'from-violet-600/40 via-purple-700/30 to-background',
     reward: '+1 token, +15 pts',
-    duration: '30s',
+    duration: '2-3min',
   },
 ];
 
