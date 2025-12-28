@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Zap } from 'lucide-react';
+import { User, Coins } from 'lucide-react';
 import { MojoOrb } from './MojoOrb';
 import { StreakRing } from './StreakRing';
 import { PullSheet } from './PullSheet';
@@ -12,13 +12,13 @@ import { useAuth } from '@/hooks/useAuth';
 import type { FeedCardData } from '@/lib/feed-data';
 
 interface HomeScreenProps {
-  credits: number;
+  tokens: number;
   points: number;
   streak: number;
   hasLoggedToday: boolean;
   trialDaysRemaining?: number;
   currentTrigger?: string | null;
-  onOpenReset: () => void;
+  onOpenExchange: () => void;
   onOpenMojoChat?: () => void;
   onOpenQuickStop?: () => void;
   onPullSelect: (pullId: string) => void;
@@ -28,13 +28,13 @@ interface HomeScreenProps {
 type MojoState = 'calm' | 'regulating' | 'under-load' | 'steady';
 
 export function HomeScreen({
-  credits,
+  tokens,
   points,
   streak,
   hasLoggedToday,
   trialDaysRemaining,
   currentTrigger,
-  onOpenReset,
+  onOpenExchange,
   onOpenMojoChat,
   onOpenQuickStop,
   onPullSelect,
@@ -46,8 +46,8 @@ export function HomeScreen({
 
   // Generate feed cards
   const feedCards = useMemo(() => 
-    generateFeedCards(streak, credits, hasLoggedToday).slice(0, 5),
-    [streak, credits, hasLoggedToday]
+    generateFeedCards(streak, tokens, hasLoggedToday).slice(0, 5),
+    [streak, tokens, hasLoggedToday]
   );
 
   // Mojo state
@@ -69,7 +69,7 @@ export function HomeScreen({
 
   const handleCardAction = (card: FeedCardData) => {
     if (card.action?.screen === 'exchange') {
-      onOpenReset();
+      onOpenExchange();
     }
   };
 
@@ -96,22 +96,25 @@ export function HomeScreen({
             </span>
           </div>
           
-          {/* Center: App name - reframed */}
+          {/* Center: App name */}
           <span className="text-[12px] font-semibold text-muted-foreground/50 tracking-[0.2em] uppercase">
-            MOJO
+            DopaMINE
           </span>
           
-          {/* Right: Trial badge + Credits + Settings */}
+          {/* Right: Trial badge + Token pill + Settings */}
           <div className="flex items-center gap-2">
             {trialDaysRemaining !== undefined && trialDaysRemaining > 0 && (
               <TrialBadge daysRemaining={trialDaysRemaining} />
             )}
             
-            {/* Credits counter - supporting UI, not primary */}
-            <div className="px-2.5 py-1 rounded-full bg-muted/30 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="text-[12px] font-medium text-foreground/70">{credits}</span>
-            </div>
+            {/* Token counter - primary currency display */}
+            <button 
+              onClick={onOpenExchange}
+              className="px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/25 flex items-center gap-1.5 hover:bg-amber-500/20 active:scale-95 transition-all"
+            >
+              <Coins className="w-3.5 h-3.5 text-amber-500" />
+              <span className="text-[12px] font-bold text-amber-500">{tokens}</span>
+            </button>
             
             <button 
               onClick={() => navigate('/settings')}
@@ -170,7 +173,7 @@ export function HomeScreen({
             </p>
           </motion.div>
 
-          {/* Mojo CTA - secondary */}
+          {/* Mojo CTA */}
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -179,39 +182,40 @@ export function HomeScreen({
             className="mt-4 px-5 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium hover:bg-accent/20 active:scale-95 transition-all flex items-center gap-2"
           >
             <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-            Ask Mojo for help
+            Talk to Mojo
           </motion.button>
         </motion.div>
 
-        {/* PRIMARY ACTION - Reset is now the main CTA */}
+        {/* PRIMARY ACTION */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="px-5 mb-6"
         >
-          <button
-            onClick={onOpenReset}
-            className="w-full h-[58px] rounded-[18px] bg-gradient-neon text-primary-foreground font-semibold text-[17px] shadow-lg shadow-primary/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-3"
-          >
-            <span className="text-xl">🔄</span>
-            Start a Reset
-          </button>
-          
-          {/* Secondary: Log the pull */}
           {!hasLoggedToday ? (
             <button
               onClick={() => setShowPullSheet(true)}
-              className="w-full mt-3 py-3 rounded-xl bg-muted/30 border border-border/20 text-foreground/80 font-medium text-[14px] hover:bg-muted/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full h-[54px] rounded-[18px] bg-gradient-neon text-primary-foreground font-semibold text-[16px] shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform"
             >
-              <span className="text-lg">📝</span>
-              Log today's pull (+3 credits)
+              Log today's pull (+3 tokens)
             </button>
           ) : (
-            <p className="text-center text-sm text-muted-foreground/50 mt-4">
-              ✓ Pull logged today
-            </p>
+            <button
+              onClick={onOpenExchange}
+              className="w-full h-[54px] rounded-[18px] bg-gradient-neon text-primary-foreground font-semibold text-[16px] shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform"
+            >
+              Spend tokens ({tokens} available)
+            </button>
           )}
+          
+          {/* Secondary link */}
+          <button
+            onClick={onOpenQuickStop}
+            className="w-full mt-3 text-[13px] text-muted-foreground/50 hover:text-muted-foreground/70 transition-colors font-medium"
+          >
+            Quick Stop (20s) →
+          </button>
         </motion.div>
 
         {/* SWIPE FEED */}
