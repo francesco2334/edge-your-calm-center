@@ -266,9 +266,12 @@ export const NameThePull = forwardRef<HTMLDivElement, NameThePullProps>(
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="flex justify-center mb-8"
+              className="flex flex-col items-center gap-3 mb-8"
             >
-              <MojoCompanion mood="thinking" size="md" message="What's underneath?" showMessage />
+              <MojoCompanion mood="curious" size="md" />
+              <p className="text-muted-foreground text-sm italic text-center max-w-[200px]">
+                "*tilts head* Hmm... what's going on in there? Tell me everything!"
+              </p>
             </motion.div>
 
             <div className="space-y-3">
