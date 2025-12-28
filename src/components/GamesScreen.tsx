@@ -1,6 +1,6 @@
 import { useState, forwardRef } from 'react';
 import { motion } from 'framer-motion';
-import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker } from './tools';
+import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker, UrgeSurfing, BodyScan } from './tools';
 import { GameStartScreen } from './GameStartScreen';
 
 interface GamesScreenProps {
@@ -8,7 +8,7 @@ interface GamesScreenProps {
   onGameFail: (gameId: string, reason: string) => void;
 }
 
-type GameId = 'standoff' | 'nameIt' | 'bluff' | 'sync' | 'reaction';
+type GameId = 'standoff' | 'nameIt' | 'bluff' | 'sync' | 'reaction' | 'surfing' | 'bodyscan';
 type ActiveGame = { id: GameId; started: boolean } | null;
 
 const GAMES: {
@@ -76,6 +76,28 @@ const GAMES: {
     gradient: 'from-rose-600/40 via-pink-700/30 to-background',
     reward: '+1 token, +15 pts',
     duration: '15s',
+  },
+  {
+    id: 'surfing',
+    name: 'Urge Surfing',
+    tagline: 'Ride the wave out.',
+    instruction: 'Track your urge intensity as it rises and falls. Observe it passing without acting.',
+    whyItWorks: 'Urges peak around 90 seconds then fade. Riding them builds tolerance.',
+    icon: '🌊',
+    gradient: 'from-cyan-600/40 via-blue-600/30 to-background',
+    reward: '+1 token, +20 pts',
+    duration: '60s',
+  },
+  {
+    id: 'bodyscan',
+    name: 'Body Scan',
+    tagline: 'Ground yourself now.',
+    instruction: 'Move attention through 6 body areas. Notice sensations without judgment.',
+    whyItWorks: 'Body awareness interrupts the urge-action loop by anchoring you in the present.',
+    icon: '🧘',
+    gradient: 'from-emerald-600/40 via-green-700/30 to-background',
+    reward: '+1 token, +15 pts',
+    duration: '30s',
   },
 ];
 
@@ -159,6 +181,20 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
               onComplete={(ms) => handleGameComplete('reaction', `${ms}ms`)}
               onCancel={() => handleGameFail('reaction', 'Early exit')}
               leaderboard={{ personalBest: 999, averageTime: 0, totalAttempts: 0, history: [], percentile: 50 }}
+            />
+          );
+        case 'surfing':
+          return (
+            <UrgeSurfing 
+              onComplete={(peak) => handleGameComplete('surfing', `Peak: ${peak}/10`)}
+              onCancel={() => handleGameFail('surfing', 'Early exit')}
+            />
+          );
+        case 'bodyscan':
+          return (
+            <BodyScan 
+              onComplete={(areas) => handleGameComplete('bodyscan', `${areas} areas`)}
+              onCancel={() => handleGameFail('bodyscan', 'Early exit')}
             />
           );
         default:
