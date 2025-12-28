@@ -21,7 +21,7 @@ interface MojoChatProps {
 
 const MAX_MESSAGE_LENGTH = 2000;
 
-type MojoEmote = 'wave' | 'dance' | 'spin' | 'blush' | 'sleepy' | null;
+type MojoEmote = 'wave' | 'dance' | 'spin' | 'blush' | 'sleepy' | 'excited' | 'dizzy' | 'love' | 'giggle' | 'yawn' | null;
 
 export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -31,105 +31,382 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [currentEmote, setCurrentEmote] = useState<MojoEmote>(null);
   const [showEmotes, setShowEmotes] = useState(false);
+  const [isUserTyping, setIsUserTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   const triggerEmote = (emote: MojoEmote) => {
     setCurrentEmote(emote);
-    setTimeout(() => setCurrentEmote(null), 2000);
+    const duration = emote === 'dizzy' ? 3000 : emote === 'dance' ? 2500 : 2000;
+    setTimeout(() => setCurrentEmote(null), duration);
+  };
+
+  // Handle user typing detection
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value.slice(0, MAX_MESSAGE_LENGTH));
+    setIsUserTyping(true);
+    
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsUserTyping(false);
+    }, 1000);
   };
 
   const EMOTES = [
     { id: 'wave' as const, icon: '👋', label: 'Wave' },
     { id: 'dance' as const, icon: '💃', label: 'Dance' },
     { id: 'spin' as const, icon: '🌀', label: 'Spin' },
-    { id: 'blush' as const, icon: '😊', label: 'Blush' },
+    { id: 'blush' as const, icon: '☺️', label: 'Blush' },
     { id: 'sleepy' as const, icon: '😴', label: 'Sleepy' },
+    { id: 'excited' as const, icon: '🤩', label: 'Excited' },
+    { id: 'dizzy' as const, icon: '😵‍💫', label: 'Dizzy' },
+    { id: 'love' as const, icon: '😍', label: 'Love' },
+    { id: 'giggle' as const, icon: '🤭', label: 'Giggle' },
+    { id: 'yawn' as const, icon: '🥱', label: 'Yawn' },
   ];
 
-  // Emoting Mojo component with animations
+  // Get mojo state based on emote, typing, or loading
+  const getMojoState = () => {
+    if (isLoading) return 'thinking';
+    if (isUserTyping && input.length > 0) return 'thinking';
+    if (currentEmote === 'sleepy' || currentEmote === 'yawn') return 'calm';
+    if (currentEmote === 'blush' || currentEmote === 'love') return 'steady';
+    if (currentEmote === 'excited') return 'steady';
+    return 'calm';
+  };
+
+  // Emoting Mojo component with enhanced animations
   const EmotingMojo = ({ emote }: { emote: MojoEmote }) => {
-    const getEmoteAnimation = (): { [key: string]: number | number[] } => {
+  const getEmoteAnimation = () => {
       switch (emote) {
         case 'wave':
-          return { rotate: [0, -15, 15, -15, 15, 0] };
+          return { rotate: [0, -20, 25, -20, 25, -15, 0] };
         case 'dance':
-          return { y: [0, -10, 0, -10, 0], x: [-5, 5, -5, 5, 0] };
+          return { 
+            y: [0, -15, 0, -15, 0, -10, 0],
+            x: [-8, 8, -8, 8, -4, 4, 0],
+            rotate: [0, -5, 5, -5, 5, 0],
+          };
         case 'spin':
-          return { rotate: [0, 360] };
+          return { rotate: [0, 360, 720], scale: [1, 0.9, 1] };
         case 'blush':
-          return { scale: [1, 1.1, 1] };
+          return { scale: [1, 1.08, 1.05, 1.08, 1], y: [0, -3, 0] };
         case 'sleepy':
-          return { y: [0, 5, 0], scale: [1, 0.95, 1] };
+          return { 
+            y: [0, 8, 4, 8, 4],
+            scale: [1, 0.92, 0.95, 0.92, 0.95],
+            rotate: [0, 3, -3, 3, 0],
+          };
+        case 'excited':
+          return { 
+            y: [0, -20, 0, -15, 0, -10, 0],
+            scale: [1, 1.15, 1, 1.12, 1, 1.08, 1],
+          };
+        case 'dizzy':
+          return { 
+            rotate: [0, 15, -15, 20, -20, 15, -15, 10, -10, 0],
+            x: [0, 5, -5, 8, -8, 5, -5, 3, -3, 0],
+          };
+        case 'love':
+          return { scale: [1, 1.2, 1.1, 1.2, 1], y: [0, -5, 0] };
+        case 'giggle':
+          return { 
+            rotate: [0, -3, 3, -3, 3, -2, 2, 0],
+            scale: [1, 1.05, 1, 1.05, 1, 1.03, 1],
+          };
+        case 'yawn':
+          return { 
+            y: [0, 5, 3, 5, 3],
+            scale: [1, 1.05, 1, 0.95, 1],
+            rotate: [0, 5, 0, -5, 0],
+          };
         default:
           return {};
       }
     };
 
+    const getEmoteDuration = () => {
+      switch (emote) {
+        case 'wave': return 1.2;
+        case 'dance': return 1.5;
+        case 'spin': return 1;
+        case 'blush': return 0.8;
+        case 'sleepy': return 2;
+        case 'excited': return 0.8;
+        case 'dizzy': return 2.5;
+        case 'love': return 1;
+        case 'giggle': return 0.6;
+        case 'yawn': return 2;
+        default: return 1;
+      }
+    };
+
     return (
       <div className="relative inline-block">
-        <motion.div animate={getEmoteAnimation()}>
-          <MojoOrb state={emote === 'sleepy' ? 'calm' : emote === 'blush' ? 'steady' : 'calm'} size="lg" />
+        <motion.div 
+          animate={getEmoteAnimation()}
+          transition={{ duration: getEmoteDuration(), ease: 'easeInOut' }}
+        >
+          <MojoOrb state={getMojoState()} size="lg" />
         </motion.div>
         
-        {/* Emote effects */}
+        {/* Enhanced emote effects */}
         <AnimatePresence>
           {emote === 'blush' && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute top-1/2 -translate-y-1/2 left-1/4 right-1/4 flex justify-between pointer-events-none"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="absolute top-[45%] -translate-y-1/2 left-[20%] right-[20%] flex justify-between pointer-events-none"
             >
-              <div className="w-4 h-3 rounded-full bg-pink-400/60" />
-              <div className="w-4 h-3 rounded-full bg-pink-400/60" />
+              <motion.div 
+                className="w-5 h-4 rounded-full bg-pink-400/70 blur-[1px]"
+                animate={{ opacity: [0.5, 0.8, 0.5] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+              <motion.div 
+                className="w-5 h-4 rounded-full bg-pink-400/70 blur-[1px]"
+                animate={{ opacity: [0.5, 0.8, 0.5] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
             </motion.div>
           )}
+          
           {emote === 'sleepy' && (
-            <motion.div
-              initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: [0, 1, 0], y: -30, x: 20 }}
-              transition={{ duration: 1.5, repeat: 1 }}
-              className="absolute top-0 right-0 text-2xl pointer-events-none"
-            >
-              💤
-            </motion.div>
+            <>
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                  animate={{ 
+                    opacity: [0, 1, 0], 
+                    y: -50 - i * 15, 
+                    x: 20 + i * 10,
+                    scale: [0.5, 1.2, 0.8]
+                  }}
+                  transition={{ 
+                    duration: 2, 
+                    delay: i * 0.5,
+                    repeat: Infinity,
+                    repeatDelay: 0.5
+                  }}
+                  className="absolute top-0 right-0 text-2xl pointer-events-none"
+                >
+                  💤
+                </motion.div>
+              ))}
+            </>
           )}
+          
           {emote === 'wave' && (
             <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute -right-4 top-1/3 text-2xl pointer-events-none"
+              initial={{ opacity: 0, scale: 0, rotate: -30 }}
+              animate={{ 
+                opacity: 1, 
+                scale: [1, 1.2, 1],
+                rotate: [-30, 30, -30, 30, 0]
+              }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{ duration: 1 }}
+              className="absolute -right-6 top-1/4 text-3xl pointer-events-none"
             >
               👋
             </motion.div>
           )}
+          
           {emote === 'dance' && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none"
+              className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-2 pointer-events-none"
             >
-              {['✨', '🎵', '✨'].map((s, i) => (
+              {['✨', '🎵', '💫', '🎶', '✨'].map((s, i) => (
                 <motion.span
                   key={i}
-                  animate={{ y: [0, -8, 0], opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 0.5, delay: i * 0.15, repeat: 2 }}
-                  className="text-sm"
+                  animate={{ 
+                    y: [0, -12, 0], 
+                    opacity: [0.7, 1, 0.7],
+                    scale: [1, 1.2, 1]
+                  }}
+                  transition={{ 
+                    duration: 0.4, 
+                    delay: i * 0.1, 
+                    repeat: Infinity,
+                    repeatType: 'reverse'
+                  }}
+                  className="text-lg"
                 >
                   {s}
                 </motion.span>
               ))}
             </motion.div>
           )}
+          
+          {emote === 'spin' && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {[0, 1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 bg-primary/60 rounded-full"
+                  style={{
+                    top: '50%',
+                    left: '50%',
+                  }}
+                  animate={{
+                    x: [0, Math.cos(i * 90 * Math.PI / 180) * 60],
+                    y: [0, Math.sin(i * 90 * Math.PI / 180) * 60],
+                    opacity: [1, 0],
+                    scale: [1, 0.3],
+                  }}
+                  transition={{ duration: 0.8, delay: i * 0.1 }}
+                />
+              ))}
+            </motion.div>
+          )}
+          
+          {emote === 'excited' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute -top-4 left-1/2 -translate-x-1/2 pointer-events-none"
+            >
+              {['⭐', '✨', '⭐'].map((s, i) => (
+                <motion.span
+                  key={i}
+                  className="absolute text-xl"
+                  style={{ left: `${(i - 1) * 24}px` }}
+                  animate={{
+                    y: [0, -20, 0],
+                    scale: [0.8, 1.3, 0.8],
+                    rotate: [0, 360],
+                  }}
+                  transition={{
+                    duration: 0.6,
+                    delay: i * 0.1,
+                    repeat: 2,
+                  }}
+                >
+                  {s}
+                </motion.span>
+              ))}
+            </motion.div>
+          )}
+          
+          {emote === 'dizzy' && (
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {[0, 1, 2].map((i) => (
+                <motion.span
+                  key={i}
+                  className="absolute text-xl"
+                  style={{ top: '-10px', left: '50%' }}
+                  animate={{
+                    rotate: [0, 360],
+                    x: [0, Math.cos(i * 120 * Math.PI / 180) * 40, 0],
+                    y: [0, Math.sin(i * 120 * Math.PI / 180) * 40, 0],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    delay: i * 0.3,
+                  }}
+                >
+                  💫
+                </motion.span>
+              ))}
+            </motion.div>
+          )}
+          
+          {emote === 'love' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 pointer-events-none overflow-visible"
+            >
+              {[0, 1, 2, 3, 4].map((i) => (
+                <motion.span
+                  key={i}
+                  className="absolute text-lg"
+                  style={{ 
+                    left: `${30 + i * 20}%`,
+                    top: '0%'
+                  }}
+                  initial={{ y: 0, opacity: 0, scale: 0.5 }}
+                  animate={{
+                    y: -60,
+                    opacity: [0, 1, 0],
+                    scale: [0.5, 1.2, 0.8],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    delay: i * 0.15,
+                    repeat: 1,
+                  }}
+                >
+                  ❤️
+                </motion.span>
+              ))}
+            </motion.div>
+          )}
+          
+          {emote === 'giggle' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute -right-4 top-1/3 pointer-events-none"
+            >
+              <motion.span
+                className="text-xl"
+                animate={{ 
+                  rotate: [-10, 10, -10],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ duration: 0.3, repeat: 4 }}
+              >
+                😆
+              </motion.span>
+            </motion.div>
+          )}
+          
+          {emote === 'yawn' && (
+            <>
+              <motion.div
+                initial={{ opacity: 0, y: 0 }}
+                animate={{ opacity: [0, 0.6, 0], y: -40, x: 15 }}
+                transition={{ duration: 2, repeat: 1 }}
+                className="absolute top-0 right-0 text-xl pointer-events-none"
+              >
+                😪
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 0.4, 0] }}
+                transition={{ duration: 2.5 }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-primary/10 rounded-full blur-xl pointer-events-none"
+              />
+            </>
+          )}
         </AnimatePresence>
       </div>
     );
   };
-
   useEffect(() => {
     if (isOpen && userId) {
       loadRecentConversation();
@@ -430,7 +707,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border/30 safe-top">
             <div className="flex items-center gap-3">
-              <MojoOrb state="calm" size="sm" />
+              <MojoOrb state={isLoading || isUserTyping ? 'thinking' : 'calm'} size="sm" />
               <div>
                 <h2 className="text-base font-medium text-foreground">Mojo</h2>
                 <p className="text-xs text-muted-foreground">Your regulation companion</p>
@@ -573,7 +850,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                 ref={inputRef}
                 type="text"
                 value={input}
-                onChange={(e) => setInput(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
+                onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
                 placeholder={hasConsented ? "Talk to Mojo..." : "Accept above to chat"}
                 className="flex-1 bg-muted/30 border border-border/30 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
