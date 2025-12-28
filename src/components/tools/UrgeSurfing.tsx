@@ -357,74 +357,79 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
             )}
           </AnimatePresence>
 
-          {/* WAVE TARGET ZONE - gentle band following wave line */}
-          <motion.div
-            className="absolute left-0 right-0 pointer-events-none z-10"
-            style={{ 
-              height: `${WAVE_ZONE_SIZE}%`
-            }}
-            animate={{ top: `${waveY - (WAVE_ZONE_SIZE / 2)}%` }}
+          {/* DYNAMIC OCEAN - position tied to waveY */}
+          <motion.div 
+            className="absolute left-0 right-0 pointer-events-none"
+            style={{ height: '60%' }}
+            animate={{ top: `${waveY - 10}%` }}
             transition={{ type: 'tween', duration: 0.8, ease: 'easeInOut' }}
           >
-            {/* Wave zone indicator - relaxed band */}
-            <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/15 via-cyan-400/30 to-cyan-400/15 border-y border-cyan-300/40" />
-            <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-cyan-300/60" />
-          </motion.div>
-
-          <div className="absolute bottom-0 left-0 right-0" style={{ height: '45%' }}>
-            {/* Deep ocean base */}
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-900 via-blue-700 to-blue-500" />
+            {/* Wave crest / target zone indicator */}
+            <div className="absolute top-0 left-0 right-0 h-16 z-20">
+              <div className="absolute inset-x-0 top-6 h-4 bg-gradient-to-b from-cyan-300/40 to-transparent" />
+            </div>
             
-            {/* Animated wave layers */}
+            {/* Main wave surface with dynamic shape */}
             <svg 
-              className="absolute top-0 left-0 w-[200%] h-full"
-              viewBox="0 0 1440 200" 
+              className="absolute top-0 left-0 w-[200%] h-32"
+              viewBox="0 0 1440 120" 
               preserveAspectRatio="none"
-              style={{ animation: 'wave-scroll 8s linear infinite' }}
+              style={{ animation: 'wave-scroll 12s linear infinite' }}
             >
               <defs>
                 <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor={currentChallenge.color} stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#0284c7" stopOpacity="0.9" />
+                  <stop offset="0%" stopColor={currentChallenge.color} stopOpacity="0.95" />
+                  <stop offset="50%" stopColor="#0ea5e9" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#0284c7" stopOpacity="0.85" />
+                </linearGradient>
+                <linearGradient id="foamGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="white" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="white" stopOpacity="0" />
                 </linearGradient>
               </defs>
-              {/* Main curvy wave */}
+              
+              {/* Foam/crest at top */}
+              <path
+                fill="url(#foamGradient)"
+                d="M0,25 Q60,15 120,25 T240,25 T360,25 T480,25 T600,25 T720,25 T840,25 T960,25 T1080,25 T1200,25 T1320,25 T1440,25 L1440,35 Q1380,30 1320,35 T1200,35 T1080,35 T960,35 T840,35 T720,35 T600,35 T480,35 T360,35 T240,35 T120,35 T0,35 Z"
+              />
+              
+              {/* Main wave body */}
               <path
                 fill="url(#waveGradient)"
-                d="M0,40 C120,80 240,0 360,40 C480,80 600,0 720,40 C840,80 960,0 1080,40 C1200,80 1320,20 1440,40 L1440,200 L0,200 Z"
+                d="M0,30 Q80,20 160,35 T320,30 T480,35 T640,25 T800,35 T960,30 T1120,35 T1280,25 T1440,30 L1440,120 L0,120 Z"
               />
-              {/* Foam line */}
-              <path
-                fill="none"
-                stroke="white"
-                strokeWidth="3"
-                strokeOpacity="0.6"
-                d="M0,42 C120,82 240,2 360,42 C480,82 600,2 720,42 C840,82 960,2 1080,42 C1200,82 1320,22 1440,42"
-              />
-              {/* Foam bubbles */}
-              <circle cx="100" cy="35" r="6" fill="white" fillOpacity="0.7" />
-              <circle cx="130" cy="50" r="4" fill="white" fillOpacity="0.6" />
-              <circle cx="300" cy="30" r="5" fill="white" fillOpacity="0.7" />
-              <circle cx="500" cy="45" r="6" fill="white" fillOpacity="0.6" />
-              <circle cx="700" cy="35" r="4" fill="white" fillOpacity="0.7" />
-              <circle cx="900" cy="50" r="5" fill="white" fillOpacity="0.6" />
-              <circle cx="1100" cy="38" r="6" fill="white" fillOpacity="0.7" />
-              <circle cx="1300" cy="45" r="4" fill="white" fillOpacity="0.6" />
+              
+              {/* Foam bubbles on crest */}
+              <circle cx="80" cy="28" r="4" fill="white" fillOpacity="0.8" />
+              <circle cx="200" cy="30" r="3" fill="white" fillOpacity="0.7" />
+              <circle cx="350" cy="27" r="5" fill="white" fillOpacity="0.75" />
+              <circle cx="520" cy="32" r="3" fill="white" fillOpacity="0.7" />
+              <circle cx="680" cy="26" r="4" fill="white" fillOpacity="0.8" />
+              <circle cx="850" cy="30" r="3" fill="white" fillOpacity="0.7" />
+              <circle cx="1000" cy="28" r="4" fill="white" fillOpacity="0.75" />
+              <circle cx="1150" cy="31" r="3" fill="white" fillOpacity="0.7" />
+              <circle cx="1300" cy="27" r="4" fill="white" fillOpacity="0.8" />
             </svg>
-
-            {/* Second wave layer */}
+            
+            {/* Secondary wave layer for depth */}
             <svg 
-              className="absolute top-4 left-0 w-[200%] h-full opacity-70"
-              viewBox="0 0 1440 200" 
+              className="absolute top-8 left-0 w-[200%] h-32 opacity-80"
+              viewBox="0 0 1440 120" 
               preserveAspectRatio="none"
-              style={{ animation: 'wave-scroll 12s linear infinite reverse' }}
+              style={{ animation: 'wave-scroll 18s linear infinite reverse' }}
             >
               <path
-                fill="#0ea5e9"
-                d="M0,60 C180,20 300,100 480,60 C660,20 780,100 960,60 C1140,20 1260,80 1440,60 L1440,200 L0,200 Z"
+                fill="#0369a1"
+                d="M0,20 Q100,35 200,20 T400,25 T600,15 T800,25 T1000,20 T1200,30 T1440,20 L1440,120 L0,120 Z"
               />
             </svg>
-          </div>
+            
+            {/* Deep ocean below */}
+            <div 
+              className="absolute top-24 left-0 right-0 bottom-0 bg-gradient-to-b from-blue-600 via-blue-800 to-blue-950"
+            />
+          </motion.div>
 
           {/* SURFER */}
           <motion.div
