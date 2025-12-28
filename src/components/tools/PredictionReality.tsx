@@ -74,9 +74,12 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="flex justify-center mb-8"
+              className="flex flex-col items-center gap-3 mb-8"
             >
-              <MojoCompanion mood="thinking" size="md" message="How good will it feel?" showMessage />
+              <MojoCompanion mood="curious" size="md" />
+              <p className="text-muted-foreground text-sm italic text-center max-w-[220px]">
+                "*leans in* Ooh, a prediction game! How good do you THINK it'll feel?"
+              </p>
             </motion.div>
 
             <motion.div
@@ -124,9 +127,12 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="mb-8"
+              className="mb-6 flex flex-col items-center gap-2"
             >
-              <MojoCompanion mood="encouraging" size="lg" message="Go try it out!" showMessage />
+              <MojoCompanion mood="encouraging" size="lg" />
+              <p className="text-muted-foreground text-sm italic">
+                "*waves* Go on, I'll wait right here!"
+              </p>
             </motion.div>
 
             <motion.p
@@ -195,9 +201,12 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="flex justify-center mb-8"
+              className="flex flex-col items-center gap-3 mb-8"
             >
-              <MojoCompanion mood="thinking" size="md" message="Be honest..." showMessage />
+              <MojoCompanion mood="curious" size="md" />
+              <p className="text-muted-foreground text-sm italic text-center max-w-[200px]">
+                "*peers closely* Okay, truth time! How was it really?"
+              </p>
             </motion.div>
 
             <div className="space-y-3">
@@ -238,14 +247,19 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="mb-8"
+            className="mb-6 flex flex-col items-center gap-2"
           >
             <MojoCompanion 
-              mood={gap === 0 ? 'celebrating' : gap > 0 ? 'encouraging' : 'cheering'} 
+              mood={gap === 0 ? 'celebrating' : gap > 0 ? 'thinking' : 'excited'} 
               size="lg" 
-              message={gap === 0 ? "Perfect!" : gap > 0 ? "Interesting..." : "Nice surprise!"}
-              showMessage
             />
+            <p className="text-muted-foreground text-sm italic text-center max-w-[220px]">
+              {gap === 0 
+                ? "*happy spin* You nailed it! Brain calibration: perfect!" 
+                : gap > 0 
+                ? "*nods wisely* Hmm, your brain oversold that one. Good to know!" 
+                : "*surprised beep* Oh! It was better than you thought!"}
+            </p>
           </motion.div>
 
           <motion.div

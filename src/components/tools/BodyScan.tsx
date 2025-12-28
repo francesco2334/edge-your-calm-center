@@ -123,14 +123,12 @@ export const BodyScan = forwardRef<HTMLDivElement, BodyScanProps>(
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="flex justify-center mb-10"
+              className="flex flex-col items-center gap-3 mb-10"
             >
-              <MojoCompanion 
-                mood="thinking" 
-                size="lg" 
-                message="Let's test your knowledge!" 
-                showMessage 
-              />
+              <MojoCompanion mood="curious" size="lg" />
+              <p className="text-muted-foreground text-sm italic text-center max-w-[220px]">
+                "Ooh ooh! I love quizzes! *bounces excitedly* Ready to show me what you know?"
+              </p>
             </motion.div>
 
             <motion.div

@@ -239,7 +239,7 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex justify-center mb-8"
+              className="flex flex-col items-center gap-3 mb-8"
             >
               {/* Mojo on surfboard */}
               <motion.div
@@ -247,11 +247,14 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
                 transition={{ duration: 2, repeat: Infinity }}
                 className="relative"
               >
-                <MojoCompanion mood="surfing" size="lg" message="Let's ride!" showMessage />
+                <MojoCompanion mood="excited" size="lg" />
                 <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-4xl">
                   🏄
                 </div>
               </motion.div>
+              <p className="text-white/90 text-sm italic text-center max-w-[200px]">
+                "Wooo! Surf's up, friend! Let's catch some waves together! 🌊"
+              </p>
             </motion.div>
 
             <motion.div

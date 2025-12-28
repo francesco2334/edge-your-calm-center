@@ -201,9 +201,12 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 }}
-              className="flex justify-center mb-6"
+              className="flex flex-col items-center gap-4 mb-6"
             >
-              <MojoCompanion mood="encouraging" size="lg" message="Ready to test your reflexes?" showMessage />
+              <MojoCompanion mood="mischievous" size="lg" />
+              <p className="text-sm text-muted-foreground italic text-center">
+                "Psst... think you can catch me? Let's see those reflexes!"
+              </p>
             </motion.div>
 
             {/* Personal stats */}
@@ -319,18 +322,19 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
           
           <div className="relative z-10 text-center">
             {/* Mojo companion stays in center as reference */}
-            <div className="relative mb-8">
+            <div className="relative mb-8 flex flex-col items-center gap-2">
               <motion.div
                 animate={{ scale: hasFlickers ? 0.9 : 1, opacity: hasFlickers ? 0.5 : 1 }}
                 transition={{ duration: 0.2 }}
               >
                 <MojoCompanion 
-                  mood={hasFlickers ? 'cheering' : 'thinking'} 
+                  mood={hasFlickers ? 'excited' : 'mischievous'} 
                   size="lg"
-                  message={hasFlickers ? "Tap them!" : "Focus..."}
-                  showMessage={hasFlickers}
                 />
               </motion.div>
+              <p className="text-xs text-muted-foreground italic">
+                {hasFlickers ? "*beep boop* Get them!!!" : "*giggles* ...waiting..."}
+              </p>
             </div>
 
             {/* Status text */}
@@ -412,14 +416,17 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="mb-6"
+            className="mb-4 flex flex-col items-center gap-2"
           >
             <MojoCompanion 
-              mood={isNewBest ? 'celebrating' : 'cheering'} 
+              mood={isNewBest ? 'celebrating' : 'proud'} 
               size="lg"
-              message={isNewBest ? "New record!" : "Great job!"}
-              showMessage
             />
+            <p className="text-sm text-muted-foreground italic">
+              {isNewBest 
+                ? "*spins excitedly* WOOOOO! You did it! New record!!!" 
+                : "*happy beeps* That was awesome, friend!"}
+            </p>
           </motion.div>
 
           {/* Taps result */}
