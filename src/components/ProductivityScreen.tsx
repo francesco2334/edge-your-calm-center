@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Dumbbell, BookOpen, Brain, Heart, Salad, Pencil, Droplets, Apple, Timer } from 'lucide-react';
+import { Check, Dumbbell, BookOpen, Brain, Heart, Salad, Pencil, Droplets, Apple, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Slider } from '@/components/ui/slider';
+import { WellnessBar } from './WellnessBar';
 
 interface ProductivityCategory {
   id: string;
@@ -51,16 +51,21 @@ const CATEGORIES: ProductivityCategory[] = [
   }
 ];
 
+interface WellnessData {
+  water: number;
+  waterLocked: boolean;
+  meals: number;
+  mealsLocked: boolean;
+  exercise: number;
+  exerciseLocked: boolean;
+}
+
 interface ProductivityScreenProps {
   logsToday: number;
   logsRemaining: number;
   onLogProductivity: (category: string, description?: string) => void;
-  waterIntake?: number;
-  onWaterChange?: (litres: number) => void;
-  healthyMeals?: number;
-  onHealthyMealLog?: () => void;
-  exerciseHours?: number;
-  onExerciseChange?: (hours: number) => void;
+  wellness?: WellnessData;
+  onWellnessChange?: (wellness: WellnessData) => void;
 }
 
 const MAX_LOGS = 3;
@@ -69,18 +74,16 @@ export function ProductivityScreen({
   logsToday, 
   logsRemaining, 
   onLogProductivity,
-  waterIntake = 0,
-  onWaterChange,
-  healthyMeals = 0,
-  onHealthyMealLog,
-  exerciseHours = 0,
-  onExerciseChange
+  wellness = { water: 0, waterLocked: false, meals: 0, mealsLocked: false, exercise: 0, exerciseLocked: false },
+  onWellnessChange
 }: ProductivityScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [otherDescription, setOtherDescription] = useState('');
   const [isLogging, setIsLogging] = useState(false);
-  const [localWater, setLocalWater] = useState(waterIntake);
-  const [localExercise, setLocalExercise] = useState(exerciseHours);
+
+  const updateWellness = (updates: Partial<WellnessData>) => {
+    onWellnessChange?.({ ...wellness, ...updates });
+  };
 
   const handleLog = async () => {
     if (!selectedCategory) return;
@@ -224,119 +227,54 @@ export function ProductivityScreen({
 
           {/* Wellness Trackers Section */}
           <motion.div 
-            className="px-6 mt-8 mb-6"
+            className="px-6 mt-8 mb-6 space-y-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
             <h2 className="text-xl font-semibold text-foreground mb-4">Daily Wellness</h2>
             
-            {/* Water Intake */}
-            <div className="p-4 rounded-xl bg-card border border-border/50 mb-3">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
-                  <Droplets className="w-5 h-5" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-foreground">Water Intake</h3>
-                  <p className="text-xs text-muted-foreground">Stay hydrated!</p>
-                </div>
-                <span className="text-lg font-bold text-blue-400">{localWater.toFixed(1)}L</span>
-              </div>
-              <div className="relative">
-                <div className="h-3 rounded-full bg-muted overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(localWater / 3) * 100}%` }}
-                    transition={{ type: 'spring', stiffness: 100 }}
-                  />
-                </div>
-                <Slider
-                  value={[localWater]}
-                  onValueChange={(val) => {
-                    setLocalWater(val[0]);
-                    onWaterChange?.(val[0]);
-                  }}
-                  max={3}
-                  step={0.25}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                />
-              </div>
-              <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>0L</span>
-                <span>1L</span>
-                <span>2L</span>
-                <span>3L</span>
-              </div>
-            </div>
+            <WellnessBar
+              icon={Droplets}
+              title="Water Intake"
+              subtitle="Drag to log your hydration"
+              value={wellness.water}
+              maxValue={3}
+              unit="L"
+              color="blue"
+              points={5}
+              isLocked={wellness.waterLocked}
+              onValueChange={(v) => updateWellness({ water: v })}
+              onLock={() => updateWellness({ waterLocked: true })}
+            />
 
-            {/* Healthy Eating */}
-            <motion.button
-              onClick={() => onHealthyMealLog?.()}
-              className={`w-full p-4 rounded-xl border transition-all text-left mb-3 ${
-                healthyMeals > 0
-                  ? 'bg-green-500/10 border-green-500/30'
-                  : 'bg-card border-border/50 hover:border-border'
-              }`}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${
-                  healthyMeals > 0 ? 'bg-green-500/20 text-green-400' : 'bg-muted text-muted-foreground'
-                }`}>
-                  <Apple className="w-5 h-5" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-foreground">Healthy Eating</h3>
-                  <p className="text-xs text-muted-foreground">Log a nutritious meal</p>
-                </div>
-                <div className="flex gap-1">
-                  {[1, 2, 3].map((meal) => (
-                    <div 
-                      key={meal}
-                      className={`w-3 h-3 rounded-full transition-all ${
-                        meal <= healthyMeals ? 'bg-green-400' : 'bg-muted'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </motion.button>
+            <WellnessBar
+              icon={Apple}
+              title="Healthy Meals"
+              subtitle="Log your nutritious meals today"
+              value={wellness.meals}
+              maxValue={3}
+              unit=""
+              color="green"
+              points={5}
+              isLocked={wellness.mealsLocked}
+              onValueChange={(v) => updateWellness({ meals: v })}
+              onLock={() => updateWellness({ mealsLocked: true })}
+            />
 
-            {/* Exercise Hours */}
-            <div className="p-4 rounded-xl bg-card border border-border/50">
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`p-2 rounded-lg ${
-                  localExercise > 0 ? 'bg-orange-500/20 text-orange-400' : 'bg-muted text-muted-foreground'
-                }`}>
-                  <Timer className="w-5 h-5" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-foreground">Exercise Today</h3>
-                  <p className="text-xs text-muted-foreground">How many hours?</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4].map((hours) => (
-                  <motion.button
-                    key={hours}
-                    onClick={() => {
-                      setLocalExercise(hours);
-                      onExerciseChange?.(hours);
-                    }}
-                    className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-                      localExercise >= hours
-                        ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
-                        : 'bg-muted text-muted-foreground border border-transparent hover:bg-muted/80'
-                    }`}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {hours}h
-                  </motion.button>
-                ))}
-              </div>
-            </div>
+            <WellnessBar
+              icon={Flame}
+              title="Exercise Hours"
+              subtitle="How long did you move today?"
+              value={wellness.exercise}
+              maxValue={4}
+              unit="h"
+              color="orange"
+              points={10}
+              isLocked={wellness.exerciseLocked}
+              onValueChange={(v) => updateWellness({ exercise: v })}
+              onLock={() => updateWellness({ exerciseLocked: true })}
+            />
           </motion.div>
 
           {/* Log button */}
