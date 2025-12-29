@@ -196,24 +196,43 @@ export function MojoCustomizeScreen({ points, onSpendPoints, onBack }: MojoCusto
                     <div className="w-12 h-12 flex items-center justify-center text-3xl">
                       {cosmetic.id.includes('crown') ? '👑' : 
                        cosmetic.id.includes('wizard') ? '🧙' :
-                       cosmetic.id.includes('beanie') ? '🧢' :
-                       cosmetic.id.includes('halo') ? '😇' : '🎩'}
+                       cosmetic.id.includes('beanie') ? '🧶' :
+                       cosmetic.id.includes('halo') ? '😇' :
+                       cosmetic.id.includes('catears') ? '🐱' :
+                       cosmetic.id.includes('bunny') ? '🐰' :
+                       cosmetic.id.includes('flower') ? '🌸' :
+                       cosmetic.id.includes('tiara') ? '👸' :
+                       cosmetic.id.includes('chef') ? '👨‍🍳' :
+                       cosmetic.id.includes('pirate') ? '🏴‍☠️' :
+                       cosmetic.id.includes('cap') ? '🧢' : '🎩'}
                     </div>
                   )}
                   {cosmetic.type === 'face' && (
                     <div className="w-12 h-12 flex items-center justify-center text-3xl">
-                      {cosmetic.id.includes('mustache') ? '🥸' :
-                       cosmetic.id.includes('monocle') ? '🧐' :
+                      {cosmetic.id.includes('mustache') || cosmetic.id.includes('handlebar') ? '🥸' :
                        cosmetic.id.includes('blush') ? '😊' :
-                       cosmetic.id.includes('heart') ? '😍' : '😎'}
+                       cosmetic.id.includes('freckles') ? '🧒' :
+                       cosmetic.id.includes('hearts') ? '😍' :
+                       cosmetic.id.includes('stars') ? '🤩' :
+                       cosmetic.id.includes('whiskers') ? '🐱' : '😊'}
                     </div>
                   )}
                   {cosmetic.type === 'accessory' && (
                     <div className="w-12 h-12 flex items-center justify-center text-3xl">
-                      {cosmetic.id.includes('fire') ? '🔥' :
-                       cosmetic.id.includes('rainbow') ? '🌈' :
-                       cosmetic.id.includes('sparkle') ? '✨' :
-                       cosmetic.id.includes('galaxy') ? '🌌' : '💫'}
+                      {cosmetic.id.includes('bowtie') ? '🎀' :
+                       cosmetic.id.includes('scarf') ? '🧣' :
+                       cosmetic.id.includes('cape') ? '🦸' :
+                       cosmetic.id.includes('necklace') ? '📿' :
+                       cosmetic.id.includes('pearls') ? '📿' :
+                       cosmetic.id.includes('headphones') ? '🎧' :
+                       cosmetic.id.includes('wings') ? '🪽' :
+                       cosmetic.id.includes('butterfly') ? '🦋' :
+                       cosmetic.id.includes('flames') ? '🔥' :
+                       cosmetic.id.includes('sparkles') ? '✨' :
+                       cosmetic.id.includes('jamesbond') ? '🕴️' :
+                       cosmetic.id.includes('superhero') ? '🦸' :
+                       cosmetic.id.includes('princess') ? '👸' :
+                       cosmetic.id.includes('teddy') ? '🧸' : '💫'}
                     </div>
                   )}
                 </div>
