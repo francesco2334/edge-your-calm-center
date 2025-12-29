@@ -36,10 +36,10 @@ export const PERMISSION_OPTIONS: ExchangeRate[] = [
 export const EARN_OPTIONS = PERMISSION_OPTIONS;
 
 export const SPEND_OPTIONS: SpendOption[] = [
-  { id: 'scroll-10', label: '10 min Scroll', icon: '📱', tokenCost: 2, minutes: 10, description: 'TikTok, Instagram, etc.' },
-  { id: 'scroll-30', label: '30 min Scroll', icon: '📲', tokenCost: 6, minutes: 30, description: 'Extended session' },
-  { id: 'free-hour', label: '1hr Free Flow', icon: '🌊', tokenCost: 12, minutes: 60, description: 'No limits for an hour' },
-  { id: 'gaming', label: '30 min Gaming', icon: '🎮', tokenCost: 6, minutes: 30, description: 'Game time' },
+  { id: 'scroll-10', label: '10 min Scroll', icon: '📱', tokenCost: 3, minutes: 10, description: 'TikTok, Instagram, etc.' },
+  { id: 'scroll-30', label: '30 min Scroll', icon: '📲', tokenCost: 9, minutes: 30, description: 'Extended session' },
+  { id: 'free-hour', label: '1hr Free Flow', icon: '🌊', tokenCost: 18, minutes: 60, description: 'No limits for an hour' },
+  { id: 'gaming', label: '30 min Gaming', icon: '🎮', tokenCost: 9, minutes: 30, description: 'Game time' },
 ];
 
 export interface CategoryScore {

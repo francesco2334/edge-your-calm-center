@@ -20,51 +20,51 @@ interface CosmeticsState {
 
 const COSMETICS_STORAGE_KEY = 'mojo-cosmetics';
 
-// Available cosmetics catalog - simple, stable items only
+// Available cosmetics catalog - prices x3
 export const COSMETICS_CATALOG: Cosmetic[] = [
   // COLORS - Changes Mojo's base gradient
   { id: 'color-default', name: 'Classic Purple', type: 'color', price: 0, rarity: 'common', description: 'The original Mojo look' },
-  { id: 'color-ocean', name: 'Ocean Blue', type: 'color', price: 150, rarity: 'common', description: 'Deep sea vibes' },
-  { id: 'color-sunset', name: 'Sunset Orange', type: 'color', price: 150, rarity: 'common', description: 'Warm sunset glow' },
-  { id: 'color-forest', name: 'Forest Green', type: 'color', price: 200, rarity: 'rare', description: 'Nature energy' },
-  { id: 'color-rose', name: 'Rose Pink', type: 'color', price: 200, rarity: 'rare', description: 'Soft and sweet' },
-  { id: 'color-midnight', name: 'Midnight Black', type: 'color', price: 300, rarity: 'epic', description: 'Dark and mysterious' },
-  { id: 'color-gold', name: 'Golden Glow', type: 'color', price: 500, rarity: 'legendary', description: 'Pure luxury' },
+  { id: 'color-ocean', name: 'Ocean Blue', type: 'color', price: 450, rarity: 'common', description: 'Deep sea vibes' },
+  { id: 'color-sunset', name: 'Sunset Orange', type: 'color', price: 450, rarity: 'common', description: 'Warm sunset glow' },
+  { id: 'color-forest', name: 'Forest Green', type: 'color', price: 600, rarity: 'rare', description: 'Nature energy' },
+  { id: 'color-rose', name: 'Rose Pink', type: 'color', price: 600, rarity: 'rare', description: 'Soft and sweet' },
+  { id: 'color-midnight', name: 'Midnight Black', type: 'color', price: 900, rarity: 'epic', description: 'Dark and mysterious' },
+  { id: 'color-gold', name: 'Golden Glow', type: 'color', price: 1500, rarity: 'legendary', description: 'Pure luxury' },
   
   // HATS - Simple SVG hats
-  { id: 'hat-beanie', name: 'Cozy Beanie', type: 'hat', price: 150, rarity: 'common', description: 'Warm and snug' },
-  { id: 'hat-cap', name: 'Baseball Cap', type: 'hat', price: 150, rarity: 'common', description: 'Classic sporty look' },
-  { id: 'hat-tophat', name: 'Top Hat', type: 'hat', price: 250, rarity: 'rare', description: 'Fancy and classy' },
-  { id: 'hat-crown', name: 'Royal Crown', type: 'hat', price: 450, rarity: 'epic', description: 'Fit for royalty' },
-  { id: 'hat-chef', name: 'Chef Toque', type: 'hat', price: 200, rarity: 'rare', description: 'Master chef vibes' },
-  { id: 'hat-pirate', name: 'Pirate Tricorn', type: 'hat', price: 350, rarity: 'epic', description: 'Arr matey!' },
-  { id: 'hat-catears', name: 'Cat Ears', type: 'hat', price: 200, rarity: 'rare', description: 'Cute kitty vibes' },
-  { id: 'hat-bunnyears', name: 'Bunny Ears', type: 'hat', price: 225, rarity: 'rare', description: 'Hoppy and adorable' },
-  { id: 'hat-flower', name: 'Flower Crown', type: 'hat', price: 175, rarity: 'common', description: 'Spring garden beauty' },
-  { id: 'hat-tiara', name: 'Princess Tiara', type: 'hat', price: 400, rarity: 'epic', description: 'Royal sparkle' },
+  { id: 'hat-beanie', name: 'Cozy Beanie', type: 'hat', price: 450, rarity: 'common', description: 'Warm and snug' },
+  { id: 'hat-cap', name: 'Baseball Cap', type: 'hat', price: 450, rarity: 'common', description: 'Classic sporty look' },
+  { id: 'hat-tophat', name: 'Top Hat', type: 'hat', price: 750, rarity: 'rare', description: 'Fancy and classy' },
+  { id: 'hat-crown', name: 'Royal Crown', type: 'hat', price: 1350, rarity: 'epic', description: 'Fit for royalty' },
+  { id: 'hat-chef', name: 'Chef Toque', type: 'hat', price: 600, rarity: 'rare', description: 'Master chef vibes' },
+  { id: 'hat-pirate', name: 'Pirate Tricorn', type: 'hat', price: 1050, rarity: 'epic', description: 'Arr matey!' },
+  { id: 'hat-catears', name: 'Cat Ears', type: 'hat', price: 600, rarity: 'rare', description: 'Cute kitty vibes' },
+  { id: 'hat-bunnyears', name: 'Bunny Ears', type: 'hat', price: 675, rarity: 'rare', description: 'Hoppy and adorable' },
+  { id: 'hat-flower', name: 'Flower Crown', type: 'hat', price: 525, rarity: 'common', description: 'Spring garden beauty' },
+  { id: 'hat-tiara', name: 'Princess Tiara', type: 'hat', price: 1200, rarity: 'epic', description: 'Royal sparkle' },
   
   // FACE - Simple face additions
-  { id: 'face-blush', name: 'Rosy Cheeks', type: 'face', price: 175, rarity: 'common', description: 'Adorable blush' },
-  { id: 'face-freckles', name: 'Cute Freckles', type: 'face', price: 175, rarity: 'common', description: 'Sprinkle of charm' },
-  { id: 'face-whiskers', name: 'Cat Whiskers', type: 'face', price: 150, rarity: 'common', description: 'Meow!' },
-  { id: 'face-hearts', name: 'Heart Eyes', type: 'face', price: 225, rarity: 'rare', description: 'In love!' },
-  { id: 'face-stars', name: 'Star Eyes', type: 'face', price: 250, rarity: 'rare', description: 'Starstruck!' },
+  { id: 'face-blush', name: 'Rosy Cheeks', type: 'face', price: 525, rarity: 'common', description: 'Adorable blush' },
+  { id: 'face-freckles', name: 'Cute Freckles', type: 'face', price: 525, rarity: 'common', description: 'Sprinkle of charm' },
+  { id: 'face-whiskers', name: 'Cat Whiskers', type: 'face', price: 450, rarity: 'common', description: 'Meow!' },
+  { id: 'face-hearts', name: 'Heart Eyes', type: 'face', price: 675, rarity: 'rare', description: 'In love!' },
+  { id: 'face-stars', name: 'Star Eyes', type: 'face', price: 750, rarity: 'rare', description: 'Starstruck!' },
   
   // ACCESSORIES - Simple items around Mojo
-  { id: 'acc-bowtie-red', name: 'Red Bow Tie', type: 'accessory', price: 150, rarity: 'common', description: 'Classic and dapper' },
-  { id: 'acc-bowtie-pink', name: 'Pink Bow Tie', type: 'accessory', price: 150, rarity: 'common', description: 'Pretty in pink' },
-  { id: 'acc-bowtie-blue', name: 'Blue Bow Tie', type: 'accessory', price: 150, rarity: 'common', description: 'Cool and calm' },
-  { id: 'acc-bowtie-gold', name: 'Golden Bow Tie', type: 'accessory', price: 300, rarity: 'rare', description: 'Fancy formal' },
-  { id: 'acc-scarf', name: 'Cozy Scarf', type: 'accessory', price: 175, rarity: 'common', description: 'Warm and stylish' },
-  { id: 'acc-cape', name: 'Hero Cape', type: 'accessory', price: 300, rarity: 'epic', description: 'Super Mojo!' },
-  { id: 'acc-necklace', name: 'Gold Chain', type: 'accessory', price: 250, rarity: 'rare', description: 'Bling bling' },
-  { id: 'acc-pearls', name: 'Pearl Necklace', type: 'accessory', price: 275, rarity: 'rare', description: 'Elegant beauty' },
+  { id: 'acc-bowtie-red', name: 'Red Bow Tie', type: 'accessory', price: 450, rarity: 'common', description: 'Classic and dapper' },
+  { id: 'acc-bowtie-pink', name: 'Pink Bow Tie', type: 'accessory', price: 450, rarity: 'common', description: 'Pretty in pink' },
+  { id: 'acc-bowtie-blue', name: 'Blue Bow Tie', type: 'accessory', price: 450, rarity: 'common', description: 'Cool and calm' },
+  { id: 'acc-bowtie-gold', name: 'Golden Bow Tie', type: 'accessory', price: 900, rarity: 'rare', description: 'Fancy formal' },
+  { id: 'acc-scarf', name: 'Cozy Scarf', type: 'accessory', price: 525, rarity: 'common', description: 'Warm and stylish' },
+  { id: 'acc-cape', name: 'Hero Cape', type: 'accessory', price: 900, rarity: 'epic', description: 'Super Mojo!' },
+  { id: 'acc-necklace', name: 'Gold Chain', type: 'accessory', price: 750, rarity: 'rare', description: 'Bling bling' },
+  { id: 'acc-pearls', name: 'Pearl Necklace', type: 'accessory', price: 825, rarity: 'rare', description: 'Elegant beauty' },
   
   // EXCLUSIVE COLLECTION - Premium outfits
-  { id: 'outfit-jamesbond', name: 'Secret Agent', type: 'accessory', price: 2500, rarity: 'legendary', description: 'Shaken, not stirred. Full tuxedo with bow tie.' },
-  { id: 'outfit-superhero', name: 'Super Mojo', type: 'accessory', price: 2500, rarity: 'legendary', description: 'Cape, mask, and lightning bolt. Save the day!' },
-  { id: 'outfit-princess', name: 'Royal Princess', type: 'accessory', price: 2500, rarity: 'legendary', description: 'Tiara, dress, and wand. Fairytale dreams!' },
-  { id: 'outfit-teddy', name: 'Teddy Bear', type: 'accessory', price: 2000, rarity: 'legendary', description: 'Fuzzy ears and bow. Huggable cuteness!' },
+  { id: 'outfit-jamesbond', name: 'Secret Agent', type: 'accessory', price: 7500, rarity: 'legendary', description: 'Shaken, not stirred. Full tuxedo with bow tie.' },
+  { id: 'outfit-superhero', name: 'Super Mojo', type: 'accessory', price: 7500, rarity: 'legendary', description: 'Cape, mask, and lightning bolt. Save the day!' },
+  { id: 'outfit-princess', name: 'Royal Princess', type: 'accessory', price: 7500, rarity: 'legendary', description: 'Tiara, dress, and wand. Fairytale dreams!' },
+  { id: 'outfit-teddy', name: 'Teddy Bear', type: 'accessory', price: 6000, rarity: 'legendary', description: 'Fuzzy ears and bow. Huggable cuteness!' },
 ];
 
 const DEFAULT_STATE: CosmeticsState = {

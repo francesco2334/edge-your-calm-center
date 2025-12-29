@@ -10,10 +10,10 @@ interface ExchangeScreenProps {
 }
 
 const SPEND_OPTIONS = [
-  { id: 'scroll-10', label: '10 min Scroll', icon: '📱', tokenCost: 1, minutes: 10, description: 'TikTok, Instagram, etc.' },
-  { id: 'scroll-30', label: '30 min Scroll', icon: '📲', tokenCost: 3, minutes: 30, description: 'Extended session' },
-  { id: 'gaming-30', label: '30 min Gaming', icon: '🎮', tokenCost: 3, minutes: 30, description: 'Video games' },
-  { id: 'free-60', label: '1hr Free Flow', icon: '🌊', tokenCost: 6, minutes: 60, description: 'No limits for an hour' },
+  { id: 'scroll-10', label: '10 min Scroll', icon: '📱', tokenCost: 3, minutes: 10, description: 'TikTok, Instagram, etc.' },
+  { id: 'scroll-30', label: '30 min Scroll', icon: '📲', tokenCost: 9, minutes: 30, description: 'Extended session' },
+  { id: 'gaming-30', label: '30 min Gaming', icon: '🎮', tokenCost: 9, minutes: 30, description: 'Video games' },
+  { id: 'free-60', label: '1hr Free Flow', icon: '🌊', tokenCost: 18, minutes: 60, description: 'No limits for an hour' },
 ];
 
 export function ExchangeScreen({ tokens, minutesPerToken, onSpendTokens, onBack }: ExchangeScreenProps) {
