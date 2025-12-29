@@ -5,6 +5,7 @@ import { MojoOrb } from './MojoOrb';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useMojoMood, emoteAnimationDurations, type MojoEmote } from '@/hooks/useMojoMood';
+import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -47,6 +48,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
   const inputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+  const cosmeticsContext = useMojoCosmeticsOptional();
   
   // Use the new mood system with animation locking
   const { 
@@ -173,7 +175,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
             times: undefined // Let framer calculate even timing
           }}
         >
-          <MojoOrb state={getMojoState()} size="lg" />
+          <MojoOrb state={getMojoState()} size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
         </motion.div>
         
         {/* Enhanced emote effects */}
@@ -729,7 +731,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-border/30 safe-top">
             <div className="flex items-center gap-3">
-              <MojoOrb state={isLoading || isUserTyping ? 'thinking' : 'calm'} size="sm" />
+              <MojoOrb state={isLoading || isUserTyping ? 'thinking' : 'calm'} size="sm" cosmetics={cosmeticsContext?.equippedCosmetics} />
               <div>
                 <h2 className="text-base font-medium text-foreground">Mojo</h2>
                 <p className="text-xs text-muted-foreground">Your regulation companion</p>
@@ -846,7 +848,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                 >
                   {msg.role === 'assistant' && (
                     <div className="flex-shrink-0 mr-2 mt-1">
-                      <MojoOrb state="calm" size="sm" />
+                      <MojoOrb state="calm" size="sm" cosmetics={cosmeticsContext?.equippedCosmetics} />
                     </div>
                   )}
                   <div
@@ -867,7 +869,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                   className="flex justify-start"
                 >
                   <div className="flex-shrink-0 mr-2 mt-1">
-                    <MojoOrb state="thinking" size="sm" />
+                    <MojoOrb state="thinking" size="sm" cosmetics={cosmeticsContext?.equippedCosmetics} />
                   </div>
                   <div className="bg-muted/50 px-4 py-3 rounded-2xl rounded-bl-sm">
                     <div className="flex gap-1">
