@@ -466,17 +466,18 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-col items-center text-center"
+            className="w-full flex flex-col items-center text-center"
           >
-            <motion.div
-              className="mb-6"
-              animate={{ 
-                y: [0, -8, 0],
-              }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <MojoOrb state="steady" size="lg" />
-            </motion.div>
+            <div className="w-full flex justify-center mb-6">
+              <motion.div
+                animate={{ 
+                  y: [0, -8, 0],
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <MojoOrb state="steady" size="lg" />
+              </motion.div>
+            </div>
             <h2 className="text-2xl font-semibold text-foreground mb-2">Centered</h2>
             <p className="text-muted-foreground text-sm mb-8">You found your focus</p>
             

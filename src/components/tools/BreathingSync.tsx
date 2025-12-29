@@ -141,14 +141,15 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              className="flex justify-center mb-12"
-            >
-              <MojoOrb state="calm" size="lg" />
-            </motion.div>
+            <div className="w-full flex justify-center mb-12">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <MojoOrb state="calm" size="lg" />
+              </motion.div>
+            </div>
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -207,29 +208,31 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
           <div className="absolute inset-0 bg-gradient-calm" />
           
           <div className="relative z-10 flex flex-col items-center justify-center flex-1">
-            {/* Breathing orb with smooth scaling */}
-            <motion.div
-              animate={{ scale: breathScale }}
-              transition={{ 
-                duration: 0.1,
-                ease: 'linear',
-              }}
-              className="mb-6 relative"
-            >
-              {/* Outer breathing ring */}
+            {/* Breathing orb with smooth scaling - Centered */}
+            <div className="w-full flex justify-center mb-6">
               <motion.div
-                className="absolute -inset-4 rounded-full border-2 border-primary/20"
-                animate={{ 
-                  scale: breathPhase === 'inhale' ? [1, 1.15] : breathPhase === 'exhale' ? [1.15, 1] : 1.15,
-                  opacity: breathPhase === 'hold' ? 0.6 : 0.3,
-                }}
+                animate={{ scale: breathScale }}
                 transition={{ 
-                  duration: breathPhase === 'inhale' ? BREATH_CYCLE.inhale : BREATH_CYCLE.exhale,
-                  ease: 'easeInOut',
+                  duration: 0.1,
+                  ease: 'linear',
                 }}
-              />
-              <MojoOrb state="regulating" size="lg" />
-            </motion.div>
+                className="relative"
+              >
+                {/* Outer breathing ring */}
+                <motion.div
+                  className="absolute -inset-4 rounded-full border-2 border-primary/20"
+                  animate={{ 
+                    scale: breathPhase === 'inhale' ? [1, 1.15] : breathPhase === 'exhale' ? [1.15, 1] : 1.15,
+                    opacity: breathPhase === 'hold' ? 0.6 : 0.3,
+                  }}
+                  transition={{ 
+                    duration: breathPhase === 'inhale' ? BREATH_CYCLE.inhale : BREATH_CYCLE.exhale,
+                    ease: 'easeInOut',
+                  }}
+                />
+                <MojoOrb state="regulating" size="lg" />
+              </motion.div>
+            </div>
 
             {/* Breath phase indicator */}
             <AnimatePresence mode="wait">
@@ -316,13 +319,14 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
         <div className="absolute inset-0 bg-gradient-calm" />
         
         <div className="relative z-10 text-center">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="mb-8"
-          >
-            <MojoOrb state="steady" size="lg" />
-          </motion.div>
+          <div className="w-full flex justify-center mb-8">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+            >
+              <MojoOrb state="steady" size="lg" />
+            </motion.div>
+          </div>
 
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
