@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Zap, Target, Timer, TrendingUp, Sparkles } from 'lucide-react';
 import { MojoOrb } from '../MojoOrb';
 import { haptics } from '@/hooks/useHaptics';
+import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
 
 interface BreathingSyncProps {
   onComplete: () => void;
@@ -28,6 +29,7 @@ const NEURO_FACTS = [
 
 export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
   function BreathingSync({ onComplete, onCancel }, ref) {
+    const cosmeticsContext = useMojoCosmeticsOptional();
     const [phase, setPhase] = useState<'intro' | 'active' | 'complete'>('intro');
     const [breathPhase, setBreathPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
     const [phaseProgress, setPhaseProgress] = useState(0); // 0-1 progress within current phase
@@ -147,7 +149,7 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
               >
-                <MojoOrb state="calm" size="lg" />
+                <MojoOrb state="calm" size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
               </motion.div>
             </div>
 
@@ -230,7 +232,7 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
                     ease: 'easeInOut',
                   }}
                 />
-                <MojoOrb state="regulating" size="lg" />
+                <MojoOrb state="regulating" size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
               </motion.div>
             </div>
 
@@ -324,7 +326,7 @@ export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
             >
-              <MojoOrb state="steady" size="lg" />
+              <MojoOrb state="steady" size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
             </motion.div>
           </div>
 

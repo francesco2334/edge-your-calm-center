@@ -214,78 +214,121 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           </div>
         )}
 
-        {/* Hat cosmetics */}
+        {/* Hat cosmetics - positioned to overlap with orb edge for natural look */}
         {cosmetics?.hat && size !== 'sm' && (
-          <div className="absolute left-1/2 -translate-x-1/2 z-20 pointer-events-none" style={{ top: size === 'lg' ? '-35%' : '-30%' }}>
+          <div 
+            className="absolute left-1/2 -translate-x-1/2 z-20 pointer-events-none" 
+            style={{ 
+              top: size === 'lg' ? '-18%' : '-15%',
+            }}
+          >
             {cosmetics.hat === 'hat-beanie' && (
-              <svg width={size === 'lg' ? 80 : 45} height={size === 'lg' ? 50 : 28} viewBox="0 0 80 50">
-                <ellipse cx="40" cy="45" rx="38" ry="12" fill="#374151" />
-                <path d="M5 45 Q5 15 40 10 Q75 15 75 45" fill="#6366f1" />
-                <circle cx="40" cy="5" r="6" fill="#6366f1" />
-                <rect x="5" y="38" width="70" height="10" rx="3" fill="#4f46e5" />
+              <svg width={size === 'lg' ? 100 : 55} height={size === 'lg' ? 60 : 35} viewBox="0 0 100 60">
+                {/* Beanie sits on head with rounded dome */}
+                <ellipse cx="50" cy="55" rx="48" ry="15" fill="#4f46e5" />
+                <path d="M8 55 Q8 20 50 12 Q92 20 92 55" fill="#6366f1" />
+                <circle cx="50" cy="8" r="7" fill="#818cf8" />
+                {/* Ribbed band at bottom */}
+                <rect x="8" y="48" width="84" height="12" rx="4" fill="#4338ca" />
+                <line x1="20" y1="48" x2="20" y2="60" stroke="#3730a3" strokeWidth="1" opacity="0.5" />
+                <line x1="35" y1="48" x2="35" y2="60" stroke="#3730a3" strokeWidth="1" opacity="0.5" />
+                <line x1="50" y1="48" x2="50" y2="60" stroke="#3730a3" strokeWidth="1" opacity="0.5" />
+                <line x1="65" y1="48" x2="65" y2="60" stroke="#3730a3" strokeWidth="1" opacity="0.5" />
+                <line x1="80" y1="48" x2="80" y2="60" stroke="#3730a3" strokeWidth="1" opacity="0.5" />
               </svg>
             )}
             {cosmetics.hat === 'hat-cap' && (
-              <svg width={size === 'lg' ? 90 : 50} height={size === 'lg' ? 45 : 25} viewBox="0 0 90 45">
-                <ellipse cx="45" cy="40" rx="40" ry="10" fill="#1e3a8a" />
-                <path d="M10 40 Q10 20 45 15 Q80 20 80 40" fill="#3b82f6" />
-                <path d="M5 40 Q0 42 15 45 L85 45 Q90 42 85 38" fill="#1e3a8a" />
+              <svg width={size === 'lg' ? 110 : 60} height={size === 'lg' ? 55 : 32} viewBox="0 0 110 55">
+                {/* Baseball cap with curved brim */}
+                <ellipse cx="55" cy="50" rx="50" ry="12" fill="#1e40af" />
+                <path d="M12 50 Q12 25 55 18 Q98 25 98 50" fill="#3b82f6" />
+                {/* Cap button on top */}
+                <circle cx="55" cy="20" r="4" fill="#1e3a8a" />
+                {/* Brim extending forward */}
+                <path d="M10 48 Q-5 52 15 58 L95 58 Q115 52 100 48" fill="#1e3a8a" />
               </svg>
             )}
             {cosmetics.hat === 'hat-tophat' && (
-              <svg width={size === 'lg' ? 70 : 40} height={size === 'lg' ? 70 : 40} viewBox="0 0 70 70">
-                <ellipse cx="35" cy="65" rx="32" ry="8" fill="#1f2937" />
-                <rect x="12" y="15" width="46" height="50" rx="3" fill="#374151" />
-                <rect x="12" y="15" width="46" height="8" fill="#4b5563" />
-                <rect x="18" y="25" width="4" height="6" rx="2" fill="#fbbf24" />
+              <svg width={size === 'lg' ? 85 : 48} height={size === 'lg' ? 85 : 48} viewBox="0 0 85 85">
+                {/* Classic top hat */}
+                <ellipse cx="42" cy="80" rx="40" ry="10" fill="#1f2937" />
+                <rect x="15" y="20" width="55" height="60" rx="3" fill="#374151" />
+                {/* Highlight band */}
+                <rect x="15" y="28" width="55" height="10" fill="#4b5563" />
+                {/* Gold buckle */}
+                <rect x="35" y="30" width="15" height="6" rx="1" fill="#fbbf24" />
               </svg>
             )}
             {cosmetics.hat === 'hat-wizard' && (
-              <svg width={size === 'lg' ? 90 : 50} height={size === 'lg' ? 80 : 45} viewBox="0 0 90 80">
-                <path d="M45 0 L10 75 L80 75 Z" fill="#4c1d95" />
-                <ellipse cx="45" cy="75" rx="38" ry="8" fill="#5b21b6" />
-                <circle cx="45" cy="8" r="6" fill="#fbbf24" />
-                {[0, 1, 2, 3, 4].map(i => (
-                  <circle key={i} cx={25 + i * 12} cy={30 + (i % 2) * 15} r="3" fill="#fbbf24" opacity="0.8" />
-                ))}
+              <svg width={size === 'lg' ? 110 : 60} height={size === 'lg' ? 95 : 52} viewBox="0 0 110 95">
+                {/* Wizard hat - tall cone shape */}
+                <path d="M55 0 L10 88 L100 88 Z" fill="#5b21b6" />
+                <ellipse cx="55" cy="88" rx="48" ry="10" fill="#7c3aed" />
+                {/* Stars decoration */}
+                <circle cx="55" cy="10" r="7" fill="#fbbf24" />
+                <circle cx="35" cy="35" r="4" fill="#fcd34d" opacity="0.9" />
+                <circle cx="70" cy="45" r="3" fill="#fcd34d" opacity="0.8" />
+                <circle cx="45" cy="60" r="3.5" fill="#fcd34d" opacity="0.85" />
+                <circle cx="75" cy="70" r="2.5" fill="#fcd34d" opacity="0.7" />
+                {/* Moon accent */}
+                <path d="M28 55 Q22 50 28 45 Q32 50 28 55" fill="#fbbf24" opacity="0.7" />
               </svg>
             )}
             {cosmetics.hat === 'hat-crown' && (
-              <svg width={size === 'lg' ? 80 : 45} height={size === 'lg' ? 55 : 30} viewBox="0 0 80 55">
-                <path d="M5 50 L10 20 L25 35 L40 5 L55 35 L70 20 L75 50 Z" fill="#fbbf24" />
-                <rect x="5" y="45" width="70" height="10" rx="2" fill="#f59e0b" />
-                <circle cx="20" cy="25" r="4" fill="#dc2626" />
-                <circle cx="40" cy="12" r="5" fill="#dc2626" />
-                <circle cx="60" cy="25" r="4" fill="#dc2626" />
+              <svg width={size === 'lg' ? 100 : 55} height={size === 'lg' ? 65 : 36} viewBox="0 0 100 65">
+                {/* Royal crown with gems */}
+                <path d="M5 55 L12 22 L28 38 L50 5 L72 38 L88 22 L95 55 Z" fill="#fbbf24" />
+                <rect x="5" y="50" width="90" height="15" rx="3" fill="#f59e0b" />
+                {/* Jewels */}
+                <circle cx="22" cy="28" r="5" fill="#dc2626" />
+                <circle cx="50" cy="12" r="6" fill="#dc2626" />
+                <circle cx="78" cy="28" r="5" fill="#dc2626" />
+                {/* Band gems */}
+                <circle cx="25" cy="57" r="3" fill="#3b82f6" />
+                <circle cx="50" cy="57" r="3" fill="#10b981" />
+                <circle cx="75" cy="57" r="3" fill="#3b82f6" />
               </svg>
             )}
             {cosmetics.hat === 'hat-halo' && (
               <motion.svg 
-                width={size === 'lg' ? 100 : 55} 
-                height={size === 'lg' ? 30 : 18} 
-                viewBox="0 0 100 30"
-                animate={{ y: [0, -3, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                width={size === 'lg' ? 120 : 65} 
+                height={size === 'lg' ? 35 : 20} 
+                viewBox="0 0 120 35"
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <ellipse cx="50" cy="15" rx="45" ry="12" fill="none" stroke="#fbbf24" strokeWidth="6" />
-                <ellipse cx="50" cy="15" rx="45" ry="12" fill="none" stroke="#fef3c7" strokeWidth="2" />
+                {/* Glowing halo ring */}
+                <ellipse cx="60" cy="18" rx="55" ry="14" fill="none" stroke="#fbbf24" strokeWidth="8" />
+                <ellipse cx="60" cy="18" rx="55" ry="14" fill="none" stroke="#fef3c7" strokeWidth="3" />
+                {/* Inner glow */}
+                <ellipse cx="60" cy="18" rx="50" ry="11" fill="none" stroke="#fef9c3" strokeWidth="1" opacity="0.5" />
               </motion.svg>
             )}
             {cosmetics.hat === 'hat-chef' && (
-              <svg width={size === 'lg' ? 85 : 48} height={size === 'lg' ? 60 : 35} viewBox="0 0 85 60">
-                <ellipse cx="42" cy="55" rx="38" ry="8" fill="#e5e7eb" />
-                <circle cx="25" cy="25" r="20" fill="#f9fafb" />
-                <circle cx="42" cy="20" r="22" fill="#f9fafb" />
-                <circle cx="60" cy="25" r="20" fill="#f9fafb" />
-                <rect x="10" y="40" width="65" height="15" fill="#f9fafb" />
+              <svg width={size === 'lg' ? 105 : 58} height={size === 'lg' ? 75 : 42} viewBox="0 0 105 75">
+                {/* Puffy chef hat */}
+                <ellipse cx="52" cy="70" rx="48" ry="10" fill="#e5e7eb" />
+                <circle cx="28" cy="30" r="25" fill="#f9fafb" />
+                <circle cx="52" cy="25" r="28" fill="#ffffff" />
+                <circle cx="76" cy="30" r="25" fill="#f9fafb" />
+                {/* Band */}
+                <rect x="10" y="55" width="85" height="18" fill="#f3f4f6" />
               </svg>
             )}
             {cosmetics.hat === 'hat-pirate' && (
-              <svg width={size === 'lg' ? 100 : 55} height={size === 'lg' ? 55 : 30} viewBox="0 0 100 55">
-                <ellipse cx="50" cy="50" rx="45" ry="8" fill="#1f2937" />
-                <path d="M10 50 Q10 25 50 20 Q90 25 90 50" fill="#374151" />
-                <circle cx="50" cy="30" r="12" fill="#f9fafb" />
-                <path d="M45 25 L50 35 L55 25 L50 40 Z" fill="#1f2937" />
+              <svg width={size === 'lg' ? 120 : 65} height={size === 'lg' ? 65 : 36} viewBox="0 0 120 65">
+                {/* Tricorn pirate hat */}
+                <ellipse cx="60" cy="60" rx="55" ry="10" fill="#1f2937" />
+                <path d="M12 60 Q12 30 60 22 Q108 30 108 60" fill="#374151" />
+                {/* Skull and crossbones */}
+                <circle cx="60" cy="38" r="14" fill="#f9fafb" />
+                <circle cx="54" cy="36" r="3" fill="#1f2937" />
+                <circle cx="66" cy="36" r="3" fill="#1f2937" />
+                <ellipse cx="60" cy="44" rx="2" ry="1" fill="#1f2937" />
+                {/* Crossbones */}
+                <line x1="45" y1="52" x2="75" y2="52" stroke="#f9fafb" strokeWidth="4" strokeLinecap="round" />
+                <line x1="48" y1="48" x2="48" y2="56" stroke="#f9fafb" strokeWidth="3" strokeLinecap="round" />
+                <line x1="72" y1="48" x2="72" y2="56" stroke="#f9fafb" strokeWidth="3" strokeLinecap="round" />
               </svg>
             )}
           </div>

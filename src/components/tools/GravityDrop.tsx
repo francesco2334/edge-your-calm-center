@@ -36,6 +36,7 @@ const generateRandomPosition = (containerWidth: number, containerHeight: number,
 
 export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
   const { notifySuccess, selectionChanged } = useHaptics();
+  const cosmeticsContext = useMojoCosmeticsOptional();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -452,7 +453,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
           } : {}}
           transition={isExcited ? { duration: 0.5, ease: 'easeOut' } : {}}
         >
-          <MojoOrb state={isExcited ? 'steady' : mojoState} size="md" />
+          <MojoOrb state={isExcited ? 'steady' : mojoState} size="md" cosmetics={cosmeticsContext?.equippedCosmetics} />
         </motion.div>
       )}
 
@@ -476,7 +477,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
                 }}
                 transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <MojoOrb state="steady" size="lg" />
+                <MojoOrb state="steady" size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
               </motion.div>
             </div>
             <h2 className="text-2xl font-semibold text-foreground mb-2">Centered</h2>

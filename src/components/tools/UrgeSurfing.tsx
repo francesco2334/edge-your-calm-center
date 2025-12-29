@@ -4,6 +4,7 @@ import { Waves, Star, AlertTriangle } from 'lucide-react';
 import { haptics } from '@/hooks/useHaptics';
 import { MojoCompanion } from '../MojoCompanion';
 import { MojoOrb } from '../MojoOrb';
+import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
 
 interface UrgeSurfingProps {
   onComplete: (wavesRidden: number) => void;
@@ -38,6 +39,7 @@ const WAVE_ZONE_SIZE = 18; // Generous zone for relaxed gameplay
 
 export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
   function UrgeSurfing({ onComplete, onCancel }, ref) {
+    const cosmeticsContext = useMojoCosmeticsOptional();
     const [phase, setPhase] = useState<'intro' | 'active' | 'complete' | 'lost'>('intro');
     const [timeElapsed, setTimeElapsed] = useState(0);
     const [surferY, setSurferY] = useState(50);
