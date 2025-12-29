@@ -601,6 +601,15 @@ export function useTokenEconomy(userId: string | null) {
     spendTokens,
     endSession,
     exitSessionEarly,
+    
+    // Dev/Debug
+    grantPoints: (amount: number) => {
+      setState(prev => ({
+        ...prev,
+        points: prev.points + amount,
+        stats: { ...prev.stats, totalPoints: prev.stats.totalPoints + amount },
+      }));
+    },
 
     // Utilities
     isSessionExpired,
