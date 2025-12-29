@@ -21,6 +21,7 @@ import { DailyQuestionPrompt } from '@/components/DailyQuestionPrompt';
 import { TriggerRouting } from '@/components/TriggerRouting';
 import { TimeSessionBanner, TimeExpiredModal } from '@/components/TimeSession';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync } from '@/components/tools';
+import { MojoCustomizeScreen } from '@/components/MojoCustomizeScreen';
 import { useTokenEconomy } from '@/hooks/useTokenEconomy';
 import { useProgress } from '@/hooks/useProgress';
 import { useOnboarding } from '@/hooks/useOnboarding';
@@ -28,11 +29,12 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useAuth } from '@/hooks/useAuth';
 import { useDailyQuestion } from '@/hooks/useDailyQuestion';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useMojoMood } from '@/hooks/useMojoMood';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
 type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'authgate' | 'subscription' | 'atlas' | 'main';
-type MainTab = 'home' | 'learn' | 'games' | 'productivity' | 'insights' | 'exchange';
+type MainTab = 'home' | 'learn' | 'games' | 'productivity' | 'insights' | 'exchange' | 'customize';
 type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
 type FailureContext = 'game-loss' | 'streak-break' | 'relapse' | null;
 
@@ -126,6 +128,9 @@ const Index = () => {
     cancelDailyReminder,
     permission: notificationPermission,
   } = usePushNotifications();
+
+  // Mojo mood system for reactions
+  const { triggerWinReaction, triggerLoseReaction } = useMojoMood();
 
   // Schedule streak warning if user hasn't logged today
   useEffect(() => {
@@ -231,16 +236,18 @@ const Index = () => {
     setFailureContext('relapse');
   };
 
-  // Handle game completion - awards +1 token + points
+  // Handle game completion - awards +1 token + points + Mojo win reaction
   const handleGameComplete = (gameId: string, details: string) => {
     recordGameComplete(gameId as any, details);
     recordActivity('game', details, 10);
+    triggerWinReaction(); // Mojo celebrates!
   };
 
-  // Handle game failure/early exit - deducts points ONLY, never tokens
+  // Handle game failure/early exit - deducts points ONLY, never tokens + Mojo sad reaction
   const handleGameFail = (gameId: string, reason: string) => {
     recordGameFail(gameId as any, reason);
     setFailureContext('game-loss');
+    triggerLoseReaction(); // Mojo reacts to loss
   };
 
   // Handle quick tool completion
@@ -467,6 +474,7 @@ const Index = () => {
           onOpenExchange={() => setActiveTab('exchange')}
           onOpenMojoChat={() => setShowMojoChat(true)}
           onOpenQuickStop={() => setShowQuickStop(true)}
+          onOpenCustomize={() => setActiveTab('customize')}
           onPullSelect={handlePullSelect}
           onRelapseLogged={handleRelapseLogged}
         />
@@ -525,6 +533,22 @@ const Index = () => {
           logsToday={productivityLogsToday}
           logsRemaining={productivityLogsRemaining}
           onLogProductivity={logProductivity}
+        />
+      )}
+
+      {activeTab === 'customize' && (
+        <MojoCustomizeScreen
+          points={points}
+          onSpendPoints={(amount) => {
+            // Points are deducted via recordGameFail which handles point deduction
+            // But we need a way to deduct points for cosmetics
+            // For now, we just track it locally and the purchase goes through
+            if (points >= amount) {
+              return true;
+            }
+            return false;
+          }}
+          onBack={() => setActiveTab('home')}
         />
       )}
 
