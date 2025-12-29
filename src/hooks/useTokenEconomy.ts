@@ -26,7 +26,7 @@ const DAILY_LOG_TOKENS = 3;        // Free daily allowance when logging pull
 const LEARN_CARDS_PER_TOKEN = 5;   // Every 5 learn cards = +1 token
 const GAME_COMPLETION_TOKEN = 1;   // Completing any game = +1 token
 const PRODUCTIVITY_LOG_TOKEN = 1;  // Productivity log = +1 token (once per day)
-const MINUTES_PER_TOKEN = 10;      // 1 token = 10 minutes
+const MINUTES_PER_TOKEN = 5;       // 2 tokens = 10 minutes (1 token = 5 minutes)
 
 // Game point values (points only, not tokens)
 const GAME_POINTS = {

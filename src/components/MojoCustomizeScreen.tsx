@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useMojoCosmetics, COSMETICS_CATALOG, type CosmeticType, type Cosmetic } from '@/hooks/useMojoCosmetics';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { MojoOrb } from './MojoOrb';
+import { useMojoCosmeticsContext } from '@/contexts/MojoCosmeticsContext';
 
 interface MojoCustomizeScreenProps {
   points: number;
@@ -13,10 +15,10 @@ interface MojoCustomizeScreenProps {
 }
 
 const TABS: { id: CosmeticType; label: string; icon: string }[] = [
+  { id: 'color', label: 'Colors', icon: '🎨' },
   { id: 'hat', label: 'Hats', icon: '🎩' },
-  { id: 'accessory', label: 'Accessories', icon: '🎀' },
-  { id: 'aura', label: 'Auras', icon: '✨' },
-  { id: 'eyes', label: 'Eyes', icon: '👀' },
+  { id: 'face', label: 'Face', icon: '�усы' },
+  { id: 'accessory', label: 'Auras', icon: '✨' },
 ];
 
 const rarityColors: Record<string, string> = {
@@ -35,7 +37,8 @@ const rarityGlow: Record<string, string> = {
 
 export function MojoCustomizeScreen({ points, onSpendPoints, onBack }: MojoCustomizeScreenProps) {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<CosmeticType>('hat');
+  const [activeTab, setActiveTab] = useState<CosmeticType>('color');
+  const { equippedCosmetics } = useMojoCosmeticsContext();
   const { 
     owned, 
     equipped, 
@@ -46,7 +49,7 @@ export function MojoCustomizeScreen({ points, onSpendPoints, onBack }: MojoCusto
     getEquippedCosmetics,
   } = useMojoCosmetics();
 
-  const equippedCosmetics = getEquippedCosmetics();
+  const equippedList = getEquippedCosmetics();
   const currentItems = COSMETICS_CATALOG.filter(c => c.type === activeTab);
 
   const handlePurchase = (cosmetic: Cosmetic) => {
@@ -94,95 +97,24 @@ export function MojoCustomizeScreen({ points, onSpendPoints, onBack }: MojoCusto
         </div>
       </div>
 
-      {/* Mojo Preview */}
+      {/* Mojo Preview - using actual MojoOrb */}
       <div className="flex flex-col items-center py-8">
-        <div className="relative">
-          {/* Base Mojo */}
-          <motion.div 
-            className="w-32 h-32 rounded-full bg-gradient-to-br from-primary/75 via-primary/55 to-accent/45 relative"
-            style={{ boxShadow: '0 0 40px hsl(var(--primary) / 0.3)' }}
-            animate={{ 
-              y: [0, -5, 0],
-              scale: [1, 1.03, 1],
-            }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            {/* Eyes */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex gap-6" style={{ marginTop: '-5%' }}>
-                {equipped.eyes ? (
-                  <span className="text-3xl">{COSMETICS_CATALOG.find(c => c.id === equipped.eyes)?.icon}</span>
-                ) : (
-                  <>
-                    <div className="w-4 h-5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
-                    <div className="w-4 h-5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Hat */}
-            <AnimatePresence>
-              {equipped.hat && (
-                <motion.div 
-                  className="absolute -top-6 left-1/2 -translate-x-1/2 text-4xl"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -20, opacity: 0 }}
-                >
-                  {COSMETICS_CATALOG.find(c => c.id === equipped.hat)?.icon}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Accessory */}
-            <AnimatePresence>
-              {equipped.accessory && (
-                <motion.div 
-                  className="absolute -right-2 top-1/4 text-2xl"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                >
-                  {COSMETICS_CATALOG.find(c => c.id === equipped.accessory)?.icon}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Aura */}
-          <AnimatePresence>
-            {equipped.aura && (
-              <motion.div 
-                className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1.5, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-              >
-                <motion.span 
-                  className="text-5xl"
-                  animate={{ 
-                    rotate: [0, 360],
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                >
-                  {COSMETICS_CATALOG.find(c => c.id === equipped.aura)?.icon}
-                </motion.span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <div className="w-full flex justify-center">
+          <MojoOrb 
+            size="lg" 
+            state="calm" 
+            cosmetics={equippedCosmetics}
+          />
         </div>
 
         {/* Equipped list */}
-        {equippedCosmetics.length > 0 && (
-          <div className="flex gap-2 mt-4">
-            {equippedCosmetics.map(({ cosmetic }) => (
+        {equippedList.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4 justify-center px-4">
+            {equippedList.map(({ cosmetic }) => (
               <div 
                 key={cosmetic.id}
                 className="px-2 py-1 bg-primary/10 rounded-full text-xs flex items-center gap-1"
               >
-                <span>{cosmetic.icon}</span>
                 <span>{cosmetic.name}</span>
               </div>
             ))}
@@ -191,13 +123,13 @@ export function MojoCustomizeScreen({ points, onSpendPoints, onBack }: MojoCusto
       </div>
 
       {/* Tabs */}
-      <div className="flex justify-center gap-2 px-4 mb-4">
+      <div className="flex justify-center gap-2 px-4 mb-4 overflow-x-auto">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "px-4 py-2 rounded-full text-sm font-medium transition-all",
+              "px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap",
               activeTab === tab.id
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted/50 text-muted-foreground hover:bg-muted"
@@ -242,14 +174,56 @@ export function MojoCustomizeScreen({ points, onSpendPoints, onBack }: MojoCusto
                   {cosmetic.rarity}
                 </div>
 
-                {/* Icon */}
-                <div className="text-4xl text-center mb-2">{cosmetic.icon}</div>
+                {/* Preview visual */}
+                <div className="flex justify-center mb-2">
+                  {cosmetic.type === 'color' && (
+                    <div 
+                      className="w-12 h-12 rounded-full"
+                      style={{ 
+                        background: cosmetic.id === 'color-ocean' ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' :
+                                   cosmetic.id === 'color-sunset' ? 'linear-gradient(135deg, #f97316, #ec4899)' :
+                                   cosmetic.id === 'color-forest' ? 'linear-gradient(135deg, #10b981, #14b8a6)' :
+                                   cosmetic.id === 'color-rose' ? 'linear-gradient(135deg, #f472b6, #fda4af)' :
+                                   cosmetic.id === 'color-midnight' ? 'linear-gradient(135deg, #334155, #1e293b)' :
+                                   cosmetic.id === 'color-gold' ? 'linear-gradient(135deg, #facc15, #f59e0b)' :
+                                   cosmetic.id === 'color-rainbow' ? 'linear-gradient(135deg, #ef4444, #facc15, #3b82f6)' :
+                                   'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))'
+                      }}
+                    />
+                  )}
+                  {cosmetic.type === 'hat' && (
+                    <div className="w-12 h-12 flex items-center justify-center text-3xl">
+                      {cosmetic.id.includes('crown') ? '👑' : 
+                       cosmetic.id.includes('wizard') ? '🧙' :
+                       cosmetic.id.includes('beanie') ? '🧢' :
+                       cosmetic.id.includes('halo') ? '😇' : '🎩'}
+                    </div>
+                  )}
+                  {cosmetic.type === 'face' && (
+                    <div className="w-12 h-12 flex items-center justify-center text-3xl">
+                      {cosmetic.id.includes('mustache') ? '🥸' :
+                       cosmetic.id.includes('monocle') ? '🧐' :
+                       cosmetic.id.includes('blush') ? '😊' :
+                       cosmetic.id.includes('heart') ? '😍' : '😎'}
+                    </div>
+                  )}
+                  {cosmetic.type === 'accessory' && (
+                    <div className="w-12 h-12 flex items-center justify-center text-3xl">
+                      {cosmetic.id.includes('fire') ? '🔥' :
+                       cosmetic.id.includes('rainbow') ? '🌈' :
+                       cosmetic.id.includes('sparkle') ? '✨' :
+                       cosmetic.id.includes('galaxy') ? '🌌' : '💫'}
+                    </div>
+                  )}
+                </div>
                 
                 {/* Name */}
                 <h3 className="font-medium text-sm text-center mb-1">{cosmetic.name}</h3>
                 
-                {/* Preview text */}
-                <p className="text-xs text-muted-foreground text-center mb-3">{cosmetic.preview}</p>
+                {/* Description */}
+                <p className="text-xs text-muted-foreground text-center mb-3 line-clamp-2">
+                  {cosmetic.description}
+                </p>
 
                 {/* Action button */}
                 {isOwned ? (
