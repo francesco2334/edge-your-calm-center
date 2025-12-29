@@ -98,8 +98,10 @@ export function ProductivityScreen({
     setOtherDescription('');
   };
 
+  const allLogsComplete = logsRemaining === 0;
+
   return (
-    <div className="min-h-screen bg-background pb-32">
+    <div className="min-h-screen bg-background overflow-y-auto">
       {/* Header */}
       <div className="px-6 pt-12 pb-6">
         <motion.h1 
@@ -119,10 +121,10 @@ export function ProductivityScreen({
         </motion.p>
       </div>
 
-      {/* All logged state */}
-      {logsRemaining === 0 ? (
+      {/* PRODUCTIVITY SECTION - Locked after completion */}
+      {allLogsComplete ? (
         <motion.div 
-          className="mx-6 p-8 rounded-2xl bg-primary/10 border border-primary/20 text-center"
+          className="mx-6 p-8 rounded-2xl bg-primary/10 border border-primary/20 text-center mb-8"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
@@ -134,7 +136,7 @@ export function ProductivityScreen({
           </h2>
           <p className="text-muted-foreground text-sm">
             You've earned +{MAX_LOGS} tokens today.<br />
-            Come back tomorrow.
+            Productivity tasks reset tomorrow.
           </p>
         </motion.div>
       ) : (
@@ -225,58 +227,6 @@ export function ProductivityScreen({
             )}
           </AnimatePresence>
 
-          {/* Wellness Trackers Section */}
-          <motion.div 
-            className="px-6 mt-8 mb-6 space-y-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <h2 className="text-xl font-semibold text-foreground mb-4">Daily Wellness</h2>
-            
-            <WellnessBar
-              icon={Droplets}
-              title="Water Intake"
-              subtitle="Drag to log your hydration"
-              value={wellness.water}
-              maxValue={3}
-              unit="L"
-              color="blue"
-              points={5}
-              isLocked={wellness.waterLocked}
-              onValueChange={(v) => updateWellness({ water: v })}
-              onLock={() => updateWellness({ waterLocked: true })}
-            />
-
-            <WellnessBar
-              icon={Apple}
-              title="Healthy Meals"
-              subtitle="Log your nutritious meals today"
-              value={wellness.meals}
-              maxValue={3}
-              unit=""
-              color="green"
-              points={5}
-              isLocked={wellness.mealsLocked}
-              onValueChange={(v) => updateWellness({ meals: v })}
-              onLock={() => updateWellness({ mealsLocked: true })}
-            />
-
-            <WellnessBar
-              icon={Flame}
-              title="Exercise Hours"
-              subtitle="How long did you move today?"
-              value={wellness.exercise}
-              maxValue={4}
-              unit="h"
-              color="orange"
-              points={10}
-              isLocked={wellness.exerciseLocked}
-              onValueChange={(v) => updateWellness({ exercise: v })}
-              onLock={() => updateWellness({ exerciseLocked: true })}
-            />
-          </motion.div>
-
           {/* Log button */}
           <AnimatePresence>
             {selectedCategory && (selectedCategory !== 'other' || otherDescription.trim()) && (
@@ -284,7 +234,7 @@ export function ProductivityScreen({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                className="fixed bottom-24 left-0 right-0 px-6"
+                className="fixed bottom-24 left-0 right-0 px-6 z-20"
               >
                 <Button
                   onClick={handleLog}
@@ -298,6 +248,61 @@ export function ProductivityScreen({
           </AnimatePresence>
         </>
       )}
+
+      {/* WELLNESS SECTION - ALWAYS ACCESSIBLE */}
+      <motion.div 
+        className="px-6 mt-4 mb-32 space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
+        <h2 className="text-xl font-semibold text-foreground mb-4">Daily Wellness</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Track your daily wellness habits — always available!
+        </p>
+        
+        <WellnessBar
+          icon={Droplets}
+          title="Water Intake"
+          subtitle="Drag to log your hydration"
+          value={wellness.water}
+          maxValue={3}
+          unit="L"
+          color="blue"
+          points={5}
+          isLocked={wellness.waterLocked}
+          onValueChange={(v) => updateWellness({ water: v })}
+          onLock={() => updateWellness({ waterLocked: true })}
+        />
+
+        <WellnessBar
+          icon={Apple}
+          title="Healthy Meals"
+          subtitle="Log your nutritious meals today"
+          value={wellness.meals}
+          maxValue={3}
+          unit=""
+          color="green"
+          points={5}
+          isLocked={wellness.mealsLocked}
+          onValueChange={(v) => updateWellness({ meals: v })}
+          onLock={() => updateWellness({ mealsLocked: true })}
+        />
+
+        <WellnessBar
+          icon={Flame}
+          title="Exercise Hours"
+          subtitle="How long did you move today?"
+          value={wellness.exercise}
+          maxValue={4}
+          unit="h"
+          color="orange"
+          points={10}
+          isLocked={wellness.exerciseLocked}
+          onValueChange={(v) => updateWellness({ exercise: v })}
+          onLock={() => updateWellness({ exerciseLocked: true })}
+        />
+      </motion.div>
     </div>
   );
 }

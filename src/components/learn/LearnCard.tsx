@@ -32,9 +32,9 @@ export function LearnCardComponent({ card, isLiked, onLike, onShare, onHide }: L
     return text;
   }, [card]);
   return (
-    <div className="absolute inset-0 flex flex-col">
-      {/* Image section - top 60% */}
-      <div className="relative h-[60%] overflow-hidden">
+    <div className="absolute inset-0 flex flex-col overflow-hidden">
+      {/* Image section - top 45% */}
+      <div className="relative h-[45%] min-h-[180px] flex-shrink-0 overflow-hidden">
         {!imageError ? (
           <img
             src={card.imageUrl}
@@ -51,8 +51,8 @@ export function LearnCardComponent({ card, isLiked, onLike, onShare, onHide }: L
         <div className={`absolute inset-0 bg-gradient-to-b ${card.gradient}`} />
       </div>
 
-      {/* Content section - bottom 40% */}
-      <div className="relative flex-1 bg-background px-6 pt-4 pb-24 overflow-y-auto">
+      {/* Content section - bottom 55% - SCROLLABLE */}
+      <div className="relative flex-1 bg-background px-6 pt-4 pb-32 overflow-y-auto scrollbar-hide">
         {/* Mojo Teacher floating beside content */}
         <div className="absolute right-16 top-3 z-10">
           <MojoTeacher />
@@ -87,12 +87,12 @@ export function LearnCardComponent({ card, isLiked, onLike, onShare, onHide }: L
           {card.title}
         </motion.h2>
 
-        {/* Content */}
+        {/* Content - NO line clamp, full text visible */}
         <motion.p
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="text-[15px] text-foreground/80 leading-relaxed mb-4 line-clamp-3"
+          className="text-[15px] text-foreground/80 leading-relaxed mb-4"
         >
           {card.content}
         </motion.p>
