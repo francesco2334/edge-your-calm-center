@@ -163,8 +163,9 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
     };
 
     return (
-      <div className="relative inline-flex items-center justify-center w-full">
+      <div className="w-full flex items-center justify-center">
         <motion.div 
+          className="flex items-center justify-center"
           animate={getEmoteAnimation()}
           transition={{ 
             duration: getDuration(), 

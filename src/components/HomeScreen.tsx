@@ -137,23 +137,25 @@ export function HomeScreen({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.7, ease: 'easeOut' }}
-          className="flex flex-col items-center justify-center pt-6 pb-8"
+          className="flex flex-col items-center justify-center w-full pt-6 pb-8"
           style={{ minHeight: '38vh' }}
         >
-          {/* Mojo + Streak Ring */}
-          <button 
-            onClick={onOpenMojoChat}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              onOpenQuickStop?.();
-            }}
-            className="focus:outline-none active:scale-[0.97] transition-transform"
-            aria-label="Chat with Mojo"
-          >
-            <StreakRing streak={streak} claimed={hasLoggedToday} size={196}>
-              <MojoOrb state={mojoState} selectedPull={currentTrigger} size="lg" />
-            </StreakRing>
-          </button>
+          {/* Mojo + Streak Ring - Centered */}
+          <div className="w-full flex justify-center">
+            <button 
+              onClick={onOpenMojoChat}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onOpenQuickStop?.();
+              }}
+              className="focus:outline-none active:scale-[0.97] transition-transform"
+              aria-label="Chat with Mojo"
+            >
+              <StreakRing streak={streak} claimed={hasLoggedToday} size={196}>
+                <MojoOrb state={mojoState} selectedPull={currentTrigger} size="lg" />
+              </StreakRing>
+            </button>
+          </div>
           
           {/* Day count */}
           <motion.div

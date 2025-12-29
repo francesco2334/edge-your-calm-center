@@ -184,7 +184,7 @@ export default function Auth() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center w-full">
         <MojoOrb state="calm" size="lg" />
       </div>
     );
@@ -252,7 +252,9 @@ export default function Auth() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-10"
           >
-            <MojoOrb state="calm" size="md" />
+            <div className="w-full flex justify-center">
+              <MojoOrb state="calm" size="md" />
+            </div>
             <h1 className="text-2xl font-semibold text-foreground mt-6 mb-2">
               Set new password
             </h1>
@@ -342,7 +344,9 @@ export default function Auth() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-10"
           >
-            <MojoOrb state="calm" size="md" />
+            <div className="w-full flex justify-center">
+              <MojoOrb state="calm" size="md" />
+            </div>
             <h1 className="text-2xl font-semibold text-foreground mt-6 mb-2">
               Reset password
             </h1>
@@ -423,7 +427,9 @@ export default function Auth() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <MojoOrb state="calm" size="md" />
+          <div className="w-full flex justify-center">
+            <MojoOrb state="calm" size="md" />
+          </div>
           <h1 className="text-2xl font-semibold text-foreground mt-6 mb-2">
             {mode === 'signup' ? 'Create account' : 'Welcome back'}
           </h1>

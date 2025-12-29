@@ -114,7 +114,7 @@ export function AllocateScreen({
             >
               {/* Title */}
               <div className="text-center mb-8">
-                <div className="flex justify-center mb-4">
+                <div className="w-full flex justify-center mb-4">
                   <MojoOrb state="calm" size="lg" />
                 </div>
                 <h1 className="text-3xl font-bold text-foreground mb-2">The Exchange</h1>
@@ -320,7 +320,7 @@ export function AllocateScreen({
               exit={{ opacity: 0, scale: 0.95 }}
               className="text-center"
             >
-              <div className="flex justify-center mb-6">
+              <div className="w-full flex justify-center mb-6">
                 <MojoOrb state="regulating" size="lg" />
               </div>
 
@@ -355,7 +355,7 @@ export function AllocateScreen({
               exit={{ opacity: 0, y: -20 }}
             >
               <div className="text-center mb-8">
-                <div className="flex justify-center mb-4">
+                <div className="w-full flex justify-center mb-4">
                   <MojoOrb state="calm" size="lg" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">Quick Check-in</h2>
