@@ -105,6 +105,7 @@ export type Database = {
           id: string
           last_active_date: string | null
           last_insight_update: string | null
+          mojo_cosmetics: Json | null
           mojo_themes: Json | null
           reaction_leaderboard: Json
           stats: Json
@@ -123,6 +124,7 @@ export type Database = {
           id?: string
           last_active_date?: string | null
           last_insight_update?: string | null
+          mojo_cosmetics?: Json | null
           mojo_themes?: Json | null
           reaction_leaderboard?: Json
           stats?: Json
@@ -141,6 +143,7 @@ export type Database = {
           id?: string
           last_active_date?: string | null
           last_insight_update?: string | null
+          mojo_cosmetics?: Json | null
           mojo_themes?: Json | null
           reaction_leaderboard?: Json
           stats?: Json
