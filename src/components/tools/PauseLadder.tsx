@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Zap, Target, Timer, TrendingUp, Sparkles, Star } from 'lucide-react';
 import { MojoOrb } from '../MojoOrb';
 import { haptics } from '@/hooks/useHaptics';
+import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
 
 const NEURO_FACTS = [
   { icon: Brain, fact: "Urges peak quickly, then drop.", detail: "Most cravings fade naturally if you wait. You're training delay tolerance right now." },
@@ -29,6 +30,7 @@ interface AntiCheatTap {
 
 export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
   function PauseLadder({ onComplete, onCancel }, ref) {
+    const cosmeticsContext = useMojoCosmeticsOptional();
     const [phase, setPhase] = useState<'active' | 'complete' | 'failed'>('active');
     const [timeHeld, setTimeHeld] = useState(0);
     const [factIndex, setFactIndex] = useState(0);
@@ -148,7 +150,7 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
               animate={{ scale: 1, opacity: 1 }}
               className="mb-6"
             >
-              <MojoOrb state="under-load" size="lg" />
+              <MojoOrb state="under-load" size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
             </motion.div>
 
             <motion.h2
@@ -205,7 +207,7 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
               animate={{ scale: 1, opacity: 1 }}
               className="mb-6"
             >
-              <MojoOrb state="steady" size="lg" />
+              <MojoOrb state="steady" size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
             </motion.div>
 
             <motion.h2
@@ -303,7 +305,7 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1 }}
             >
-              <MojoOrb state="regulating" size="lg" />
+              <MojoOrb state="regulating" size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
             </motion.div>
           </div>
 

@@ -4,6 +4,7 @@ import { MojoOrb } from '../MojoOrb';
 import { MojoCompanion } from '../MojoCompanion';
 import { Check, X } from 'lucide-react';
 import { haptics } from '@/hooks/useHaptics';
+import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
 
 interface NameThePullProps {
   onComplete: (feeling: string) => void;
@@ -198,6 +199,7 @@ const getRandomQuiz = (feelingId: string): FeelingQuiz => {
 
 export const NameThePull = forwardRef<HTMLDivElement, NameThePullProps>(
   function NameThePull({ onComplete, onCancel }, ref) {
+    const cosmeticsContext = useMojoCosmeticsOptional();
     const [selected, setSelected] = useState<string | null>(null);
     const [currentQuiz, setCurrentQuiz] = useState<FeelingQuiz | null>(null);
     const [phase, setPhase] = useState<'select' | 'quiz' | 'result' | 'complete'>('select');
