@@ -236,12 +236,8 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center gap-3 mb-8"
-            >
-              {/* Mojo on surfboard */}
+            <div className="w-full flex flex-col items-center gap-3 mb-8">
+              {/* Mojo on surfboard - Centered */}
               <motion.div
                 animate={{ y: [0, -10, 0], rotate: [-3, 3, -3] }}
                 transition={{ duration: 2, repeat: Infinity }}
@@ -255,7 +251,7 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
               <p className="text-white/90 text-sm italic text-center max-w-[200px]">
                 "Wooo! Surf's up, friend! Let's catch some waves together! 🌊"
               </p>
-            </motion.div>
+            </div>
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -608,7 +604,7 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
             />
           ))}
           
-          <div className="relative z-10 text-center">
+          <div className="relative z-10 w-full flex flex-col items-center text-center">
             <motion.div
               initial={{ scale: 0.8, opacity: 0, rotate: 180 }}
               animate={{ scale: 1, opacity: 1, rotate: 0 }}
@@ -675,7 +671,7 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
           />
         ))}
         
-        <div className="relative z-10 text-center">
+        <div className="relative z-10 w-full flex flex-col items-center text-center">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

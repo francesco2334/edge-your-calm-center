@@ -142,7 +142,7 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
         <div ref={ref} className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-calm" />
           
-          <div className="relative z-10 text-center">
+          <div className="relative z-10 w-full flex flex-col items-center text-center">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -199,7 +199,7 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
         <div ref={ref} className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-calm" />
           
-          <div className="relative z-10 text-center">
+          <div className="relative z-10 w-full flex flex-col items-center text-center">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -296,15 +296,16 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
             </motion.p>
           )}
 
-          {/* Mojo orb */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="mb-8"
-          >
-            <MojoOrb state="regulating" size="lg" />
-          </motion.div>
+          {/* Mojo orb - Centered */}
+          <div className="w-full flex justify-center mb-8">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              <MojoOrb state="regulating" size="lg" />
+            </motion.div>
+          </div>
 
           {/* Rotating Neuro Facts */}
           <div className="w-full max-w-sm">

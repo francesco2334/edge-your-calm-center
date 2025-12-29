@@ -262,17 +262,18 @@ export const NameThePull = forwardRef<HTMLDivElement, NameThePullProps>(
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              className="flex flex-col items-center gap-3 mb-8"
-            >
-              <MojoCompanion mood="curious" size="md" />
+            <div className="w-full flex flex-col items-center gap-3 mb-8">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <MojoCompanion mood="curious" size="md" />
+              </motion.div>
               <p className="text-muted-foreground text-sm italic text-center max-w-[200px]">
                 "*tilts head* Hmm... what's going on in there? Tell me everything!"
               </p>
-            </motion.div>
+            </div>
 
             <div className="space-y-3">
               {FEELINGS.map((feeling, i) => (
@@ -428,7 +429,7 @@ export const NameThePull = forwardRef<HTMLDivElement, NameThePullProps>(
         <div ref={ref} className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-calm" />
           
-          <div className="relative z-10 text-center max-w-sm">
+          <div className="relative z-10 w-full flex flex-col items-center text-center max-w-sm">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -497,7 +498,7 @@ export const NameThePull = forwardRef<HTMLDivElement, NameThePullProps>(
       <div ref={ref} className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-calm" />
         
-        <div className="relative z-10 text-center">
+        <div className="relative z-10 w-full flex flex-col items-center text-center">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
