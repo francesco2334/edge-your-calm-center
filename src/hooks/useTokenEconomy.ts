@@ -610,6 +610,16 @@ export function useTokenEconomy(userId: string | null) {
         stats: { ...prev.stats, totalPoints: prev.stats.totalPoints + amount },
       }));
     },
+    
+    // Spend points (for cosmetics, etc.)
+    spendPoints: (amount: number): boolean => {
+      if (state.points < amount) return false;
+      setState(prev => ({
+        ...prev,
+        points: prev.points - amount,
+      }));
+      return true;
+    },
 
     // Utilities
     isSessionExpired,

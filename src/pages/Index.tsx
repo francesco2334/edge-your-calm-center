@@ -74,6 +74,7 @@ const Index = () => {
     recordGameComplete,
     recordGameFail,
     spendTokens,
+    spendPoints,
     endSession,
     exitSessionEarly,
     logProductivity,
@@ -548,15 +549,7 @@ const Index = () => {
       {activeTab === 'customize' && (
         <MojoCustomizeScreen
           points={points}
-          onSpendPoints={(amount) => {
-            // Points are deducted via recordGameFail which handles point deduction
-            // But we need a way to deduct points for cosmetics
-            // For now, we just track it locally and the purchase goes through
-            if (points >= amount) {
-              return true;
-            }
-            return false;
-          }}
+          onSpendPoints={spendPoints}
           onBack={() => setActiveTab('home')}
         />
       )}
