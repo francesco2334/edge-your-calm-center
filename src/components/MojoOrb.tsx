@@ -188,12 +188,13 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           </div>
         )}
 
-        {/* Accessory: Sparkles */}
+        {/* Accessory: Sparkles with trailing effect */}
         {cosmetics?.accessory === 'acc-sparkles' && size !== 'sm' && (
-          <div className="absolute -inset-6 pointer-events-none">
+          <div className="absolute -inset-8 pointer-events-none overflow-visible">
+            {/* Static sparkles around orb */}
             {[0, 1, 2, 3, 4, 5].map(i => (
               <motion.div
-                key={i}
+                key={`static-${i}`}
                 className="absolute w-2 h-2 bg-yellow-300 rounded-full"
                 style={{
                   left: `${10 + (i * 15) + Math.sin(i) * 10}%`,
@@ -210,6 +211,43 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
                   delay: i * 0.2,
                 }}
               />
+            ))}
+            {/* Trailing sparkle particles */}
+            {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
+              <motion.div
+                key={`trail-${i}`}
+                className="absolute"
+                style={{
+                  width: size === 'lg' ? '8px' : '5px',
+                  height: size === 'lg' ? '8px' : '5px',
+                }}
+                initial={{ 
+                  x: 0, 
+                  y: 0, 
+                  opacity: 0,
+                  scale: 0,
+                }}
+                animate={{
+                  x: [0, (Math.cos(i * 45 * Math.PI / 180) * (size === 'lg' ? 80 : 45))],
+                  y: [0, (Math.sin(i * 45 * Math.PI / 180) * (size === 'lg' ? 80 : 45))],
+                  opacity: [0.9, 0],
+                  scale: [1.2, 0.3],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  delay: i * 0.18,
+                  ease: 'easeOut',
+                }}
+              >
+                <svg viewBox="0 0 20 20" className="w-full h-full">
+                  <path 
+                    d="M10 0 L11 8 L20 10 L11 12 L10 20 L9 12 L0 10 L9 8 Z" 
+                    fill="#fcd34d"
+                    style={{ filter: 'drop-shadow(0 0 4px #fbbf24)' }}
+                  />
+                </svg>
+              </motion.div>
             ))}
           </div>
         )}
@@ -487,31 +525,72 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
               </>
             )}
 
-            {/* Heart Eyes - replaces normal eyes with hearts */}
+            {/* Heart Eyes - replaces normal eyes with hearts + floating hearts */}
             {cosmetics.face === 'face-hearts' && (
-              <div 
-                className="absolute flex gap-4 items-center justify-center"
-                style={{ top: '35%' }}
-              >
-                <motion.svg 
-                  width={size === 'lg' ? 20 : 12} 
-                  height={size === 'lg' ? 18 : 10} 
-                  viewBox="0 0 20 18"
-                  animate={{ scale: [1, 1.15, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
+              <>
+                <div 
+                  className="absolute flex gap-4 items-center justify-center"
+                  style={{ top: '35%' }}
                 >
-                  <path d="M10 18 L1 9 Q-2 4 3 2 Q8 0 10 5 Q12 0 17 2 Q22 4 19 9 Z" fill="#ec4899" />
-                </motion.svg>
-                <motion.svg 
-                  width={size === 'lg' ? 20 : 12} 
-                  height={size === 'lg' ? 18 : 10} 
-                  viewBox="0 0 20 18"
-                  animate={{ scale: [1, 1.15, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: 0.1 }}
-                >
-                  <path d="M10 18 L1 9 Q-2 4 3 2 Q8 0 10 5 Q12 0 17 2 Q22 4 19 9 Z" fill="#ec4899" />
-                </motion.svg>
-              </div>
+                  <motion.svg 
+                    width={size === 'lg' ? 20 : 12} 
+                    height={size === 'lg' ? 18 : 10} 
+                    viewBox="0 0 20 18"
+                    animate={{ scale: [1, 1.15, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
+                  >
+                    <path d="M10 18 L1 9 Q-2 4 3 2 Q8 0 10 5 Q12 0 17 2 Q22 4 19 9 Z" fill="#ec4899" />
+                  </motion.svg>
+                  <motion.svg 
+                    width={size === 'lg' ? 20 : 12} 
+                    height={size === 'lg' ? 18 : 10} 
+                    viewBox="0 0 20 18"
+                    animate={{ scale: [1, 1.15, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity, delay: 0.1 }}
+                  >
+                    <path d="M10 18 L1 9 Q-2 4 3 2 Q8 0 10 5 Q12 0 17 2 Q22 4 19 9 Z" fill="#ec4899" />
+                  </motion.svg>
+                </div>
+                {/* Floating hearts around Mojo */}
+                <div className="absolute -inset-10 pointer-events-none overflow-visible">
+                  {[0, 1, 2, 3, 4, 5].map(i => (
+                    <motion.div
+                      key={`floating-heart-${i}`}
+                      className="absolute"
+                      style={{
+                        left: `${15 + i * 14}%`,
+                        bottom: '20%',
+                      }}
+                      initial={{ y: 0, opacity: 0, scale: 0.5 }}
+                      animate={{
+                        y: [0, -(size === 'lg' ? 100 : 60)],
+                        x: [0, (i % 2 === 0 ? 15 : -15)],
+                        opacity: [0, 1, 1, 0],
+                        scale: [0.5, 1, 0.8, 0.4],
+                        rotate: [0, (i % 2 === 0 ? 20 : -20)],
+                      }}
+                      transition={{
+                        duration: 2.5,
+                        repeat: Infinity,
+                        delay: i * 0.4,
+                        ease: 'easeOut',
+                      }}
+                    >
+                      <svg 
+                        width={size === 'lg' ? 16 : 10} 
+                        height={size === 'lg' ? 14 : 9} 
+                        viewBox="0 0 20 18"
+                      >
+                        <path 
+                          d="M10 18 L1 9 Q-2 4 3 2 Q8 0 10 5 Q12 0 17 2 Q22 4 19 9 Z" 
+                          fill={i % 3 === 0 ? '#f472b6' : i % 3 === 1 ? '#ec4899' : '#fb7185'}
+                          style={{ filter: 'drop-shadow(0 0 3px #ec4899)' }}
+                        />
+                      </svg>
+                    </motion.div>
+                  ))}
+                </div>
+              </>
             )}
 
             {/* Star Eyes */}
