@@ -197,17 +197,18 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              className="flex flex-col items-center gap-4 mb-6"
-            >
-              <MojoCompanion mood="mischievous" size="lg" />
+            <div className="w-full flex flex-col items-center gap-4 mb-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <MojoCompanion mood="mischievous" size="lg" />
+              </motion.div>
               <p className="text-sm text-muted-foreground italic text-center">
                 "Psst... think you can catch me? Let's see those reflexes!"
               </p>
-            </motion.div>
+            </div>
 
             {/* Personal stats */}
             <motion.div
@@ -321,8 +322,8 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
           </AnimatePresence>
           
           <div className="relative z-10 text-center">
-            {/* Mojo companion stays in center as reference */}
-            <div className="relative mb-8 flex flex-col items-center gap-2">
+            {/* Mojo companion stays in center as reference - Centered */}
+            <div className="relative mb-8 w-full flex flex-col items-center gap-2">
               <motion.div
                 animate={{ scale: hasFlickers ? 0.9 : 1, opacity: hasFlickers ? 0.5 : 1 }}
                 transition={{ duration: 0.2 }}
@@ -412,11 +413,11 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
       <div ref={ref} className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-calm" />
         
-        <div className="relative z-10 text-center max-w-sm">
+        <div className="relative z-10 w-full flex flex-col items-center text-center max-w-sm">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="mb-4 flex flex-col items-center gap-2"
+            className="mb-4 w-full flex flex-col items-center gap-2"
           >
             <MojoCompanion 
               mood={isNewBest ? 'celebrating' : 'proud'} 

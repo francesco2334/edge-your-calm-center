@@ -119,17 +119,18 @@ export const BodyScan = forwardRef<HTMLDivElement, BodyScanProps>(
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              className="flex flex-col items-center gap-3 mb-10"
-            >
-              <MojoCompanion mood="curious" size="lg" />
+            <div className="w-full flex flex-col items-center gap-3 mb-10">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <MojoCompanion mood="curious" size="lg" />
+              </motion.div>
               <p className="text-muted-foreground text-sm italic text-center max-w-[220px]">
                 "Ooh ooh! I love quizzes! *bounces excitedly* Ready to show me what you know?"
               </p>
-            </motion.div>
+            </div>
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -342,7 +343,7 @@ export const BodyScan = forwardRef<HTMLDivElement, BodyScanProps>(
       <div ref={ref} className="min-h-screen flex flex-col items-center justify-center px-6 py-8 pb-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-violet-950 via-purple-950 to-background" />
         
-        <div className="relative z-10 text-center">
+        <div className="relative z-10 w-full flex flex-col items-center text-center">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
