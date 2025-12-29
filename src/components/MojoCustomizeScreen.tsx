@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Lock, Check, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useMojoCosmetics, COSMETICS_CATALOG, type CosmeticType, type Cosmetic } from '@/hooks/useMojoCosmetics';
+import { COSMETICS_CATALOG, type CosmeticType, type Cosmetic } from '@/hooks/useMojoCosmetics';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { MojoOrb } from './MojoOrb';
@@ -17,7 +17,7 @@ interface MojoCustomizeScreenProps {
 const TABS: { id: CosmeticType; label: string; icon: string }[] = [
   { id: 'color', label: 'Colors', icon: '🎨' },
   { id: 'hat', label: 'Hats', icon: '🎩' },
-  { id: 'face', label: 'Face', icon: '�усы' },
+  { id: 'face', label: 'Face', icon: '👤' },
   { id: 'accessory', label: 'Auras', icon: '✨' },
 ];
 
@@ -38,16 +38,17 @@ const rarityGlow: Record<string, string> = {
 export function MojoCustomizeScreen({ points, onSpendPoints, onBack }: MojoCustomizeScreenProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<CosmeticType>('color');
-  const { equippedCosmetics } = useMojoCosmeticsContext();
+  
+  // Use the shared context - this ensures changes sync across the app
   const { 
-    owned, 
+    equippedCosmetics,
     equipped, 
     ownsCosmetic, 
     purchaseCosmetic, 
     equipCosmetic, 
     unequipCosmetic,
     getEquippedCosmetics,
-  } = useMojoCosmetics();
+  } = useMojoCosmeticsContext();
 
   const equippedList = getEquippedCosmetics();
   const currentItems = COSMETICS_CATALOG.filter(c => c.type === activeTab);
