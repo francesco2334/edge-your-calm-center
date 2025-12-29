@@ -22,10 +22,10 @@ export function MojoCosmeticsProvider({ children }: { children: ReactNode }) {
   
   // Convert to the format MojoOrb expects
   const equippedCosmetics: EquippedCosmetics = {
+    color: cosmetics.equipped.color,
     hat: cosmetics.equipped.hat,
+    face: cosmetics.equipped.face,
     accessory: cosmetics.equipped.accessory,
-    aura: cosmetics.equipped.aura,
-    eyes: cosmetics.equipped.eyes,
   };
 
   return (
