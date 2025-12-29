@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
 
 export type CosmeticType = 'color' | 'hat' | 'face' | 'accessory';
 
@@ -18,7 +20,7 @@ interface CosmeticsState {
 
 const COSMETICS_STORAGE_KEY = 'mojo-cosmetics';
 
-// Available cosmetics catalog - prices start at 150
+// Available cosmetics catalog - simple, stable items only
 export const COSMETICS_CATALOG: Cosmetic[] = [
   // COLORS - Changes Mojo's base gradient
   { id: 'color-default', name: 'Classic Purple', type: 'color', price: 0, rarity: 'common', description: 'The original Mojo look' },
@@ -28,15 +30,12 @@ export const COSMETICS_CATALOG: Cosmetic[] = [
   { id: 'color-rose', name: 'Rose Pink', type: 'color', price: 200, rarity: 'rare', description: 'Soft and sweet' },
   { id: 'color-midnight', name: 'Midnight Black', type: 'color', price: 300, rarity: 'epic', description: 'Dark and mysterious' },
   { id: 'color-gold', name: 'Golden Glow', type: 'color', price: 500, rarity: 'legendary', description: 'Pure luxury' },
-  { id: 'color-rainbow', name: 'Rainbow Shift', type: 'color', price: 750, rarity: 'legendary', description: 'All the colors!' },
   
-  // HATS - Actual SVG hats that sit on Mojo
+  // HATS - Simple SVG hats
   { id: 'hat-beanie', name: 'Cozy Beanie', type: 'hat', price: 150, rarity: 'common', description: 'Warm and snug' },
   { id: 'hat-cap', name: 'Baseball Cap', type: 'hat', price: 150, rarity: 'common', description: 'Classic sporty look' },
   { id: 'hat-tophat', name: 'Top Hat', type: 'hat', price: 250, rarity: 'rare', description: 'Fancy and classy' },
-  { id: 'hat-wizard', name: 'Wizard Hat', type: 'hat', price: 300, rarity: 'rare', description: 'Magical powers' },
   { id: 'hat-crown', name: 'Royal Crown', type: 'hat', price: 450, rarity: 'epic', description: 'Fit for royalty' },
-  { id: 'hat-halo', name: 'Angel Halo', type: 'hat', price: 400, rarity: 'epic', description: 'Heavenly glow' },
   { id: 'hat-chef', name: 'Chef Toque', type: 'hat', price: 200, rarity: 'rare', description: 'Master chef vibes' },
   { id: 'hat-pirate', name: 'Pirate Tricorn', type: 'hat', price: 350, rarity: 'epic', description: 'Arr matey!' },
   { id: 'hat-catears', name: 'Cat Ears', type: 'hat', price: 200, rarity: 'rare', description: 'Cute kitty vibes' },
@@ -44,16 +43,14 @@ export const COSMETICS_CATALOG: Cosmetic[] = [
   { id: 'hat-flower', name: 'Flower Crown', type: 'hat', price: 175, rarity: 'common', description: 'Spring garden beauty' },
   { id: 'hat-tiara', name: 'Princess Tiara', type: 'hat', price: 400, rarity: 'epic', description: 'Royal sparkle' },
   
-  // FACE - Cute additions that work with Mojo's close-together eyes
+  // FACE - Simple face additions
   { id: 'face-blush', name: 'Rosy Cheeks', type: 'face', price: 175, rarity: 'common', description: 'Adorable blush' },
   { id: 'face-freckles', name: 'Cute Freckles', type: 'face', price: 175, rarity: 'common', description: 'Sprinkle of charm' },
-  { id: 'face-mustache', name: 'Gentleman Stache', type: 'face', price: 150, rarity: 'common', description: 'Distinguished look' },
-  { id: 'face-handlebar', name: 'Handlebar Mustache', type: 'face', price: 200, rarity: 'rare', description: 'Twirl-worthy' },
+  { id: 'face-whiskers', name: 'Cat Whiskers', type: 'face', price: 150, rarity: 'common', description: 'Meow!' },
   { id: 'face-hearts', name: 'Heart Eyes', type: 'face', price: 225, rarity: 'rare', description: 'In love!' },
   { id: 'face-stars', name: 'Star Eyes', type: 'face', price: 250, rarity: 'rare', description: 'Starstruck!' },
-  { id: 'face-whiskers', name: 'Cat Whiskers', type: 'face', price: 150, rarity: 'common', description: 'Meow!' },
   
-  // ACCESSORIES - Items around Mojo  
+  // ACCESSORIES - Simple items around Mojo
   { id: 'acc-bowtie-red', name: 'Red Bow Tie', type: 'accessory', price: 150, rarity: 'common', description: 'Classic and dapper' },
   { id: 'acc-bowtie-pink', name: 'Pink Bow Tie', type: 'accessory', price: 150, rarity: 'common', description: 'Pretty in pink' },
   { id: 'acc-bowtie-blue', name: 'Blue Bow Tie', type: 'accessory', price: 150, rarity: 'common', description: 'Cool and calm' },
@@ -62,13 +59,8 @@ export const COSMETICS_CATALOG: Cosmetic[] = [
   { id: 'acc-cape', name: 'Hero Cape', type: 'accessory', price: 300, rarity: 'epic', description: 'Super Mojo!' },
   { id: 'acc-necklace', name: 'Gold Chain', type: 'accessory', price: 250, rarity: 'rare', description: 'Bling bling' },
   { id: 'acc-pearls', name: 'Pearl Necklace', type: 'accessory', price: 275, rarity: 'rare', description: 'Elegant beauty' },
-  { id: 'acc-headphones', name: 'Headphones', type: 'accessory', price: 225, rarity: 'rare', description: 'Music lover' },
-  { id: 'acc-wings', name: 'Angel Wings', type: 'accessory', price: 500, rarity: 'legendary', description: 'Ethereal beauty' },
-  { id: 'acc-butterflywings', name: 'Butterfly Wings', type: 'accessory', price: 400, rarity: 'epic', description: 'Flutter by!' },
-  { id: 'acc-flames', name: 'Fire Aura', type: 'accessory', price: 400, rarity: 'epic', description: 'Burning passion' },
-  { id: 'acc-sparkles', name: 'Sparkle Trail', type: 'accessory', price: 350, rarity: 'epic', description: 'Magical shimmer' },
   
-  // EXCLUSIVE COLLECTION - Super expensive full outfits
+  // EXCLUSIVE COLLECTION - Premium outfits
   { id: 'outfit-jamesbond', name: 'Secret Agent', type: 'accessory', price: 2500, rarity: 'legendary', description: 'Shaken, not stirred. Full tuxedo with bow tie.' },
   { id: 'outfit-superhero', name: 'Super Mojo', type: 'accessory', price: 2500, rarity: 'legendary', description: 'Cape, mask, and lightning bolt. Save the day!' },
   { id: 'outfit-princess', name: 'Royal Princess', type: 'accessory', price: 2500, rarity: 'legendary', description: 'Tiara, dress, and wand. Fairytale dreams!' },
@@ -86,12 +78,12 @@ const DEFAULT_STATE: CosmeticsState = {
 };
 
 export function useMojoCosmetics() {
+  const { user } = useAuth();
   const [state, setState] = useState<CosmeticsState>(() => {
     try {
       const saved = localStorage.getItem(COSMETICS_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Ensure color-default is always owned
         if (!parsed.owned.includes('color-default')) {
           parsed.owned.push('color-default');
         }
@@ -100,11 +92,69 @@ export function useMojoCosmetics() {
     } catch {}
     return DEFAULT_STATE;
   });
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Persist state
+  // Load from database on mount if user is logged in
   useEffect(() => {
+    const loadFromDatabase = async () => {
+      if (!user) {
+        setIsLoaded(true);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('user_progress')
+          .select('mojo_cosmetics')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error loading cosmetics:', error);
+          setIsLoaded(true);
+          return;
+        }
+
+        if (data?.mojo_cosmetics) {
+          const dbCosmetics = data.mojo_cosmetics as unknown as CosmeticsState;
+          // Ensure color-default is always owned
+          if (!dbCosmetics.owned?.includes('color-default')) {
+            dbCosmetics.owned = dbCosmetics.owned || [];
+            dbCosmetics.owned.push('color-default');
+          }
+          setState(dbCosmetics);
+          localStorage.setItem(COSMETICS_STORAGE_KEY, JSON.stringify(dbCosmetics));
+        }
+      } catch (err) {
+        console.error('Error loading cosmetics:', err);
+      }
+      setIsLoaded(true);
+    };
+
+    loadFromDatabase();
+  }, [user]);
+
+  // Save to database when state changes (debounced)
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+
+    // Save to localStorage immediately
     localStorage.setItem(COSMETICS_STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
+
+    // Debounce database save
+    const timer = setTimeout(async () => {
+      try {
+        await supabase
+          .from('user_progress')
+          .update({ mojo_cosmetics: JSON.parse(JSON.stringify(state)) })
+          .eq('user_id', user.id);
+      } catch (err) {
+        console.error('Error saving cosmetics:', err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [state, user, isLoaded]);
 
   const ownsCosmetic = useCallback((cosmeticId: string) => {
     return state.owned.includes(cosmeticId);
@@ -134,7 +184,6 @@ export function useMojoCosmetics() {
   }, [state.owned]);
 
   const unequipCosmetic = useCallback((type: CosmeticType) => {
-    // Don't allow unequipping color - just change to default
     if (type === 'color') {
       setState(prev => ({
         ...prev,
