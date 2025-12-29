@@ -305,31 +305,103 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
               </motion.svg>
             )}
             {cosmetics.hat === 'hat-chef' && (
-              <svg width={size === 'lg' ? 105 : 58} height={size === 'lg' ? 75 : 42} viewBox="0 0 105 75">
-                {/* Puffy chef hat */}
-                <ellipse cx="52" cy="70" rx="48" ry="10" fill="#e5e7eb" />
-                <circle cx="28" cy="30" r="25" fill="#f9fafb" />
-                <circle cx="52" cy="25" r="28" fill="#ffffff" />
-                <circle cx="76" cy="30" r="25" fill="#f9fafb" />
-                {/* Band */}
-                <rect x="10" y="55" width="85" height="18" fill="#f3f4f6" />
+              <svg width={size === 'lg' ? 105 : 58} height={size === 'lg' ? 80 : 45} viewBox="0 0 105 80">
+                {/* Tall puffy chef toque */}
+                <ellipse cx="52" cy="75" rx="48" ry="10" fill="#e5e7eb" />
+                {/* Puffy clouds making up the toque */}
+                <circle cx="28" cy="45" r="22" fill="#f9fafb" />
+                <circle cx="52" cy="35" r="26" fill="#ffffff" />
+                <circle cx="76" cy="45" r="22" fill="#f9fafb" />
+                <circle cx="40" cy="25" r="18" fill="#ffffff" />
+                <circle cx="64" cy="25" r="18" fill="#ffffff" />
+                <circle cx="52" cy="15" r="15" fill="#f9fafb" />
+                {/* Headband */}
+                <rect x="8" y="60" width="89" height="18" fill="#f3f4f6" />
+                <rect x="8" y="60" width="89" height="4" fill="#e5e7eb" />
               </svg>
             )}
             {cosmetics.hat === 'hat-pirate' && (
-              <svg width={size === 'lg' ? 120 : 65} height={size === 'lg' ? 65 : 36} viewBox="0 0 120 65">
-                {/* Tricorn pirate hat */}
-                <ellipse cx="60" cy="60" rx="55" ry="10" fill="#1f2937" />
-                <path d="M12 60 Q12 30 60 22 Q108 30 108 60" fill="#374151" />
-                {/* Skull and crossbones */}
-                <circle cx="60" cy="38" r="14" fill="#f9fafb" />
-                <circle cx="54" cy="36" r="3" fill="#1f2937" />
-                <circle cx="66" cy="36" r="3" fill="#1f2937" />
-                <ellipse cx="60" cy="44" rx="2" ry="1" fill="#1f2937" />
-                {/* Crossbones */}
-                <line x1="45" y1="52" x2="75" y2="52" stroke="#f9fafb" strokeWidth="4" strokeLinecap="round" />
-                <line x1="48" y1="48" x2="48" y2="56" stroke="#f9fafb" strokeWidth="3" strokeLinecap="round" />
-                <line x1="72" y1="48" x2="72" y2="56" stroke="#f9fafb" strokeWidth="3" strokeLinecap="round" />
+              <svg width={size === 'lg' ? 120 : 65} height={size === 'lg' ? 70 : 38} viewBox="0 0 120 70">
+                {/* Tricorn pirate hat with proper shape */}
+                <ellipse cx="60" cy="65" rx="55" ry="10" fill="#1f2937" />
+                {/* Main hat body */}
+                <path d="M10 65 Q0 40 30 35 L60 10 L90 35 Q120 40 110 65" fill="#374151" />
+                {/* Tricorn fold lines */}
+                <path d="M60 10 L60 35" stroke="#4b5563" strokeWidth="2" fill="none" />
+                {/* Skull emblem */}
+                <circle cx="60" cy="42" r="12" fill="#f9fafb" />
+                <circle cx="55" cy="40" r="2.5" fill="#1f2937" />
+                <circle cx="65" cy="40" r="2.5" fill="#1f2937" />
+                <path d="M56 48 Q60 50 64 48" stroke="#1f2937" strokeWidth="1.5" fill="none" />
+                {/* Gold trim */}
+                <path d="M15 58 Q60 45 105 58" stroke="#fbbf24" strokeWidth="3" fill="none" />
+                {/* Feather */}
+                <path d="M95 30 Q110 20 105 10 Q100 20 95 15 Q90 25 95 30" fill="#dc2626" />
               </svg>
+            )}
+            {cosmetics.hat === 'hat-catears' && (
+              <svg width={size === 'lg' ? 100 : 55} height={size === 'lg' ? 50 : 28} viewBox="0 0 100 50">
+                {/* Left cat ear */}
+                <path d="M10 48 L22 5 L42 45 Z" fill="#f472b6" />
+                <path d="M16 42 L22 12 L35 40 Z" fill="#fda4af" />
+                {/* Right cat ear */}
+                <path d="M58 45 L78 5 L90 48 Z" fill="#f472b6" />
+                <path d="M65 40 L78 12 L84 42 Z" fill="#fda4af" />
+              </svg>
+            )}
+            {cosmetics.hat === 'hat-bunnyears' && (
+              <svg width={size === 'lg' ? 100 : 55} height={size === 'lg' ? 80 : 44} viewBox="0 0 100 80">
+                {/* Left bunny ear - long and floppy */}
+                <ellipse cx="25" cy="40" rx="12" ry="38" fill="#fce7f3" stroke="#f9a8d4" strokeWidth="2" />
+                <ellipse cx="25" cy="40" rx="6" ry="28" fill="#fda4af" />
+                {/* Right bunny ear */}
+                <ellipse cx="75" cy="40" rx="12" ry="38" fill="#fce7f3" stroke="#f9a8d4" strokeWidth="2" />
+                <ellipse cx="75" cy="40" rx="6" ry="28" fill="#fda4af" />
+              </svg>
+            )}
+            {cosmetics.hat === 'hat-flower' && (
+              <svg width={size === 'lg' ? 120 : 66} height={size === 'lg' ? 35 : 20} viewBox="0 0 120 35">
+                {/* Flower crown wreath */}
+                <ellipse cx="60" cy="30" rx="55" ry="8" fill="none" stroke="#22c55e" strokeWidth="4" />
+                {/* Flowers */}
+                <circle cx="20" cy="20" r="10" fill="#f472b6" />
+                <circle cx="20" cy="20" r="4" fill="#fbbf24" />
+                <circle cx="45" cy="15" r="8" fill="#a78bfa" />
+                <circle cx="45" cy="15" r="3" fill="#fbbf24" />
+                <circle cx="75" cy="15" r="8" fill="#f472b6" />
+                <circle cx="75" cy="15" r="3" fill="#fbbf24" />
+                <circle cx="100" cy="20" r="10" fill="#fb7185" />
+                <circle cx="100" cy="20" r="4" fill="#fbbf24" />
+                {/* Leaves */}
+                <ellipse cx="32" cy="28" rx="6" ry="4" fill="#22c55e" transform="rotate(-20 32 28)" />
+                <ellipse cx="88" cy="28" rx="6" ry="4" fill="#22c55e" transform="rotate(20 88 28)" />
+              </svg>
+            )}
+            {cosmetics.hat === 'hat-tiara' && (
+              <motion.svg 
+                width={size === 'lg' ? 100 : 55} 
+                height={size === 'lg' ? 45 : 25} 
+                viewBox="0 0 100 45"
+                animate={{ 
+                  filter: ['drop-shadow(0 0 3px #f472b6)', 'drop-shadow(0 0 8px #f472b6)', 'drop-shadow(0 0 3px #f472b6)']
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                {/* Tiara base */}
+                <path d="M5 40 Q15 35 25 38 L50 8 L75 38 Q85 35 95 40" fill="none" stroke="#fbbf24" strokeWidth="4" />
+                {/* Crown points */}
+                <path d="M20 38 L30 20 L40 35" fill="none" stroke="#fbbf24" strokeWidth="3" />
+                <path d="M60 35 L70 20 L80 38" fill="none" stroke="#fbbf24" strokeWidth="3" />
+                {/* Center heart gem */}
+                <path d="M50 12 L45 18 L50 28 L55 18 Z" fill="#f472b6" />
+                <circle cx="47" cy="16" r="4" fill="#ec4899" />
+                <circle cx="53" cy="16" r="4" fill="#ec4899" />
+                {/* Side gems */}
+                <circle cx="30" cy="25" r="4" fill="#a78bfa" />
+                <circle cx="70" cy="25" r="4" fill="#a78bfa" />
+                {/* Sparkle accents */}
+                <circle cx="50" cy="5" r="2" fill="white" opacity="0.9" />
+              </motion.svg>
             )}
           </div>
         )}
@@ -415,72 +487,80 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
               </>
             )}
 
-            {/* Glasses */}
-            {cosmetics.face === 'face-glasses' && (
+            {/* Heart Eyes - replaces normal eyes with hearts */}
+            {cosmetics.face === 'face-hearts' && (
+              <div 
+                className="absolute flex gap-4 items-center justify-center"
+                style={{ top: '35%' }}
+              >
+                <motion.svg 
+                  width={size === 'lg' ? 20 : 12} 
+                  height={size === 'lg' ? 18 : 10} 
+                  viewBox="0 0 20 18"
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity }}
+                >
+                  <path d="M10 18 L1 9 Q-2 4 3 2 Q8 0 10 5 Q12 0 17 2 Q22 4 19 9 Z" fill="#ec4899" />
+                </motion.svg>
+                <motion.svg 
+                  width={size === 'lg' ? 20 : 12} 
+                  height={size === 'lg' ? 18 : 10} 
+                  viewBox="0 0 20 18"
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, delay: 0.1 }}
+                >
+                  <path d="M10 18 L1 9 Q-2 4 3 2 Q8 0 10 5 Q12 0 17 2 Q22 4 19 9 Z" fill="#ec4899" />
+                </motion.svg>
+              </div>
+            )}
+
+            {/* Star Eyes */}
+            {cosmetics.face === 'face-stars' && (
+              <div 
+                className="absolute flex gap-4 items-center justify-center"
+                style={{ top: '33%' }}
+              >
+                <motion.svg 
+                  width={size === 'lg' ? 20 : 12} 
+                  height={size === 'lg' ? 20 : 12} 
+                  viewBox="0 0 24 24"
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <path d="M12 2 L14 9 L22 9 L16 14 L18 22 L12 17 L6 22 L8 14 L2 9 L10 9 Z" fill="#fbbf24" />
+                </motion.svg>
+                <motion.svg 
+                  width={size === 'lg' ? 20 : 12} 
+                  height={size === 'lg' ? 20 : 12} 
+                  viewBox="0 0 24 24"
+                  animate={{ rotate: [0, -15, 15, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
+                >
+                  <path d="M12 2 L14 9 L22 9 L16 14 L18 22 L12 17 L6 22 L8 14 L2 9 L10 9 Z" fill="#fbbf24" />
+                </motion.svg>
+              </div>
+            )}
+
+            {/* Cat Whiskers */}
+            {cosmetics.face === 'face-whiskers' && (
               <svg 
                 viewBox="0 0 100 40" 
                 className="absolute"
                 style={{ 
-                  width: size === 'lg' ? '70%' : '60%',
-                  top: size === 'lg' ? '32%' : '30%',
+                  width: size === 'lg' ? '80%' : '70%',
+                  top: size === 'lg' ? '50%' : '48%',
                 }}
               >
-                <circle cx="25" cy="20" r="16" fill="none" stroke="#374151" strokeWidth="3" />
-                <circle cx="75" cy="20" r="16" fill="none" stroke="#374151" strokeWidth="3" />
-                <path d="M41 20 Q50 15 59 20" fill="none" stroke="#374151" strokeWidth="3" />
-                <circle cx="25" cy="20" r="14" fill="white" fillOpacity="0.1" />
-                <circle cx="75" cy="20" r="14" fill="white" fillOpacity="0.1" />
-              </svg>
-            )}
-
-            {/* Sunglasses */}
-            {cosmetics.face === 'face-sunglasses' && (
-              <svg 
-                viewBox="0 0 100 35" 
-                className="absolute"
-                style={{ 
-                  width: size === 'lg' ? '75%' : '65%',
-                  top: size === 'lg' ? '33%' : '32%',
-                }}
-              >
-                <rect x="5" y="8" width="35" height="22" rx="4" fill="#1f2937" />
-                <rect x="60" y="8" width="35" height="22" rx="4" fill="#1f2937" />
-                <path d="M40 18 L60 18" stroke="#1f2937" strokeWidth="4" />
-                <rect x="7" y="10" width="31" height="18" rx="3" fill="linear-gradient(to bottom, #374151, #1f2937)" />
-                <rect x="62" y="10" width="31" height="18" rx="3" fill="linear-gradient(to bottom, #374151, #1f2937)" />
-              </svg>
-            )}
-
-            {/* Monocle */}
-            {cosmetics.face === 'face-monocle' && (
-              <svg 
-                viewBox="0 0 50 60" 
-                className="absolute"
-                style={{ 
-                  width: size === 'lg' ? '30%' : '25%',
-                  left: size === 'lg' ? '55%' : '55%',
-                  top: size === 'lg' ? '28%' : '28%',
-                }}
-              >
-                <circle cx="25" cy="20" r="18" fill="none" stroke="#fbbf24" strokeWidth="3" />
-                <circle cx="25" cy="20" r="15" fill="white" fillOpacity="0.15" />
-                <path d="M25 38 L25 55" stroke="#fbbf24" strokeWidth="2" />
-              </svg>
-            )}
-
-            {/* Eye Patch */}
-            {cosmetics.face === 'face-eyepatch' && (
-              <svg 
-                viewBox="0 0 60 50" 
-                className="absolute"
-                style={{ 
-                  width: size === 'lg' ? '35%' : '30%',
-                  left: size === 'lg' ? '8%' : '10%',
-                  top: size === 'lg' ? '25%' : '25%',
-                }}
-              >
-                <ellipse cx="30" cy="25" rx="25" ry="18" fill="#1f2937" />
-                <path d="M0 5 L30 25 L60 5" fill="none" stroke="#374151" strokeWidth="4" />
+                {/* Left whiskers */}
+                <line x1="5" y1="15" x2="30" y2="18" stroke="#374151" strokeWidth="2" strokeLinecap="round" />
+                <line x1="5" y1="20" x2="30" y2="20" stroke="#374151" strokeWidth="2" strokeLinecap="round" />
+                <line x1="5" y1="25" x2="30" y2="22" stroke="#374151" strokeWidth="2" strokeLinecap="round" />
+                {/* Right whiskers */}
+                <line x1="95" y1="15" x2="70" y2="18" stroke="#374151" strokeWidth="2" strokeLinecap="round" />
+                <line x1="95" y1="20" x2="70" y2="20" stroke="#374151" strokeWidth="2" strokeLinecap="round" />
+                <line x1="95" y1="25" x2="70" y2="22" stroke="#374151" strokeWidth="2" strokeLinecap="round" />
+                {/* Nose */}
+                <ellipse cx="50" cy="20" rx="4" ry="3" fill="#374151" />
               </svg>
             )}
 
@@ -522,8 +602,8 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           </div>
         )}
 
-        {/* Accessory: Bow Tie (front) */}
-        {cosmetics?.accessory === 'acc-bowtie' && size !== 'sm' && (
+        {/* Accessory: Colored Bow Ties */}
+        {(cosmetics?.accessory === 'acc-bowtie-red' || cosmetics?.accessory === 'acc-bowtie-pink' || cosmetics?.accessory === 'acc-bowtie-blue' || cosmetics?.accessory === 'acc-bowtie-gold') && size !== 'sm' && (
           <svg 
             viewBox="0 0 60 30" 
             className="absolute left-1/2 -translate-x-1/2 z-20"
@@ -532,9 +612,21 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
               bottom: size === 'lg' ? '-5%' : '-3%',
             }}
           >
-            <path d="M30 15 L5 0 L5 30 Z" fill="#dc2626" />
-            <path d="M30 15 L55 0 L55 30 Z" fill="#dc2626" />
-            <circle cx="30" cy="15" r="6" fill="#b91c1c" />
+            <path d="M30 15 L5 0 L5 30 Z" fill={
+              cosmetics.accessory === 'acc-bowtie-red' ? '#dc2626' :
+              cosmetics.accessory === 'acc-bowtie-pink' ? '#f472b6' :
+              cosmetics.accessory === 'acc-bowtie-blue' ? '#3b82f6' : '#fbbf24'
+            } />
+            <path d="M30 15 L55 0 L55 30 Z" fill={
+              cosmetics.accessory === 'acc-bowtie-red' ? '#dc2626' :
+              cosmetics.accessory === 'acc-bowtie-pink' ? '#f472b6' :
+              cosmetics.accessory === 'acc-bowtie-blue' ? '#3b82f6' : '#fbbf24'
+            } />
+            <circle cx="30" cy="15" r="6" fill={
+              cosmetics.accessory === 'acc-bowtie-red' ? '#b91c1c' :
+              cosmetics.accessory === 'acc-bowtie-pink' ? '#ec4899' :
+              cosmetics.accessory === 'acc-bowtie-blue' ? '#2563eb' : '#f59e0b'
+            } />
           </svg>
         )}
 
@@ -570,6 +662,23 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           </svg>
         )}
 
+        {/* Accessory: Pearl Necklace */}
+        {cosmetics?.accessory === 'acc-pearls' && size !== 'sm' && (
+          <svg 
+            viewBox="0 0 80 30" 
+            className="absolute left-1/2 -translate-x-1/2 z-20"
+            style={{ 
+              width: size === 'lg' ? '55%' : '45%',
+              bottom: size === 'lg' ? '-6%' : '-4%',
+            }}
+          >
+            <path d="M8 5 Q40 28 72 5" fill="none" stroke="#fce7f3" strokeWidth="2" />
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <circle key={i} cx={10 + i * 7.5} cy={5 + Math.sin((i - 4) * 0.35) * 18} r="4" fill="#fce7f3" stroke="#f9a8d4" strokeWidth="0.5" />
+            ))}
+          </svg>
+        )}
+
         {/* Accessory: Headphones */}
         {cosmetics?.accessory === 'acc-headphones' && size !== 'sm' && (
           <svg 
@@ -586,6 +695,233 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
             <rect x="8" y="50" width="19" height="25" rx="5" fill="#4b5563" />
             <rect x="93" y="50" width="19" height="25" rx="5" fill="#4b5563" />
           </svg>
+        )}
+
+        {/* Accessory: Butterfly Wings */}
+        {cosmetics?.accessory === 'acc-butterflywings' && size !== 'sm' && (
+          <div className="absolute inset-0 pointer-events-none">
+            <motion.svg 
+              viewBox="0 0 100 80" 
+              className="absolute -left-[55%] top-[10%] w-[55%] h-[80%]"
+              animate={{ rotate: [-5, 8, -5] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <path d="M95 40 Q70 5 30 15 Q5 25 15 45 Q25 65 50 55 Q75 45 95 40" fill="url(#butterflyGrad1)" opacity="0.85" />
+              <path d="M95 40 Q75 55 50 75 Q35 85 25 70 Q15 55 40 50 Q65 45 95 40" fill="url(#butterflyGrad2)" opacity="0.85" />
+              <defs>
+                <linearGradient id="butterflyGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f472b6" />
+                  <stop offset="50%" stopColor="#a78bfa" />
+                  <stop offset="100%" stopColor="#38bdf8" />
+                </linearGradient>
+                <linearGradient id="butterflyGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#38bdf8" />
+                  <stop offset="50%" stopColor="#a78bfa" />
+                  <stop offset="100%" stopColor="#f472b6" />
+                </linearGradient>
+              </defs>
+            </motion.svg>
+            <motion.svg 
+              viewBox="0 0 100 80" 
+              className="absolute -right-[55%] top-[10%] w-[55%] h-[80%] scale-x-[-1]"
+              animate={{ rotate: [5, -8, 5] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <path d="M95 40 Q70 5 30 15 Q5 25 15 45 Q25 65 50 55 Q75 45 95 40" fill="url(#butterflyGrad1)" opacity="0.85" />
+              <path d="M95 40 Q75 55 50 75 Q35 85 25 70 Q15 55 40 50 Q65 45 95 40" fill="url(#butterflyGrad2)" opacity="0.85" />
+            </motion.svg>
+          </div>
+        )}
+
+        {/* EXCLUSIVE OUTFIT: James Bond / Secret Agent */}
+        {cosmetics?.accessory === 'outfit-jamesbond' && size !== 'sm' && (
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Tuxedo body */}
+            <svg 
+              viewBox="0 0 100 60" 
+              className="absolute left-1/2 -translate-x-1/2 z-20"
+              style={{ 
+                width: size === 'lg' ? '85%' : '75%',
+                bottom: size === 'lg' ? '-25%' : '-20%',
+              }}
+            >
+              {/* Black jacket */}
+              <path d="M15 0 L5 60 L95 60 L85 0 L65 10 L50 5 L35 10 Z" fill="#1f2937" />
+              {/* White shirt */}
+              <path d="M35 10 L50 5 L65 10 L60 60 L40 60 Z" fill="#f9fafb" />
+              {/* Lapels */}
+              <path d="M35 10 L40 30 L35 35 L20 15" fill="#374151" />
+              <path d="M65 10 L60 30 L65 35 L80 15" fill="#374151" />
+              {/* Bow tie */}
+              <path d="M50 15 L42 10 L42 20 Z" fill="#1f2937" />
+              <path d="M50 15 L58 10 L58 20 Z" fill="#1f2937" />
+              <circle cx="50" cy="15" r="3" fill="#374151" />
+              {/* Pocket square */}
+              <path d="M22 25 L28 22 L30 30 L24 32" fill="#f9fafb" />
+            </svg>
+          </div>
+        )}
+
+        {/* EXCLUSIVE OUTFIT: Superhero */}
+        {cosmetics?.accessory === 'outfit-superhero' && size !== 'sm' && (
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Hero cape (behind) */}
+            <motion.svg
+              viewBox="0 0 100 120"
+              className="absolute -bottom-[50%] left-1/2 -translate-x-1/2 w-[100%] h-[90%] -z-10"
+              animate={{ skewX: [-2, 2, -2] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <path d="M15 0 Q5 60 20 120 L80 120 Q95 60 85 0" fill="url(#heroCapeGrad)" />
+              <defs>
+                <linearGradient id="heroCapeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#dc2626" />
+                  <stop offset="100%" stopColor="#7f1d1d" />
+                </linearGradient>
+              </defs>
+            </motion.svg>
+            {/* Hero mask */}
+            <svg 
+              viewBox="0 0 80 30" 
+              className="absolute left-1/2 -translate-x-1/2 z-30"
+              style={{ 
+                width: size === 'lg' ? '60%' : '50%',
+                top: size === 'lg' ? '28%' : '26%',
+              }}
+            >
+              <path d="M5 15 Q20 5 40 15 Q60 5 75 15 L70 25 Q40 18 10 25 Z" fill="#1e40af" />
+              {/* Eye cutouts */}
+              <ellipse cx="25" cy="18" rx="8" ry="5" fill="#0f172a" />
+              <ellipse cx="55" cy="18" rx="8" ry="5" fill="#0f172a" />
+            </svg>
+            {/* Lightning bolt emblem */}
+            <svg 
+              viewBox="0 0 30 40" 
+              className="absolute left-1/2 -translate-x-1/2 z-20"
+              style={{ 
+                width: size === 'lg' ? '20%' : '15%',
+                bottom: size === 'lg' ? '-10%' : '-5%',
+              }}
+            >
+              <path d="M18 0 L5 18 L12 18 L8 40 L25 15 L16 15 Z" fill="#fbbf24" />
+            </svg>
+          </div>
+        )}
+
+        {/* EXCLUSIVE OUTFIT: Princess */}
+        {cosmetics?.accessory === 'outfit-princess' && size !== 'sm' && (
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Princess dress */}
+            <svg 
+              viewBox="0 0 120 80" 
+              className="absolute left-1/2 -translate-x-1/2 z-20"
+              style={{ 
+                width: size === 'lg' ? '95%' : '85%',
+                bottom: size === 'lg' ? '-35%' : '-28%',
+              }}
+            >
+              {/* Dress body */}
+              <path d="M40 0 L20 80 L100 80 L80 0 Q60 10 40 0" fill="url(#princessDressGrad)" />
+              {/* Bodice */}
+              <path d="M40 0 L45 25 L60 30 L75 25 L80 0 Q60 10 40 0" fill="#ec4899" />
+              {/* Sparkles on dress */}
+              <circle cx="35" cy="45" r="2" fill="white" opacity="0.7" />
+              <circle cx="85" cy="50" r="2" fill="white" opacity="0.7" />
+              <circle cx="50" cy="60" r="1.5" fill="white" opacity="0.6" />
+              <circle cx="70" cy="55" r="1.5" fill="white" opacity="0.6" />
+              <circle cx="60" cy="70" r="2" fill="white" opacity="0.7" />
+              <defs>
+                <linearGradient id="princessDressGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#f472b6" />
+                  <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+              </defs>
+            </svg>
+            {/* Tiara (on top) */}
+            <motion.svg 
+              width={size === 'lg' ? 80 : 44} 
+              height={size === 'lg' ? 35 : 20} 
+              viewBox="0 0 80 35"
+              className="absolute left-1/2 -translate-x-1/2 z-30"
+              style={{ top: size === 'lg' ? '-15%' : '-12%' }}
+              animate={{ filter: ['drop-shadow(0 0 4px #f472b6)', 'drop-shadow(0 0 10px #f472b6)', 'drop-shadow(0 0 4px #f472b6)'] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <path d="M5 32 Q20 25 40 8 Q60 25 75 32" fill="none" stroke="#fbbf24" strokeWidth="4" />
+              <circle cx="40" cy="10" r="5" fill="#f472b6" />
+              <circle cx="22" cy="22" r="3" fill="#a78bfa" />
+              <circle cx="58" cy="22" r="3" fill="#a78bfa" />
+            </motion.svg>
+            {/* Magic wand */}
+            <motion.svg 
+              viewBox="0 0 50 80" 
+              className="absolute z-20"
+              style={{ 
+                width: size === 'lg' ? '25%' : '20%',
+                right: size === 'lg' ? '-15%' : '-10%',
+                top: size === 'lg' ? '20%' : '25%',
+              }}
+              animate={{ rotate: [-5, 5, -5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <rect x="22" y="25" width="6" height="55" rx="2" fill="#f472b6" />
+              <path d="M25 0 L28 18 L45 12 L32 22 L40 38 L25 28 L10 38 L18 22 L5 12 L22 18 Z" fill="#fbbf24" />
+              <circle cx="25" cy="20" r="4" fill="white" opacity="0.8" />
+            </motion.svg>
+          </div>
+        )}
+
+        {/* EXCLUSIVE OUTFIT: Teddy Bear */}
+        {cosmetics?.accessory === 'outfit-teddy' && size !== 'sm' && (
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Teddy ears */}
+            <svg 
+              width={size === 'lg' ? 120 : 66} 
+              height={size === 'lg' ? 45 : 25} 
+              viewBox="0 0 120 45"
+              className="absolute left-1/2 -translate-x-1/2 z-20"
+              style={{ top: size === 'lg' ? '-20%' : '-15%' }}
+            >
+              {/* Left ear */}
+              <circle cx="25" cy="25" r="22" fill="#d4a574" />
+              <circle cx="25" cy="25" r="12" fill="#c4956a" />
+              {/* Right ear */}
+              <circle cx="95" cy="25" r="22" fill="#d4a574" />
+              <circle cx="95" cy="25" r="12" fill="#c4956a" />
+            </svg>
+            {/* Fuzzy texture overlay */}
+            <div 
+              className="absolute inset-0 rounded-full opacity-30 z-10"
+              style={{
+                background: 'radial-gradient(circle at 30% 30%, #d4a574 0%, transparent 50%)',
+              }}
+            />
+            {/* Teddy nose */}
+            <svg 
+              viewBox="0 0 40 30" 
+              className="absolute left-1/2 -translate-x-1/2 z-30"
+              style={{ 
+                width: size === 'lg' ? '25%' : '20%',
+                top: size === 'lg' ? '50%' : '48%',
+              }}
+            >
+              <ellipse cx="20" cy="12" rx="12" ry="8" fill="#c4956a" />
+              <ellipse cx="20" cy="10" rx="5" ry="4" fill="#4a3728" />
+            </svg>
+            {/* Bow */}
+            <svg 
+              viewBox="0 0 60 30" 
+              className="absolute left-1/2 -translate-x-1/2 z-20"
+              style={{ 
+                width: size === 'lg' ? '40%' : '35%',
+                bottom: size === 'lg' ? '-5%' : '-3%',
+              }}
+            >
+              <path d="M30 15 L5 0 L5 30 Z" fill="#ec4899" />
+              <path d="M30 15 L55 0 L55 30 Z" fill="#ec4899" />
+              <circle cx="30" cy="15" r="6" fill="#db2777" />
+            </svg>
+          </div>
         )}
 
         {/* Eyes */}
