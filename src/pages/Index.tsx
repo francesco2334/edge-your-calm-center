@@ -83,11 +83,11 @@ const Index = () => {
     grantPoints,
   } = useTokenEconomy(user?.id ?? null);
 
-  // DEV: Grant 1000 points on first load (remove after testing)
+  // DEV: Grant 1,000,000 points on first load (remove after testing)
   useEffect(() => {
-    if (economyLoaded && points < 1000) {
-      grantPoints(1000);
-      toast({ title: "Dev: +1000 points granted!" });
+    if (economyLoaded && points < 100000) {
+      grantPoints(1000000);
+      toast({ title: "Dev: +1,000,000 points granted!" });
     }
   }, [economyLoaded]);
 
