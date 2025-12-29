@@ -4,6 +4,7 @@ import { X, Send } from 'lucide-react';
 import { MojoOrb } from './MojoOrb';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useMojoMood, emoteAnimationDurations, type MojoEmote } from '@/hooks/useMojoMood';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -21,7 +22,18 @@ interface MojoChatProps {
 
 const MAX_MESSAGE_LENGTH = 2000;
 
-type MojoEmote = 'wave' | 'dance' | 'spin' | 'blush' | 'sleepy' | 'excited' | 'dizzy' | 'love' | 'giggle' | 'yawn' | null;
+const EMOTES: { id: MojoEmote; icon: string; label: string }[] = [
+  { id: 'wave', icon: '👋', label: 'Wave' },
+  { id: 'dance', icon: '💃', label: 'Dance' },
+  { id: 'spin', icon: '🌀', label: 'Spin' },
+  { id: 'blush', icon: '☺️', label: 'Blush' },
+  { id: 'sleepy', icon: '😴', label: 'Sleepy' },
+  { id: 'excited', icon: '🤩', label: 'Excited' },
+  { id: 'dizzy', icon: '😵‍💫', label: 'Dizzy' },
+  { id: 'love', icon: '😍', label: 'Love' },
+  { id: 'giggle', icon: '🤭', label: 'Giggle' },
+  { id: 'yawn', icon: '🥱', label: 'Yawn' },
+];
 
 export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -29,19 +41,22 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
   const [isLoading, setIsLoading] = useState(false);
   const [hasConsented, setHasConsented] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [currentEmote, setCurrentEmote] = useState<MojoEmote>(null);
   const [showEmotes, setShowEmotes] = useState(false);
   const [isUserTyping, setIsUserTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
-
-  const triggerEmote = (emote: MojoEmote) => {
-    setCurrentEmote(emote);
-    const duration = emote === 'dizzy' ? 3000 : emote === 'dance' ? 2500 : 2000;
-    setTimeout(() => setCurrentEmote(null), duration);
-  };
+  
+  // Use the new mood system with animation locking
+  const { 
+    mood, 
+    emote: currentEmote, 
+    isAnimating, 
+    triggerEmote, 
+    canTriggerEmote,
+    getMojoComment 
+  } = useMojoMood();
 
   // Handle user typing detection
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,100 +71,106 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
     }, 1000);
   };
 
-  const EMOTES = [
-    { id: 'wave' as const, icon: '👋', label: 'Wave' },
-    { id: 'dance' as const, icon: '💃', label: 'Dance' },
-    { id: 'spin' as const, icon: '🌀', label: 'Spin' },
-    { id: 'blush' as const, icon: '☺️', label: 'Blush' },
-    { id: 'sleepy' as const, icon: '😴', label: 'Sleepy' },
-    { id: 'excited' as const, icon: '🤩', label: 'Excited' },
-    { id: 'dizzy' as const, icon: '😵‍💫', label: 'Dizzy' },
-    { id: 'love' as const, icon: '😍', label: 'Love' },
-    { id: 'giggle' as const, icon: '🤭', label: 'Giggle' },
-    { id: 'yawn' as const, icon: '🥱', label: 'Yawn' },
-  ];
-
-  // Get mojo state based on emote, typing, or loading
+  // Get mojo state based on emote, mood, typing, or loading
   const getMojoState = () => {
     if (isLoading) return 'thinking';
     if (isUserTyping && input.length > 0) return 'thinking';
-    if (currentEmote === 'sleepy' || currentEmote === 'yawn') return 'calm';
-    if (currentEmote === 'blush' || currentEmote === 'love') return 'steady';
-    if (currentEmote === 'excited') return 'steady';
+    if (currentEmote === 'sleepy' || currentEmote === 'yawn' || mood === 'tired') return 'calm';
+    if (currentEmote === 'blush' || currentEmote === 'love' || mood === 'content') return 'steady';
+    if (currentEmote === 'excited' || mood === 'playful') return 'steady';
+    if (mood === 'overwhelmed') return 'under-load';
+    if (mood === 'focused') return 'regulating';
     return 'calm';
   };
 
-  // Emoting Mojo component with enhanced animations
+  // Enhanced Emoting Mojo with 3-phase animations (anticipation + main + recovery)
   const EmotingMojo = ({ emote }: { emote: MojoEmote }) => {
-  const getEmoteAnimation = () => {
+    const getEmoteAnimation = () => {
       switch (emote) {
         case 'wave':
-          return { rotate: [0, -20, 25, -20, 25, -15, 0] };
-        case 'dance':
+          // 3-phase: anticipation (slight pull back), main wave, recovery
           return { 
-            y: [0, -15, 0, -15, 0, -10, 0],
-            x: [-8, 8, -8, 8, -4, 4, 0],
-            rotate: [0, -5, 5, -5, 5, 0],
+            rotate: [0, -8, -25, 30, -25, 30, -15, 0],
+            scale: [1, 1.02, 1, 1, 1, 1, 1, 1],
+          };
+        case 'dance':
+          // 3-phase: prep bounce, full dance, settle
+          return { 
+            y: [0, -5, 0, -18, 0, -18, 0, -12, 0, -5, 0],
+            x: [0, 0, -10, 10, -10, 10, -6, 6, -3, 0, 0],
+            rotate: [0, 0, -6, 6, -6, 6, -3, 3, 0, 0, 0],
           };
         case 'spin':
-          return { rotate: [0, 360, 720], scale: [1, 0.9, 1] };
-        case 'blush':
-          return { scale: [1, 1.08, 1.05, 1.08, 1], y: [0, -3, 0] };
-        case 'sleepy':
+          // 3-phase: wind up (slight counter-rotate), full spins, wobble settle
           return { 
-            y: [0, 8, 4, 8, 4],
-            scale: [1, 0.92, 0.95, 0.92, 0.95],
-            rotate: [0, 3, -3, 3, 0],
+            rotate: [0, -15, 0, 360, 720, 740, 720, 720],
+            scale: [1, 0.95, 1, 0.92, 1, 1.05, 0.98, 1],
+          };
+        case 'blush':
+          // 3-phase: subtle build, full blush pulse, gentle fade
+          return { 
+            scale: [1, 1.02, 1.1, 1.06, 1.1, 1.08, 1.04, 1],
+            y: [0, 0, -4, -2, -4, -2, 0, 0],
+          };
+        case 'sleepy':
+          // 3-phase: eyes heavy, full droop, settle into sleep
+          return { 
+            y: [0, 2, 8, 5, 10, 6, 8, 6],
+            scale: [1, 0.98, 0.92, 0.94, 0.90, 0.93, 0.92, 0.93],
+            rotate: [0, 1, 4, 2, 5, 3, 4, 3],
           };
         case 'excited':
+          // 3-phase: crouch prep, explosive bounces, settle
           return { 
-            y: [0, -20, 0, -15, 0, -10, 0],
-            scale: [1, 1.15, 1, 1.12, 1, 1.08, 1],
+            y: [0, 5, 0, -25, 0, -20, 0, -15, 0, -8, 0],
+            scale: [1, 0.95, 1, 1.18, 1, 1.15, 1, 1.1, 1, 1.05, 1],
           };
         case 'dizzy':
+          // 3-phase: initial stumble, full wobble, recovery stumble
           return { 
-            rotate: [0, 15, -15, 20, -20, 15, -15, 10, -10, 0],
-            x: [0, 5, -5, 8, -8, 5, -5, 3, -3, 0],
+            rotate: [0, 5, -8, 15, -20, 25, -25, 20, -18, 15, -10, 8, -5, 3, 0],
+            x: [0, 2, -3, 6, -8, 10, -10, 8, -7, 5, -4, 3, -2, 1, 0],
+            y: [0, -2, 0, -3, 0, -2, 0, -2, 0, -1, 0, 0, 0, 0, 0],
           };
         case 'love':
-          return { scale: [1, 1.2, 1.1, 1.2, 1], y: [0, -5, 0] };
-        case 'giggle':
+          // 3-phase: heart swell build, full pulse, gentle settle
           return { 
-            rotate: [0, -3, 3, -3, 3, -2, 2, 0],
-            scale: [1, 1.05, 1, 1.05, 1, 1.03, 1],
+            scale: [1, 1.05, 1.22, 1.15, 1.22, 1.18, 1.1, 1],
+            y: [0, -2, -8, -5, -8, -5, -3, 0],
+          };
+        case 'giggle':
+          // 3-phase: inhale/build, rapid giggles, exhale settle
+          return { 
+            rotate: [0, 0, -4, 4, -5, 5, -4, 4, -3, 3, -2, 2, 0],
+            scale: [1, 1.02, 1.06, 1.04, 1.07, 1.04, 1.06, 1.03, 1.04, 1.02, 1.02, 1.01, 1],
+            y: [0, -2, -3, -2, -4, -2, -3, -2, -2, -1, -1, 0, 0],
           };
         case 'yawn':
+          // 3-phase: mouth opens slowly, full yawn hold, gentle close
           return { 
-            y: [0, 5, 3, 5, 3],
-            scale: [1, 1.05, 1, 0.95, 1],
-            rotate: [0, 5, 0, -5, 0],
+            y: [0, 1, 4, 8, 6, 8, 5, 3, 1],
+            scale: [1, 1.02, 1.08, 1.05, 1.03, 1.05, 1.02, 1, 1],
+            rotate: [0, 2, 6, 8, 5, 6, 4, 2, 0],
           };
         default:
           return {};
       }
     };
 
-    const getEmoteDuration = () => {
-      switch (emote) {
-        case 'wave': return 1.2;
-        case 'dance': return 1.5;
-        case 'spin': return 1;
-        case 'blush': return 0.8;
-        case 'sleepy': return 2;
-        case 'excited': return 0.8;
-        case 'dizzy': return 2.5;
-        case 'love': return 1;
-        case 'giggle': return 0.6;
-        case 'yawn': return 2;
-        default: return 1;
-      }
+    const getDuration = () => {
+      if (!emote) return 1;
+      return emoteAnimationDurations[emote] / 1000; // Convert ms to seconds
     };
 
     return (
-      <div className="relative inline-block">
+      <div className="relative inline-flex items-center justify-center w-full">
         <motion.div 
           animate={getEmoteAnimation()}
-          transition={{ duration: getEmoteDuration(), ease: 'easeInOut' }}
+          transition={{ 
+            duration: getDuration(), 
+            ease: [0.25, 0.1, 0.25, 1], // Smooth easing for natural feel
+            times: undefined // Let framer calculate even timing
+          }}
         >
           <MojoOrb state={getMojoState()} size="lg" />
         </motion.div>
@@ -734,13 +755,15 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center pt-8"
+                className="flex flex-col items-center justify-center pt-8"
               >
-                <EmotingMojo emote={currentEmote} />
-                <p className="text-muted-foreground mt-6 text-sm font-medium">
+                <div className="flex items-center justify-center w-full">
+                  <EmotingMojo emote={currentEmote} />
+                </div>
+                <p className="text-muted-foreground mt-6 text-sm font-medium text-center">
                   Before we chat
                 </p>
-                <p className="text-muted-foreground/70 mt-3 text-xs max-w-xs mx-auto leading-relaxed">
+                <p className="text-muted-foreground/70 mt-3 text-xs max-w-xs mx-auto leading-relaxed text-center">
                   Your messages are processed by AI to provide responses. No personal data is stored or shared. Mojo is a support tool, not medical advice.
                 </p>
                 <button
@@ -754,17 +777,19 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center pt-8"
+                className="flex flex-col items-center justify-center pt-8"
               >
-                <EmotingMojo emote={currentEmote} />
-                <p className="text-muted-foreground mt-6 text-sm">
+                <div className="flex items-center justify-center w-full">
+                  <EmotingMojo emote={currentEmote} />
+                </div>
+                <p className="text-muted-foreground mt-6 text-sm text-center">
                   Hey, I'm Mojo. What's pulling at you today?
                 </p>
-                <p className="text-muted-foreground/60 mt-2 text-xs max-w-xs mx-auto">
+                <p className="text-muted-foreground/60 mt-2 text-xs max-w-xs mx-auto text-center">
                   I help with everyday attention habits — not medical or mental health advice.
                 </p>
                 
-                {/* Emote buttons */}
+                {/* Emote buttons - disabled when animating */}
                 <motion.div 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -786,16 +811,21 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                         exit={{ opacity: 0, height: 0 }}
                         className="flex justify-center gap-2 mt-3 flex-wrap"
                       >
-                        {EMOTES.map((emote) => (
+                        {EMOTES.map((emoteItem) => (
                           <motion.button
-                            key={emote.id}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => triggerEmote(emote.id)}
-                            className="flex flex-col items-center gap-1 p-2 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors min-w-[50px]"
+                            key={emoteItem.id}
+                            whileHover={canTriggerEmote ? { scale: 1.1 } : {}}
+                            whileTap={canTriggerEmote ? { scale: 0.95 } : {}}
+                            onClick={() => emoteItem.id && triggerEmote(emoteItem.id)}
+                            disabled={!canTriggerEmote}
+                            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors min-w-[50px] ${
+                              canTriggerEmote 
+                                ? 'bg-muted/30 hover:bg-muted/50 cursor-pointer' 
+                                : 'bg-muted/20 opacity-50 cursor-not-allowed'
+                            }`}
                           >
-                            <span className="text-lg">{emote.icon}</span>
-                            <span className="text-[10px] text-muted-foreground">{emote.label}</span>
+                            <span className="text-lg">{emoteItem.icon}</span>
+                            <span className="text-[10px] text-muted-foreground">{emoteItem.label}</span>
                           </motion.button>
                         ))}
                       </motion.div>
