@@ -9,6 +9,7 @@ import { SwipeFeed } from './SwipeFeed';
 import { TrialBadge } from './TrialBadge';
 import { generateFeedCards } from '@/lib/feed-data';
 import { useAuth } from '@/hooks/useAuth';
+import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
 import type { FeedCardData } from '@/lib/feed-data';
 
 interface HomeScreenProps {
@@ -44,6 +45,7 @@ export function HomeScreen({
 }: HomeScreenProps) {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const cosmeticsContext = useMojoCosmeticsOptional();
   const [showPullSheet, setShowPullSheet] = useState(false);
 
   // Generate feed cards
@@ -91,7 +93,7 @@ export function HomeScreen({
           {/* Left: Mojo state */}
           <div className="flex items-center gap-2 opacity-40">
             <div className="w-5 h-5">
-              <MojoOrb state={mojoState} size="sm" />
+              <MojoOrb state={mojoState} size="sm" cosmetics={cosmeticsContext?.equippedCosmetics} />
             </div>
             <span className="text-[11px] text-muted-foreground capitalize tracking-wide font-medium">
               {mojoState}
@@ -154,7 +156,7 @@ export function HomeScreen({
               aria-label="Chat with Mojo"
             >
               <StreakRing streak={streak} claimed={hasLoggedToday} size={196}>
-                <MojoOrb state={mojoState} selectedPull={currentTrigger} size="lg" />
+                <MojoOrb state={mojoState} selectedPull={currentTrigger} size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
               </StreakRing>
             </button>
             

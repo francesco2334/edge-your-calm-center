@@ -3,6 +3,7 @@ import { motion, useMotionValue } from 'framer-motion';
 import { X } from 'lucide-react';
 import { MojoOrb } from '../MojoOrb';
 import { useHaptics } from '@/hooks/useHaptics';
+import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
 
 interface GravityDropProps {
   onComplete: () => void;
