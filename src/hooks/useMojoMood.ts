@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export type MojoMood = 'calm' | 'playful' | 'tired' | 'focused' | 'overwhelmed' | 'low-energy' | 'content';
-export type MojoEmote = 'wave' | 'dance' | 'spin' | 'blush' | 'sleepy' | 'excited' | 'dizzy' | 'love' | 'giggle' | 'yawn' | null;
+export type MojoMood = 'calm' | 'playful' | 'tired' | 'focused' | 'overwhelmed' | 'low-energy' | 'content' | 'celebrating' | 'sad';
+export type MojoEmote = 'wave' | 'dance' | 'spin' | 'blush' | 'sleepy' | 'excited' | 'dizzy' | 'love' | 'giggle' | 'yawn' | 'celebrate' | 'cry' | 'cheer' | null;
 
 interface MojoMoodState {
   mood: MojoMood;
@@ -27,6 +27,9 @@ const emoteMoodEffects: Record<NonNullable<MojoEmote>, { mood: MojoMood; duratio
   love: { mood: 'content', duration: 90000 },
   giggle: { mood: 'playful', duration: 60000 },
   yawn: { mood: 'tired', duration: 90000 },
+  celebrate: { mood: 'celebrating', duration: 120000 },
+  cry: { mood: 'sad', duration: 60000 },
+  cheer: { mood: 'celebrating', duration: 90000 },
 };
 
 // Animation durations with 3-phase structure (anticipation + main + recovery)
@@ -41,9 +44,14 @@ export const emoteAnimationDurations: Record<NonNullable<MojoEmote>, number> = {
   love: 2200,      // 0.3s swell + 1.5s hearts + 0.4s settle
   giggle: 1800,    // 0.3s inhale + 1.1s giggle + 0.4s settle
   yawn: 2600,      // 0.4s open + 1.8s yawn + 0.4s close
+  celebrate: 2800, // 0.3s prep + 2.1s party + 0.4s settle
+  cry: 2400,       // 0.3s build + 1.7s sob + 0.4s recover
+  cheer: 2200,     // 0.3s prep + 1.5s cheer + 0.4s settle
 };
 
-const idleAnimations: MojoEmote[] = ['wave', 'blush', 'giggle'];
+const idleAnimations: MojoEmote[] = ['wave', 'blush', 'giggle', 'yawn'];
+const winReactions: MojoEmote[] = ['celebrate', 'cheer', 'dance', 'excited'];
+const loseReactions: MojoEmote[] = ['cry', 'dizzy', 'sleepy'];
 
 export function useMojoMood() {
   const [state, setState] = useState<MojoMoodState>(() => {
@@ -158,6 +166,20 @@ export function useMojoMood() {
     return true;
   }, [state.isAnimating]);
 
+  // Trigger win reaction
+  const triggerWinReaction = useCallback(() => {
+    if (state.isAnimating) return false;
+    const reaction = winReactions[Math.floor(Math.random() * winReactions.length)];
+    return triggerEmote(reaction);
+  }, [state.isAnimating, triggerEmote]);
+
+  // Trigger lose reaction
+  const triggerLoseReaction = useCallback(() => {
+    if (state.isAnimating) return false;
+    const reaction = loseReactions[Math.floor(Math.random() * loseReactions.length)];
+    return triggerEmote(reaction);
+  }, [state.isAnimating, triggerEmote]);
+
   // Set mood directly
   const setMood = useCallback((mood: MojoMood, duration?: number) => {
     setState(prev => ({
@@ -215,6 +237,10 @@ export function useMojoMood() {
         return "I like hanging out with you.";
       case 'overwhelmed':
         return "Whoa... give me a sec...";
+      case 'celebrating':
+        return "We did it! 🎊";
+      case 'sad':
+        return "It's okay, we'll try again...";
       default:
         return null;
     }
@@ -225,6 +251,8 @@ export function useMojoMood() {
     emote: state.emote,
     isAnimating: state.isAnimating,
     triggerEmote,
+    triggerWinReaction,
+    triggerLoseReaction,
     setMood,
     recordInteraction,
     getMojoComment,

@@ -21,6 +21,7 @@ interface HomeScreenProps {
   onOpenExchange: () => void;
   onOpenMojoChat?: () => void;
   onOpenQuickStop?: () => void;
+  onOpenCustomize?: () => void;
   onPullSelect: (pullId: string) => void;
   onRelapseLogged?: () => void;
 }
@@ -37,6 +38,7 @@ export function HomeScreen({
   onOpenExchange,
   onOpenMojoChat,
   onOpenQuickStop,
+  onOpenCustomize,
   onPullSelect,
   onRelapseLogged,
 }: HomeScreenProps) {
@@ -141,7 +143,7 @@ export function HomeScreen({
           style={{ minHeight: '38vh' }}
         >
           {/* Mojo + Streak Ring - Centered */}
-          <div className="w-full flex justify-center">
+          <div className="w-full flex flex-col items-center justify-center relative">
             <button 
               onClick={onOpenMojoChat}
               onContextMenu={(e) => {
@@ -154,6 +156,14 @@ export function HomeScreen({
               <StreakRing streak={streak} claimed={hasLoggedToday} size={196}>
                 <MojoOrb state={mojoState} selectedPull={currentTrigger} size="lg" />
               </StreakRing>
+            </button>
+            
+            {/* Customize Mojo button */}
+            <button
+              onClick={onOpenCustomize}
+              className="mt-3 px-3 py-1.5 text-xs text-muted-foreground bg-muted/30 rounded-full hover:bg-muted/50 transition-colors"
+            >
+              ✨ Customize Mojo
             </button>
           </div>
           
