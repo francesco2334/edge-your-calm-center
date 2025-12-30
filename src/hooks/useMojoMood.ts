@@ -12,7 +12,7 @@ interface MojoMoodState {
 }
 
 const MOOD_STORAGE_KEY = 'mojo-mood-state';
-const IDLE_TRIGGER_MS = 8000; // 8 seconds before idle animation
+const IDLE_TRIGGER_MS = 6000; // 6 seconds before idle animation (more frequent)
 const MOOD_TRANSITION_DELAY = 3000; // 3 seconds after emote to affect mood
 
 // Map emotes to mood effects
@@ -49,8 +49,9 @@ export const emoteAnimationDurations: Record<NonNullable<MojoEmote>, number> = {
   cheer: 2200,     // 0.3s prep + 1.5s cheer + 0.4s settle
 };
 
-const idleAnimations: MojoEmote[] = ['wave', 'blush', 'giggle', 'yawn'];
-const winReactions: MojoEmote[] = ['celebrate', 'cheer', 'dance', 'excited'];
+// Expanded idle animations for more lifelike behavior
+const idleAnimations: MojoEmote[] = ['wave', 'blush', 'giggle', 'yawn', 'dance', 'excited', 'spin', 'love'];
+const winReactions: MojoEmote[] = ['celebrate', 'cheer', 'dance', 'excited', 'love'];
 const loseReactions: MojoEmote[] = ['cry', 'dizzy', 'sleepy'];
 
 export function useMojoMood() {
@@ -91,14 +92,15 @@ export function useMojoMood() {
     }));
   }, [state.mood, state.lastInteraction]);
 
-  // Idle animation trigger
+  // Idle animation trigger - more frequent and varied
   useEffect(() => {
     if (state.isAnimating) return;
 
     idleIntervalRef.current = setInterval(() => {
       const timeSinceLastInteraction = Date.now() - state.lastInteraction;
       
-      if (timeSinceLastInteraction > IDLE_TRIGGER_MS && !state.isAnimating && Math.random() > 0.6) {
+      // Higher chance of idle animation (50% when idle)
+      if (timeSinceLastInteraction > IDLE_TRIGGER_MS && !state.isAnimating && Math.random() > 0.5) {
         // Trigger a random idle animation
         const randomIdle = idleAnimations[Math.floor(Math.random() * idleAnimations.length)];
         triggerEmote(randomIdle, true);
