@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Coins, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +17,7 @@ const SPEND_OPTIONS = [
   { id: 'free-60', label: '1hr Free Flow', icon: '🌊', tokenCost: 18, minutes: 60, description: 'No limits for an hour' },
 ];
 
-export function ExchangeScreen({ tokens, minutesPerToken, onSpendTokens, onBack }: ExchangeScreenProps) {
+export const ExchangeScreen = forwardRef<HTMLDivElement, ExchangeScreenProps>(({ tokens, minutesPerToken, onSpendTokens, onBack }, ref) => {
   const { toast } = useToast();
 
   const handleSpend = (option: typeof SPEND_OPTIONS[0]) => {
@@ -33,7 +34,7 @@ export function ExchangeScreen({ tokens, minutesPerToken, onSpendTokens, onBack 
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden">
+    <div ref={ref} className="min-h-screen flex flex-col px-6 py-8 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-calm" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-pulse opacity-25" />
 
@@ -163,4 +164,6 @@ export function ExchangeScreen({ tokens, minutesPerToken, onSpendTokens, onBack 
       </div>
     </div>
   );
-}
+});
+
+ExchangeScreen.displayName = 'ExchangeScreen';
