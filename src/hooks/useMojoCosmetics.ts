@@ -56,13 +56,11 @@ export const COSMETICS_CATALOG: Cosmetic[] = [
   { id: 'acc-bowtie-blue', name: 'Blue Bow Tie', type: 'accessory', price: 450, rarity: 'common', description: 'Cool and calm' },
   { id: 'acc-bowtie-gold', name: 'Golden Bow Tie', type: 'accessory', price: 900, rarity: 'rare', description: 'Fancy formal' },
   { id: 'acc-scarf', name: 'Cozy Scarf', type: 'accessory', price: 525, rarity: 'common', description: 'Warm and stylish' },
-  { id: 'acc-cape', name: 'Hero Cape', type: 'accessory', price: 900, rarity: 'epic', description: 'Super Mojo!' },
   { id: 'acc-necklace', name: 'Gold Chain', type: 'accessory', price: 750, rarity: 'rare', description: 'Bling bling' },
   { id: 'acc-pearls', name: 'Pearl Necklace', type: 'accessory', price: 825, rarity: 'rare', description: 'Elegant beauty' },
   
   // EXCLUSIVE COLLECTION - Premium outfits
-  { id: 'outfit-jamesbond', name: 'Secret Agent', type: 'accessory', price: 7500, rarity: 'legendary', description: 'Shaken, not stirred. Full tuxedo with bow tie.' },
-  { id: 'outfit-superhero', name: 'Super Mojo', type: 'accessory', price: 7500, rarity: 'legendary', description: 'Cape, mask, and lightning bolt. Save the day!' },
+  { id: 'outfit-jamesbond', name: 'Secret Agent', type: 'accessory', price: 7500, rarity: 'legendary', description: 'Shaken, not stirred. Full tuxedo with martini and pistol.' },
   { id: 'outfit-princess', name: 'Royal Princess', type: 'accessory', price: 7500, rarity: 'legendary', description: 'Tiara, dress, and wand. Fairytale dreams!' },
   { id: 'outfit-teddy', name: 'Teddy Bear', type: 'accessory', price: 6000, rarity: 'legendary', description: 'Fuzzy ears and bow. Huggable cuteness!' },
 ];
