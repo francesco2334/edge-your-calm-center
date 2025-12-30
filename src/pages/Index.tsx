@@ -30,6 +30,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDailyQuestion } from '@/hooks/useDailyQuestion';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useMojoMood } from '@/hooks/useMojoMood';
+import { useWellness } from '@/hooks/useWellness';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
@@ -143,6 +144,9 @@ const Index = () => {
   // Mojo mood system for reactions
   const { triggerWinReaction, triggerLoseReaction } = useMojoMood();
 
+  // Wellness tracking with daily reset
+  const { wellness, updateWellness, isLoaded: wellnessLoaded } = useWellness(grantPoints);
+
   // Schedule streak warning if user hasn't logged today
   useEffect(() => {
     if (!hasLoggedToday && notificationPermission === 'granted') {
@@ -173,7 +177,7 @@ const Index = () => {
   // Determine initial screen based on onboarding, auth, and subscription status
   // SINGLE SOURCE OF TRUTH for routing
   useEffect(() => {
-    if (authLoading || !economyLoaded || !onboardingLoaded || !subscriptionLoaded) return;
+    if (authLoading || !economyLoaded || !onboardingLoaded || !subscriptionLoaded || !wellnessLoaded) return;
     
     // Priority 1: Not completed onboarding yet → show onboarding flow
     if (!onboardingCompleted) {
@@ -189,10 +193,10 @@ const Index = () => {
 
     // Priority 3: User is authenticated or guest, go to main app
     setCurrentScreen('main');
-  }, [user, authLoading, economyLoaded, onboardingLoaded, subscriptionLoaded, onboardingCompleted, authGateSeen]);
+  }, [user, authLoading, economyLoaded, onboardingLoaded, subscriptionLoaded, wellnessLoaded, onboardingCompleted, authGateSeen]);
 
   // Show loading state while data loads
-  if (authLoading || !economyLoaded || !onboardingLoaded || !subscriptionLoaded || currentScreen === null) {
+  if (authLoading || !economyLoaded || !onboardingLoaded || !subscriptionLoaded || !wellnessLoaded || currentScreen === null) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center safe-area-inset">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -567,6 +571,8 @@ const Index = () => {
           logsToday={productivityLogsToday}
           logsRemaining={productivityLogsRemaining}
           onLogProductivity={logProductivity}
+          wellness={wellness}
+          onWellnessChange={updateWellness}
         />
       )}
 
