@@ -140,26 +140,6 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           </div>
         )}
 
-        {/* Accessory: Cape (behind orb) */}
-        {cosmetics?.accessory === 'acc-cape' && size !== 'sm' && (
-          <motion.svg
-            viewBox="0 0 100 120"
-            className="absolute -bottom-[40%] left-1/2 -translate-x-1/2 w-[90%] h-[80%] -z-10"
-            animate={{ skewX: [-2, 2, -2] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <path
-              d="M20 0 Q10 60 25 120 L75 120 Q90 60 80 0"
-              fill="url(#capeGradient)"
-            />
-            <defs>
-              <linearGradient id="capeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#dc2626" />
-                <stop offset="100%" stopColor="#7f1d1d" />
-              </linearGradient>
-            </defs>
-          </motion.svg>
-        )}
 
         {/* Accessory: Fire Aura */}
         {cosmetics?.accessory === 'acc-flames' && size !== 'sm' && (
@@ -815,13 +795,56 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
         {/* EXCLUSIVE OUTFIT: James Bond / Secret Agent */}
         {cosmetics?.accessory === 'outfit-jamesbond' && size !== 'sm' && (
           <div className="absolute inset-0 pointer-events-none">
-            {/* Tuxedo body */}
+            {/* Martini glass on left side */}
+            <svg 
+              viewBox="0 0 40 60" 
+              className="absolute z-30"
+              style={{ 
+                width: size === 'lg' ? '22%' : '18%',
+                left: size === 'lg' ? '-20%' : '-15%',
+                top: size === 'lg' ? '25%' : '28%',
+              }}
+            >
+              {/* Glass */}
+              <path d="M5 5 L35 5 L20 30 L20 50 L10 55 L30 55 L20 50" fill="none" stroke="#94a3b8" strokeWidth="2" />
+              <path d="M8 8 L32 8 L20 28 Z" fill="#e0f2fe" fillOpacity="0.6" />
+              {/* Olive */}
+              <circle cx="20" cy="15" r="4" fill="#84cc16" />
+              <rect x="19" y="8" width="2" height="10" fill="#78716c" />
+            </svg>
+            
+            {/* Pistol on right side */}
+            <svg 
+              viewBox="0 0 50 35" 
+              className="absolute z-30"
+              style={{ 
+                width: size === 'lg' ? '28%' : '22%',
+                right: size === 'lg' ? '-25%' : '-18%',
+                top: size === 'lg' ? '30%' : '32%',
+              }}
+            >
+              {/* Gun body */}
+              <rect x="5" y="8" width="35" height="10" rx="2" fill="#374151" />
+              {/* Barrel */}
+              <rect x="35" y="10" width="12" height="6" rx="1" fill="#1f2937" />
+              {/* Handle */}
+              <path d="M8 18 L5 32 L15 32 L18 18" fill="#78716c" />
+              {/* Trigger guard */}
+              <path d="M18 18 Q22 25 18 28 L22 28 Q26 22 22 18" fill="none" stroke="#374151" strokeWidth="2" />
+              {/* Trigger */}
+              <rect x="19" y="20" width="2" height="5" fill="#1f2937" />
+              {/* Slide detail */}
+              <line x1="10" y1="10" x2="10" y2="16" stroke="#4b5563" strokeWidth="1" />
+              <line x1="15" y1="10" x2="15" y2="16" stroke="#4b5563" strokeWidth="1" />
+            </svg>
+            
+            {/* Tuxedo body - positioned lower */}
             <svg 
               viewBox="0 0 100 60" 
               className="absolute left-1/2 -translate-x-1/2 z-20"
               style={{ 
                 width: size === 'lg' ? '85%' : '75%',
-                bottom: size === 'lg' ? '-25%' : '-20%',
+                bottom: size === 'lg' ? '-30%' : '-25%',
               }}
             >
               {/* Black jacket */}
@@ -841,51 +864,6 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
           </div>
         )}
 
-        {/* EXCLUSIVE OUTFIT: Superhero */}
-        {cosmetics?.accessory === 'outfit-superhero' && size !== 'sm' && (
-          <div className="absolute inset-0 pointer-events-none">
-            {/* Hero cape (behind) */}
-            <motion.svg
-              viewBox="0 0 100 120"
-              className="absolute -bottom-[50%] left-1/2 -translate-x-1/2 w-[100%] h-[90%] -z-10"
-              animate={{ skewX: [-2, 2, -2] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <path d="M15 0 Q5 60 20 120 L80 120 Q95 60 85 0" fill="url(#heroCapeGrad)" />
-              <defs>
-                <linearGradient id="heroCapeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#dc2626" />
-                  <stop offset="100%" stopColor="#7f1d1d" />
-                </linearGradient>
-              </defs>
-            </motion.svg>
-            {/* Hero mask */}
-            <svg 
-              viewBox="0 0 80 30" 
-              className="absolute left-1/2 -translate-x-1/2 z-30"
-              style={{ 
-                width: size === 'lg' ? '60%' : '50%',
-                top: size === 'lg' ? '28%' : '26%',
-              }}
-            >
-              <path d="M5 15 Q20 5 40 15 Q60 5 75 15 L70 25 Q40 18 10 25 Z" fill="#1e40af" />
-              {/* Eye cutouts */}
-              <ellipse cx="25" cy="18" rx="8" ry="5" fill="#0f172a" />
-              <ellipse cx="55" cy="18" rx="8" ry="5" fill="#0f172a" />
-            </svg>
-            {/* Lightning bolt emblem */}
-            <svg 
-              viewBox="0 0 30 40" 
-              className="absolute left-1/2 -translate-x-1/2 z-20"
-              style={{ 
-                width: size === 'lg' ? '20%' : '15%',
-                bottom: size === 'lg' ? '-10%' : '-5%',
-              }}
-            >
-              <path d="M18 0 L5 18 L12 18 L8 40 L25 15 L16 15 Z" fill="#fbbf24" />
-            </svg>
-          </div>
-        )}
 
         {/* EXCLUSIVE OUTFIT: Princess */}
         {cosmetics?.accessory === 'outfit-princess' && size !== 'sm' && (
