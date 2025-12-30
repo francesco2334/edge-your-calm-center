@@ -29,14 +29,14 @@ const MOTIVATIONAL_QUOTES = [
   "Chase the vision, not the comfort.",
 ];
 
-// Difficulty settings per round - HARDER
+// Difficulty settings per round - HARDER but with proper catch detection
 const getDifficultySettings = (round: number) => {
   const settings = [
-    { size: 70, moves: false, evades: false, catchRadius: 25, moveSpeed: 0 },      // Round 1: Smaller start
-    { size: 55, moves: true, evades: false, catchRadius: 22, moveSpeed: 600 },     // Round 2: Moving early
-    { size: 45, moves: true, evades: true, catchRadius: 18, moveSpeed: 450 },      // Round 3: Evading + smaller
-    { size: 38, moves: true, evades: true, catchRadius: 15, moveSpeed: 350 },      // Round 4: Fast + small
-    { size: 32, moves: true, evades: true, catchRadius: 12, moveSpeed: 250 },      // Round 5: Very hard
+    { size: 70, moves: false, evades: false, catchRadius: 45, moveSpeed: 0 },      // Round 1: Easy start
+    { size: 60, moves: true, evades: false, catchRadius: 40, moveSpeed: 600 },     // Round 2: Moving
+    { size: 50, moves: true, evades: true, catchRadius: 35, moveSpeed: 450 },      // Round 3: Evading
+    { size: 45, moves: true, evades: true, catchRadius: 32, moveSpeed: 350 },      // Round 4: Faster
+    { size: 40, moves: true, evades: true, catchRadius: 28, moveSpeed: 250 },      // Round 5: Hard
   ];
   return settings[Math.min(round, settings.length - 1)];
 };
@@ -63,6 +63,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
   const [showComplete, setShowComplete] = useState(false);
   const [currentQuote, setCurrentQuote] = useState('');
   const [showQuote, setShowQuote] = useState(false);
+  const [usedQuoteIndices, setUsedQuoteIndices] = useState<number[]>([]);
   const [mojoState, setMojoState] = useState<'calm' | 'regulating' | 'steady'>('calm');
   const [proximity, setProximity] = useState(0);
   const wasCloseRef = useRef(false);
@@ -251,9 +252,14 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
       setIsExcited(false);
       setShowPop(true);
       
-      // Show a motivational quote after each round
-      const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
-      setCurrentQuote(randomQuote);
+      // Show a motivational quote after each round - no repeats
+      const availableIndices = MOTIVATIONAL_QUOTES.map((_, i) => i).filter(i => !usedQuoteIndices.includes(i));
+      const randomIndex = availableIndices.length > 0 
+        ? availableIndices[Math.floor(Math.random() * availableIndices.length)]
+        : Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length); // Fallback if all used
+      
+      setUsedQuoteIndices(prev => [...prev, randomIndex]);
+      setCurrentQuote(MOTIVATIONAL_QUOTES[randomIndex]);
       setShowQuote(true);
       
       setTimeout(() => {
