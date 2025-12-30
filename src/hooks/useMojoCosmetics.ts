@@ -77,26 +77,33 @@ const DEFAULT_STATE: CosmeticsState = {
 
 export function useMojoCosmetics() {
   const { user } = useAuth();
-  const [state, setState] = useState<CosmeticsState>(() => {
-    try {
-      const saved = localStorage.getItem(COSMETICS_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (!parsed.owned.includes('color-default')) {
-          parsed.owned.push('color-default');
-        }
-        return parsed;
-      }
-    } catch {}
-    return DEFAULT_STATE;
-  });
+  const [state, setState] = useState<CosmeticsState>(DEFAULT_STATE);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasLoadedFromDb, setHasLoadedFromDb] = useState(false);
 
   // Load from database on mount if user is logged in
   useEffect(() => {
     const loadFromDatabase = async () => {
+      // First try localStorage as fallback
+      let localState: CosmeticsState | null = null;
+      try {
+        const saved = localStorage.getItem(COSMETICS_STORAGE_KEY);
+        if (saved) {
+          localState = JSON.parse(saved);
+          if (localState && !localState.owned?.includes('color-default')) {
+            localState.owned = localState.owned || [];
+            localState.owned.push('color-default');
+          }
+        }
+      } catch {}
+
       if (!user) {
+        // No user - use localStorage or default
+        if (localState) {
+          setState(localState);
+        }
         setIsLoaded(true);
+        setHasLoadedFromDb(true);
         return;
       }
 
@@ -109,7 +116,9 @@ export function useMojoCosmetics() {
 
         if (error) {
           console.error('Error loading cosmetics:', error);
+          if (localState) setState(localState);
           setIsLoaded(true);
+          setHasLoadedFromDb(true);
           return;
         }
 
@@ -120,39 +129,54 @@ export function useMojoCosmetics() {
             dbCosmetics.owned = dbCosmetics.owned || [];
             dbCosmetics.owned.push('color-default');
           }
+          // Ensure equipped structure exists
+          if (!dbCosmetics.equipped) {
+            dbCosmetics.equipped = DEFAULT_STATE.equipped;
+          }
           setState(dbCosmetics);
           localStorage.setItem(COSMETICS_STORAGE_KEY, JSON.stringify(dbCosmetics));
+        } else if (localState) {
+          // No DB data but have local - use local and sync to DB
+          setState(localState);
         }
       } catch (err) {
         console.error('Error loading cosmetics:', err);
+        if (localState) setState(localState);
       }
       setIsLoaded(true);
+      setHasLoadedFromDb(true);
     };
 
     loadFromDatabase();
   }, [user]);
 
-  // Save to database when state changes (debounced)
+  // Save to database when state changes - only after initial load
   useEffect(() => {
-    if (!isLoaded || !user) return;
+    if (!isLoaded || !hasLoadedFromDb) return;
 
     // Save to localStorage immediately
     localStorage.setItem(COSMETICS_STORAGE_KEY, JSON.stringify(state));
 
+    if (!user) return;
+
     // Debounce database save
     const timer = setTimeout(async () => {
       try {
-        await supabase
+        const { error } = await supabase
           .from('user_progress')
           .update({ mojo_cosmetics: JSON.parse(JSON.stringify(state)) })
           .eq('user_id', user.id);
+        
+        if (error) {
+          console.error('Error saving cosmetics to DB:', error);
+        }
       } catch (err) {
         console.error('Error saving cosmetics:', err);
       }
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [state, user, isLoaded]);
+  }, [state, user, isLoaded, hasLoadedFromDb]);
 
   const ownsCosmetic = useCallback((cosmeticId: string) => {
     return state.owned.includes(cosmeticId);
