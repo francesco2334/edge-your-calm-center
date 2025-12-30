@@ -58,6 +58,7 @@ interface WellnessData {
   mealsLocked: boolean;
   exercise: number;
   exerciseLocked: boolean;
+  lastUpdated?: string;
 }
 
 interface ProductivityScreenProps {
@@ -258,49 +259,49 @@ export function ProductivityScreen({
       >
         <h2 className="text-xl font-semibold text-foreground mb-4">Daily Wellness</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Track your daily wellness habits — always available!
+          Log once per day — the higher you go, the more points you earn!
         </p>
         
         <WellnessBar
           icon={Droplets}
           title="Water Intake"
-          subtitle="Drag to log your hydration"
+          subtitle="Log once per day • More water = more points!"
           value={wellness.water}
           maxValue={3}
           unit="L"
           color="blue"
-          points={5}
+          basePoints={5}
           isLocked={wellness.waterLocked}
           onValueChange={(v) => updateWellness({ water: v })}
-          onLock={() => updateWellness({ waterLocked: true })}
+          onLock={(earnedPoints) => updateWellness({ waterLocked: true })}
         />
 
         <WellnessBar
           icon={Apple}
           title="Healthy Meals"
-          subtitle="Log your nutritious meals today"
+          subtitle="Log once per day • More meals = more points!"
           value={wellness.meals}
           maxValue={3}
           unit=""
           color="green"
-          points={5}
+          basePoints={5}
           isLocked={wellness.mealsLocked}
           onValueChange={(v) => updateWellness({ meals: v })}
-          onLock={() => updateWellness({ mealsLocked: true })}
+          onLock={(earnedPoints) => updateWellness({ mealsLocked: true })}
         />
 
         <WellnessBar
           icon={Flame}
           title="Exercise Hours"
-          subtitle="How long did you move today?"
+          subtitle="Log once per day • More hours = more points!"
           value={wellness.exercise}
           maxValue={4}
           unit="h"
           color="orange"
-          points={10}
+          basePoints={8}
           isLocked={wellness.exerciseLocked}
           onValueChange={(v) => updateWellness({ exercise: v })}
-          onLock={() => updateWellness({ exerciseLocked: true })}
+          onLock={(earnedPoints) => updateWellness({ exerciseLocked: true })}
         />
       </motion.div>
     </div>

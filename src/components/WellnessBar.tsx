@@ -12,10 +12,30 @@ interface WellnessBarProps {
   maxValue: number;
   unit: string;
   color: 'blue' | 'green' | 'orange';
-  points: number;
+  basePoints: number; // Base points per unit
   isLocked: boolean;
   onValueChange: (value: number) => void;
-  onLock: () => void;
+  onLock: (earnedPoints: number) => void;
+}
+
+// Calculate progressive points: more value = more points per unit
+function calculateProgressivePoints(value: number, maxValue: number, basePoints: number): number {
+  if (value <= 0) return 0;
+  
+  // Progressive multiplier: reaching higher values gives bonus points
+  // 25% = 1x, 50% = 1.5x, 75% = 2x, 100% = 3x
+  const percentage = value / maxValue;
+  let multiplier = 1;
+  
+  if (percentage >= 1) {
+    multiplier = 3;
+  } else if (percentage >= 0.75) {
+    multiplier = 2;
+  } else if (percentage >= 0.5) {
+    multiplier = 1.5;
+  }
+  
+  return Math.round(value * basePoints * multiplier);
 }
 
 const colorClasses = {
@@ -53,7 +73,7 @@ export function WellnessBar({
   maxValue,
   unit,
   color,
-  points,
+  basePoints,
   isLocked,
   onValueChange,
   onLock,
@@ -62,8 +82,12 @@ export function WellnessBar({
   const [isDragging, setIsDragging] = useState(false);
   const [showPoints, setShowPoints] = useState(false);
   const [showMojoCelebration, setShowMojoCelebration] = useState(false);
+  const [earnedPoints, setEarnedPoints] = useState(0);
   const colors = colorClasses[color];
   const progress = (localValue / maxValue) * 100;
+  
+  // Calculate current potential points based on value
+  const currentPoints = calculateProgressivePoints(localValue, maxValue, basePoints);
 
   // Celebration messages based on wellness type
   const celebrationMessages: Record<string, string[]> = {
@@ -96,12 +120,14 @@ export function WellnessBar({
 
   const handleLockClick = () => {
     if (localValue > 0 && !isLocked) {
+      const pointsToEarn = calculateProgressivePoints(localValue, maxValue, basePoints);
+      setEarnedPoints(pointsToEarn);
       setShowPoints(true);
       // Pick random celebration message
       const messages = celebrationMessages[color];
       setCelebrationMessage(messages[Math.floor(Math.random() * messages.length)]);
       setShowMojoCelebration(true);
-      onLock();
+      onLock(pointsToEarn);
       setTimeout(() => {
         setShowPoints(false);
         setShowMojoCelebration(false);
@@ -161,7 +187,7 @@ export function WellnessBar({
           >
             <div className={`px-4 py-2 rounded-full ${colors.icon} flex items-center gap-2 shadow-lg ${colors.glow}`}>
               <Sparkles className="w-4 h-4" />
-              <span className="font-bold">+{points} pts</span>
+              <span className="font-bold">+{earnedPoints} pts</span>
             </div>
           </motion.div>
         )}
@@ -316,12 +342,12 @@ export function WellnessBar({
         {isLocked ? (
           <>
             <Lock className="w-4 h-4" />
-            <span>Logged • +{points} pts earned</span>
+            <span>Logged today • Come back tomorrow!</span>
             <Check className="w-4 h-4" />
           </>
         ) : (
           <>
-            <span>Lock in & Earn +{points} pts</span>
+            <span>Lock in & Earn +{currentPoints} pts</span>
             <Sparkles className="w-4 h-4" />
           </>
         )}
