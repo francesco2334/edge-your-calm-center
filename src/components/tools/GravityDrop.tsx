@@ -15,14 +15,28 @@ interface Position {
   y: number;
 }
 
-// Difficulty settings per round
+// Motivational quotes about finding yourself and chasing goals
+const MOTIVATIONAL_QUOTES = [
+  "The journey of a thousand miles begins with a single step.",
+  "You are closer to your goals than you think.",
+  "Trust the process. Embrace the journey.",
+  "Your potential is limitless.",
+  "Every small victory matters.",
+  "You're becoming who you're meant to be.",
+  "Stay focused. Stay driven.",
+  "The only way out is through.",
+  "You have the power to rewrite your story.",
+  "Chase the vision, not the comfort.",
+];
+
+// Difficulty settings per round - HARDER
 const getDifficultySettings = (round: number) => {
   const settings = [
-    { size: 80, moves: false, evades: false, catchRadius: 30 },      // Round 1: Easy
-    { size: 70, moves: false, evades: false, catchRadius: 28 },      // Round 2: Smaller
-    { size: 60, moves: true, evades: false, catchRadius: 25 },       // Round 3: Moving
-    { size: 55, moves: true, evades: true, catchRadius: 22 },        // Round 4: Evading
-    { size: 50, moves: true, evades: true, catchRadius: 20 },        // Round 5: Hard
+    { size: 70, moves: false, evades: false, catchRadius: 25, moveSpeed: 0 },      // Round 1: Smaller start
+    { size: 55, moves: true, evades: false, catchRadius: 22, moveSpeed: 600 },     // Round 2: Moving early
+    { size: 45, moves: true, evades: true, catchRadius: 18, moveSpeed: 450 },      // Round 3: Evading + smaller
+    { size: 38, moves: true, evades: true, catchRadius: 15, moveSpeed: 350 },      // Round 4: Fast + small
+    { size: 32, moves: true, evades: true, catchRadius: 12, moveSpeed: 250 },      // Round 5: Very hard
   ];
   return settings[Math.min(round, settings.length - 1)];
 };
@@ -47,6 +61,8 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
   const [isExcited, setIsExcited] = useState(false);
   const [showPop, setShowPop] = useState(false);
   const [showComplete, setShowComplete] = useState(false);
+  const [currentQuote, setCurrentQuote] = useState('');
+  const [showQuote, setShowQuote] = useState(false);
   const [mojoState, setMojoState] = useState<'calm' | 'regulating' | 'steady'>('calm');
   const [proximity, setProximity] = useState(0);
   const wasCloseRef = useRef(false);
@@ -102,7 +118,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
     moveIntervalRef.current = setInterval(() => {
       if (!isSettled) {
         setTargetPos(prev => {
-          const moveAmount = 15 + round * 5;
+          const moveAmount = 25 + round * 10; // More aggressive movement
           const newX = Math.max(80, Math.min(
             containerSize.width - 80 - difficulty.size,
             prev.x + (Math.random() - 0.5) * moveAmount * 2
@@ -114,7 +130,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
           return { x: newX, y: newY };
         });
       }
-    }, 800 - round * 100);
+    }, difficulty.moveSpeed || 600); // Use difficulty-based speed
     
     return () => {
       if (moveIntervalRef.current) {
@@ -136,17 +152,21 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
     const dy = targetCenterY - mojoCenterY;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // Evade when Mojo gets within 120px
-    if (distance < 120 && distance > 0) {
+    // Evade when Mojo gets within 150px (larger detection radius)
+    if (distance < 150 && distance > 0) {
       if (evadeTimeoutRef.current) return; // Already evading
       
       evadeTimeoutRef.current = setTimeout(() => {
-        // Move away from Mojo
-        const evadeDistance = 60 + round * 15;
+        // Move away from Mojo - more aggressive evasion
+        const evadeDistance = 80 + round * 25;
         const angle = Math.atan2(dy, dx);
         
-        let newX = targetPos.x + Math.cos(angle) * evadeDistance;
-        let newY = targetPos.y + Math.sin(angle) * evadeDistance;
+        // Add some randomness to make it less predictable
+        const randomOffset = (Math.random() - 0.5) * 0.5;
+        const finalAngle = angle + randomOffset;
+        
+        let newX = targetPos.x + Math.cos(finalAngle) * evadeDistance;
+        let newY = targetPos.y + Math.sin(finalAngle) * evadeDistance;
         
         // Keep within bounds
         newX = Math.max(60, Math.min(containerSize.width - 60 - difficulty.size, newX));
@@ -154,7 +174,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
         
         setTargetPos({ x: newX, y: newY });
         evadeTimeoutRef.current = null;
-      }, 150);
+      }, 80 - round * 10); // Faster reaction time in later rounds
     }
   }, [difficulty.evades, difficulty.size, isSettled, targetPos, containerSize, round]);
 
@@ -231,30 +251,39 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
       setIsExcited(false);
       setShowPop(true);
       
+      // Show a motivational quote after each round
+      const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+      setCurrentQuote(randomQuote);
+      setShowQuote(true);
+      
       setTimeout(() => {
         setShowPop(false);
-        wasCloseRef.current = false;
         
-        if (round + 1 >= totalRounds) {
-          setTimeout(() => setShowComplete(true), 300);
-        } else {
-          const nextRound = round + 1;
-          const nextDifficulty = getDifficultySettings(nextRound);
+        setTimeout(() => {
+          setShowQuote(false);
+          wasCloseRef.current = false;
           
-          setRound(nextRound);
-          setIsSettled(false);
-          setMojoState('calm');
-          setProximity(0);
-          
-          const newTarget = generateRandomPosition(containerSize.width, containerSize.height, nextDifficulty.size);
-          setTargetPos(newTarget);
-          
-          const centerX = containerSize.width / 2 - 40;
-          const centerY = containerSize.height / 2 - 40;
-          setInitialPos({ x: centerX, y: centerY });
-          dragX.set(0);
-          dragY.set(0);
-        }
+          if (round + 1 >= totalRounds) {
+            setTimeout(() => setShowComplete(true), 300);
+          } else {
+            const nextRound = round + 1;
+            const nextDifficulty = getDifficultySettings(nextRound);
+            
+            setRound(nextRound);
+            setIsSettled(false);
+            setMojoState('calm');
+            setProximity(0);
+            
+            const newTarget = generateRandomPosition(containerSize.width, containerSize.height, nextDifficulty.size);
+            setTargetPos(newTarget);
+            
+            const centerX = containerSize.width / 2 - 40;
+            const centerY = containerSize.height / 2 - 40;
+            setInitialPos({ x: centerX, y: centerY });
+            dragX.set(0);
+            dragY.set(0);
+          }
+        }, 1200); // Show quote for 1.2 seconds
       }, 500);
     }, 600);
   }, [isSettled, round, totalRounds, containerSize, notifySuccess, dragX, dragY]);
@@ -429,6 +458,26 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
           transition={{ duration: 0.5, ease: 'easeOut' }}
         />
       ))}
+
+      {/* Motivational quote overlay */}
+      {showQuote && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="absolute inset-x-0 top-1/3 z-30 flex items-center justify-center px-8"
+        >
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            className="bg-background/80 backdrop-blur-md rounded-2xl px-6 py-4 border border-primary/20 shadow-lg"
+          >
+            <p className="text-center text-foreground font-medium text-lg leading-relaxed">
+              "{currentQuote}"
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* Draggable Mojo */}
       {isReady && !showPop && (
