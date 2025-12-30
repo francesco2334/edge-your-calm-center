@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { WelcomeScreen } from '@/components/WelcomeScreen';
 import { PermissionScreen } from '@/components/PermissionScreen';
 import { AssessmentScreen } from '@/components/AssessmentScreen';
@@ -7,7 +7,7 @@ import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
 import { AuthGateScreen } from '@/components/AuthGateScreen';
 import { SubscriptionScreen } from '@/components/SubscriptionScreen';
 import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
-import { HomeScreen } from '@/components/HomeScreen';
+import { HomeScreen, HomeScreenHandle } from '@/components/HomeScreen';
 import { GamesScreen } from '@/components/GamesScreen';
 import { ExchangeScreen } from '@/components/ExchangeScreen';
 import { InsightsScreen } from '@/components/InsightsScreen';
@@ -52,6 +52,7 @@ const Index = () => {
   const [showTriggerRouting, setShowTriggerRouting] = useState(false);
   const [currentTrigger, setCurrentTrigger] = useState<string | null>(null);
   const [showTimeExpired, setShowTimeExpired] = useState(false);
+  const homeScreenRef = useRef<HomeScreenHandle>(null);
   
   // Daily question hook
   const { hasAnsweredToday } = useDailyQuestion();
@@ -214,13 +215,25 @@ const Index = () => {
       cancelStreakWarning();
       cancelDailyReminder();
       
+      // Mojo celebrates daily login and streak!
+      setTimeout(() => {
+        homeScreenRef.current?.celebrateDailyLogin(streak + 1);
+        homeScreenRef.current?.celebrateTokenEarned(3);
+      }, 500);
+      
       // Record daily activity and check for trophy progress
       const { newTrophies, nextTrophy } = recordDailyActivity();
       
-      // Send notifications for any newly earned trophies
-      if (newTrophies.length > 0 && notificationPermission === 'granted') {
+      // Send notifications for any newly earned trophies + Mojo celebration
+      if (newTrophies.length > 0) {
         for (const trophy of newTrophies) {
-          await sendTrophyEarnedNotification(trophy.name, trophy.icon);
+          if (notificationPermission === 'granted') {
+            await sendTrophyEarnedNotification(trophy.name, trophy.icon);
+          }
+          // Mojo celebrates trophy!
+          setTimeout(() => {
+            homeScreenRef.current?.celebrateTrophyEarned(trophy.name);
+          }, 2000);
         }
       }
       
@@ -244,6 +257,10 @@ const Index = () => {
   // Handle relapse-type pulls
   const handleRelapseLogged = () => {
     setFailureContext('relapse');
+    // Mojo is here for comeback
+    setTimeout(() => {
+      homeScreenRef.current?.celebrateComeback();
+    }, 1000);
   };
 
   // Handle game completion - awards +1 token + points + Mojo win reaction
@@ -251,6 +268,12 @@ const Index = () => {
     recordGameComplete(gameId as any, details);
     recordActivity('game', details, 10);
     triggerWinReaction(); // Mojo celebrates!
+    
+    // Also trigger personalized celebration
+    setTimeout(() => {
+      homeScreenRef.current?.celebrateGameWin(gameId);
+      homeScreenRef.current?.celebrateTokenEarned(1);
+    }, 500);
   };
 
   // Handle game failure/early exit - deducts points ONLY, never tokens + Mojo sad reaction
@@ -475,6 +498,7 @@ const Index = () => {
 
       {activeTab === 'home' && (
         <HomeScreen 
+          ref={homeScreenRef}
           tokens={tokens}
           points={points}
           streak={streak}
