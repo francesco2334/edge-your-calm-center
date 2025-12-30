@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, Coins } from 'lucide-react';
 import { MojoOrb } from './MojoOrb';
+import { MojoWithPersonality } from './MojoWithPersonality';
 import { StreakRing } from './StreakRing';
 import { PullSheet } from './PullSheet';
 import { SwipeFeed } from './SwipeFeed';
@@ -146,19 +147,25 @@ export function HomeScreen({
         >
           {/* Mojo + Streak Ring - Centered */}
           <div className="w-full flex flex-col items-center justify-center relative">
-            <button 
+            <div 
               onClick={onOpenMojoChat}
               onContextMenu={(e) => {
                 e.preventDefault();
                 onOpenQuickStop?.();
               }}
-              className="focus:outline-none active:scale-[0.97] transition-transform"
+              className="focus:outline-none cursor-pointer"
               aria-label="Chat with Mojo"
             >
               <StreakRing streak={streak} claimed={hasLoggedToday} size={196}>
-                <MojoOrb state={mojoState} selectedPull={currentTrigger} size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
+                <MojoWithPersonality 
+                  state={mojoState} 
+                  selectedPull={currentTrigger} 
+                  size="lg" 
+                  cosmetics={cosmeticsContext?.equippedCosmetics}
+                  onTap={onOpenMojoChat}
+                />
               </StreakRing>
-            </button>
+            </div>
             
             {/* Customize Mojo button */}
             <button
