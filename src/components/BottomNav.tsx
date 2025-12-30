@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { haptics } from '@/hooks/useHaptics';
 
 type NavTab = 'learn' | 'games' | 'home' | 'productivity' | 'insights';
 
@@ -31,7 +32,10 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
             return (
               <motion.button
                 key={tab.id}
-                onClick={() => onTabChange(tab.id)}
+                onClick={() => {
+                  haptics.tapMedium();
+                  onTabChange(tab.id);
+                }}
                 className="relative -mt-6"
                 whileTap={{ scale: 0.92 }}
               >
