@@ -809,10 +809,10 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                   <AnimatePresence>
                     {showEmotes && (
                       <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="flex justify-center gap-2 mt-3 flex-wrap"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="flex justify-center gap-2 mt-3 flex-wrap overflow-visible"
                       >
                         {EMOTES.map((emoteItem) => (
                           <motion.button
