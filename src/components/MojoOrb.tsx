@@ -837,13 +837,13 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
               <line x1="15" y1="10" x2="15" y2="16" stroke="#4b5563" strokeWidth="1" />
             </svg>
             
-            {/* Tuxedo body - positioned lower */}
+            {/* Tuxedo body - positioned closer to eyes */}
             <svg 
               viewBox="0 0 100 60" 
               className="absolute left-1/2 -translate-x-1/2 z-20"
               style={{ 
                 width: size === 'lg' ? '85%' : '75%',
-                bottom: size === 'lg' ? '-30%' : '-25%',
+                bottom: size === 'lg' ? '-15%' : '-12%',
               }}
             >
               {/* Black jacket */}
