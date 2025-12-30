@@ -42,7 +42,7 @@ const GAMES: {
     tagline: 'Catch your brain lying.',
     instruction: 'Rate how good you think something will feel, then rate how it actually felt.',
     whyItWorks: 'Dopamine exaggerates predictions. Seeing the gap weakens cravings.',
-    icon: '🎯',
+    icon: '🎭',
     gradient: 'from-amber-600/40 via-orange-700/30 to-background',
     reward: '+1 token, +15 pts',
     duration: '30s',
