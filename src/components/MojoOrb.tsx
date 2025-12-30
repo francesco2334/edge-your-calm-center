@@ -36,30 +36,27 @@ const COLOR_GRADIENTS: Record<string, { gradient: string; glow: string }> = {
   'color-rainbow': { gradient: 'from-red-500/70 via-yellow-400/60 to-blue-500/70', glow: '0 0 50px hsl(280 70% 60% / 0.3)' },
 };
 
+// State styles - NO gradient overrides, only temporary glow/scale effects
+// Mojo keeps its cosmetic color and only changes glow intensity based on state
 const stateStyles: Record<MojoState, { 
-  gradientOverride?: string;
-  glowOverride?: string;
+  glowIntensity?: string;
   scale: number;
 }> = {
   calm: { scale: 1 },
   regulating: { 
-    gradientOverride: 'from-amber-500/75 via-primary/60 to-primary/45',
-    glowOverride: '0 0 48px hsl(var(--dopa-warm) / 0.4)',
+    glowIntensity: '0 0 48px hsl(var(--primary) / 0.4)',
     scale: 1.04 
   },
   'under-load': { 
-    gradientOverride: 'from-orange-500/80 via-amber-500/60 to-primary/45',
-    glowOverride: '0 0 44px hsl(var(--dopa-warm) / 0.45)',
+    glowIntensity: '0 0 52px hsl(var(--primary) / 0.5)',
     scale: 1.08 
   },
   steady: { 
-    gradientOverride: 'from-emerald-500/75 via-emerald-400/55 to-primary/45',
-    glowOverride: '0 0 52px hsl(142 70% 45% / 0.4)',
+    glowIntensity: '0 0 56px hsl(var(--primary) / 0.45)',
     scale: 1 
   },
   thinking: { 
-    gradientOverride: 'from-violet-500/75 via-primary/60 to-accent/45',
-    glowOverride: '0 0 44px hsl(var(--primary) / 0.35)',
+    glowIntensity: '0 0 44px hsl(var(--primary) / 0.35)',
     scale: 1 
   },
 };
@@ -70,13 +67,13 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
     const [prevState, setPrevState] = useState(state);
     const [justBecameHappy, setJustBecameHappy] = useState(false);
     
-    // Get color from cosmetics or default
+    // Get color from cosmetics or default - always use cosmetic color
     const colorId = cosmetics?.color || 'color-default';
     const colorStyle = COLOR_GRADIENTS[colorId] || COLOR_GRADIENTS['color-default'];
     
-    // Use state override or cosmetic color
-    const gradient = stateStyle.gradientOverride || colorStyle.gradient;
-    const glow = stateStyle.glowOverride || colorStyle.glow;
+    // Always use cosmetic color, state only affects glow intensity
+    const gradient = colorStyle.gradient;
+    const glow = stateStyle.glowIntensity || colorStyle.glow;
     
     // Detect transition to steady state
     useEffect(() => {
