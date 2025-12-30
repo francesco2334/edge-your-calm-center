@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, Calendar, TrendingUp, TrendingDown, Minus, BookOpen, Lightbulb } from 'lucide-react';
 import type { MonthlyNote, MonthlySummary, MonthlyScore } from '@/lib/progress-data';
@@ -19,7 +19,7 @@ interface MonthData {
   summary?: MonthlySummary;
 }
 
-export function JourneyTimeline({ monthlyNotes, monthlySummaries, monthlyScores }: JourneyTimelineProps) {
+export const JourneyTimeline = forwardRef<HTMLDivElement, JourneyTimelineProps>(({ monthlyNotes, monthlySummaries, monthlyScores }, ref) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Combine all data by month and sort chronologically (newest first)
@@ -68,7 +68,7 @@ export function JourneyTimeline({ monthlyNotes, monthlySummaries, monthlyScores 
   };
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <Calendar className="w-4 h-4" />
@@ -190,4 +190,6 @@ export function JourneyTimeline({ monthlyNotes, monthlySummaries, monthlyScores 
       </div>
     </div>
   );
-}
+});
+
+JourneyTimeline.displayName = 'JourneyTimeline';

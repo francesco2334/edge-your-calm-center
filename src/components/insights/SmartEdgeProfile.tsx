@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { Target, TrendingUp, Brain, Zap, RefreshCw } from 'lucide-react';
 import type { BehaviorPatterns, FocusArea } from '@/hooks/useSmartInsights';
@@ -9,12 +10,12 @@ interface SmartEdgeProfileProps {
   isLoading?: boolean;
 }
 
-export function SmartEdgeProfile({ 
+export const SmartEdgeProfile = forwardRef<HTMLDivElement, SmartEdgeProfileProps>(({ 
   behaviorPatterns, 
   focusAreas, 
   mojoThemes,
   isLoading 
-}: SmartEdgeProfileProps) {
+}, ref) => {
   const patternLabels: Record<keyof BehaviorPatterns, { label: string; icon: typeof Zap }> = {
     intensity_seeking: { label: 'Intensity Seeking', icon: Zap },
     impulse_control: { label: 'Impulse Control', icon: Brain },
@@ -50,7 +51,7 @@ export function SmartEdgeProfile({
   }
 
   return (
-    <div className="space-y-4">
+    <div ref={ref} className="space-y-4">
       <p className="text-sm text-muted-foreground">Edge Profile</p>
       
       {/* Behavior Pattern Bars */}
@@ -145,4 +146,6 @@ export function SmartEdgeProfile({
       )}
     </div>
   );
-}
+});
+
+SmartEdgeProfile.displayName = 'SmartEdgeProfile';
