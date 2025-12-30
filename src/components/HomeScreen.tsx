@@ -88,10 +88,10 @@ export function HomeScreen({
         <motion.header
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-5 py-4 h-12"
+          className="grid grid-cols-3 items-center px-5 py-4 h-12"
         >
           {/* Left: Mojo state */}
-          <div className="flex items-center gap-2 opacity-40">
+          <div className="flex items-center gap-2 opacity-40 justify-start">
             <div className="w-5 h-5">
               <MojoOrb state={mojoState} size="sm" cosmetics={cosmeticsContext?.equippedCosmetics} />
             </div>
@@ -101,12 +101,12 @@ export function HomeScreen({
           </div>
           
           {/* Center: App name */}
-          <span className="text-[12px] font-semibold text-muted-foreground/50 tracking-[0.2em] uppercase">
+          <span className="text-[12px] font-semibold text-muted-foreground/50 tracking-[0.2em] uppercase text-center">
             DopaMINE
           </span>
           
           {/* Right: Trial badge + Token pill + Settings */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end">
             {trialDaysRemaining !== undefined && trialDaysRemaining > 0 && (
               <TrialBadge daysRemaining={trialDaysRemaining} />
             )}
