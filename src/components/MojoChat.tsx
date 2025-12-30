@@ -175,7 +175,7 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
             times: undefined // Let framer calculate even timing
           }}
         >
-          <MojoOrb state={getMojoState()} size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} />
+          <MojoOrb state={getMojoState()} size="lg" cosmetics={cosmeticsContext?.equippedCosmetics} disableInternalAnimation={!!emote} />
         </motion.div>
         
         {/* Enhanced emote effects */}

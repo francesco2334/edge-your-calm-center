@@ -15,6 +15,8 @@ interface MojoOrbProps {
   selectedPull?: string | null;
   size?: 'sm' | 'md' | 'lg';
   cosmetics?: EquippedCosmetics;
+  /** Disable internal animations when MojoOrb is animated by a parent component (e.g., during emotes) */
+  disableInternalAnimation?: boolean;
 }
 
 // iOS-sized orbs per spec: sm=20, md=80, lg=156
@@ -62,7 +64,7 @@ const stateStyles: Record<MojoState, {
 };
 
 export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
-  function MojoOrb({ state, selectedPull, size = 'md', cosmetics }, ref) {
+  function MojoOrb({ state, selectedPull, size = 'md', cosmetics, disableInternalAnimation = false }, ref) {
     const stateStyle = stateStyles[state];
     const [prevState, setPrevState] = useState(state);
     const [justBecameHappy, setJustBecameHappy] = useState(false);
@@ -95,19 +97,19 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
       <motion.div
         ref={ref}
         className={`${sizeClasses[size]} relative`}
-        animate={{
+        animate={disableInternalAnimation ? undefined : {
           scale: justBecameHappy ? [stateStyle.scale, stateStyle.scale * 1.15, stateStyle.scale * 0.95, stateStyle.scale * 1.05, stateStyle.scale] : stateStyle.scale,
           y: justBecameHappy ? [0, -8, 2, -4, 0] : 0,
           x: leanX,
         }}
-        transition={justBecameHappy ? {
+        transition={disableInternalAnimation ? undefined : (justBecameHappy ? {
           duration: 0.5,
           ease: [0.36, 0, 0.66, -0.56],
         } : {
           type: 'spring',
           stiffness: 180,
           damping: 18,
-        }}
+        })}
       >
         {/* Accessory: Wings (behind orb) */}
         {cosmetics?.accessory === 'acc-wings' && size !== 'sm' && (
