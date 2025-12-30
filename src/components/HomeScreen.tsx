@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useImperativeHandle, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, Coins } from 'lucide-react';
 import { MojoOrb } from './MojoOrb';
-import { MojoWithPersonality } from './MojoWithPersonality';
+import { MojoWithPersonality, MojoPersonalityHandle } from './MojoWithPersonality';
 import { StreakRing } from './StreakRing';
 import { PullSheet } from './PullSheet';
 import { SwipeFeed } from './SwipeFeed';
@@ -28,9 +28,20 @@ interface HomeScreenProps {
   onRelapseLogged?: () => void;
 }
 
+// Export handle for parent to trigger celebrations
+export interface HomeScreenHandle {
+  celebrateStreakMilestone: (streak: number) => void;
+  celebrateTokenEarned: (amount?: number) => void;
+  celebrateGameWin: (gameName?: string) => void;
+  celebrateDailyLogin: (streak: number) => void;
+  celebrateLearnProgress: (cardsViewed: number) => void;
+  celebrateTrophyEarned: (trophyName: string) => void;
+  celebrateComeback: () => void;
+}
+
 type MojoState = 'calm' | 'regulating' | 'under-load' | 'steady';
 
-export function HomeScreen({
+export const HomeScreen = forwardRef<HomeScreenHandle, HomeScreenProps>(function HomeScreen({
   tokens,
   points,
   streak,
@@ -43,11 +54,23 @@ export function HomeScreen({
   onOpenCustomize,
   onPullSelect,
   onRelapseLogged,
-}: HomeScreenProps) {
+}, ref) {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const cosmeticsContext = useMojoCosmeticsOptional();
   const [showPullSheet, setShowPullSheet] = useState(false);
+  const mojoRef = useRef<MojoPersonalityHandle>(null);
+
+  // Expose celebration methods via ref
+  useImperativeHandle(ref, () => ({
+    celebrateStreakMilestone: (s) => mojoRef.current?.celebrateStreakMilestone(s),
+    celebrateTokenEarned: (a) => mojoRef.current?.celebrateTokenEarned(a),
+    celebrateGameWin: (g) => mojoRef.current?.celebrateGameWin(g),
+    celebrateDailyLogin: (s) => mojoRef.current?.celebrateDailyLogin(s),
+    celebrateLearnProgress: (c) => mojoRef.current?.celebrateLearnProgress(c),
+    celebrateTrophyEarned: (t) => mojoRef.current?.celebrateTrophyEarned(t),
+    celebrateComeback: () => mojoRef.current?.celebrateComeback(),
+  }), []);
 
   // Generate feed cards
   const feedCards = useMemo(() => 
@@ -158,6 +181,7 @@ export function HomeScreen({
             >
               <StreakRing streak={streak} claimed={hasLoggedToday} size={196}>
                 <MojoWithPersonality 
+                  ref={mojoRef}
                   state={mojoState} 
                   selectedPull={currentTrigger} 
                   size="lg" 
@@ -261,4 +285,4 @@ export function HomeScreen({
       />
     </div>
   );
-}
+});

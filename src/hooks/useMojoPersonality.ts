@@ -67,17 +67,74 @@ const MOJO_PHRASES = {
     "I'm proud of you",
     "Keep going!",
   ],
+  // Milestone celebration phrases
+  streakMilestone: [
+    "INCREDIBLE! Look at that streak! 🔥",
+    "You're on FIRE! 🎆",
+    "Unstoppable! 💪",
+    "This streak is legendary!",
+    "You're crushing it!",
+    "Milestone achieved! 🏆",
+  ],
+  tokenEarned: [
+    "Cha-ching! 💰",
+    "Nice! More tokens!",
+    "You earned that! 🌟",
+    "Token time!",
+    "Keep stacking! 💎",
+  ],
+  gameWon: [
+    "WINNER! 🎮",
+    "You nailed it! 🎯",
+    "Champion! 🏆",
+    "Victory! 🥇",
+    "That was AMAZING!",
+    "Skills! Pure skills!",
+  ],
+  dailyLogin: [
+    "Another day, another win! ✨",
+    "Consistency is key! 🗝️",
+    "Logged in = leveling up!",
+    "Here we go again! 💪",
+    "Day started right!",
+  ],
+  learnProgress: [
+    "Knowledge is power! 📚",
+    "Learning looks good on you!",
+    "Big brain energy! 🧠",
+    "Getting smarter!",
+    "Love to see it!",
+  ],
+  trophyEarned: [
+    "TROPHY UNLOCKED! 🏆✨",
+    "You DID that! 🎊",
+    "Hall of fame material!",
+    "This one's for the record books!",
+    "Legendary achievement! 🌟",
+  ],
+  comebackStreak: [
+    "Welcome back warrior! ⚔️",
+    "Fresh start, let's go!",
+    "Every day is a new chance!",
+    "The comeback begins NOW!",
+    "Bounce back energy! 🔄",
+  ],
 };
+
+// Milestone thresholds for streak celebrations
+const STREAK_MILESTONES = [3, 7, 14, 21, 30, 60, 90, 100, 180, 365];
 
 // Spontaneous actions Mojo can do
 const SPONTANEOUS_EMOTES: MojoEmote[] = ['dance', 'wave', 'giggle', 'excited', 'blush', 'love', 'spin'];
 const HAPPY_EMOTES: MojoEmote[] = ['dance', 'excited', 'celebrate', 'cheer', 'love'];
+const CELEBRATION_EMOTES: MojoEmote[] = ['celebrate', 'cheer', 'dance', 'excited'];
 
 interface MojoPersonalityState {
   currentPhrase: string | null;
   isPhraseVisible: boolean;
   lastPhraseTime: number;
   isSpontaneousAction: boolean;
+  lastCelebratedStreak: number;
 }
 
 const PHRASE_DISPLAY_DURATION = 3500; // How long phrase stays visible
@@ -93,6 +150,7 @@ export function useMojoPersonality() {
     isPhraseVisible: false,
     lastPhraseTime: Date.now(),
     isSpontaneousAction: false,
+    lastCelebratedStreak: 0,
   });
 
   const phraseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -240,6 +298,111 @@ export function useMojoPersonality() {
     showPhrase(getRandomItem(MOJO_PHRASES[cat]));
   }, [showPhrase]);
 
+  // === MILESTONE CELEBRATIONS ===
+
+  // Celebrate streak milestone
+  const celebrateStreakMilestone = useCallback((streak: number) => {
+    // Check if this is a milestone we should celebrate
+    const isMilestone = STREAK_MILESTONES.includes(streak);
+    if (!isMilestone || streak <= state.lastCelebratedStreak) return;
+
+    setState(prev => ({ ...prev, lastCelebratedStreak: streak }));
+    
+    if (mojoMood.canTriggerEmote) {
+      mojoMood.triggerEmote('celebrate');
+    }
+    
+    // Special phrase for big milestones
+    if (streak >= 100) {
+      showPhrase(`🎆 ${streak} DAYS! You're LEGENDARY! 🎆`);
+    } else if (streak >= 30) {
+      showPhrase(`🔥 ${streak} day streak! You're on FIRE! 🔥`);
+    } else {
+      showPhrase(getRandomItem(MOJO_PHRASES.streakMilestone));
+    }
+  }, [mojoMood, showPhrase, state.lastCelebratedStreak]);
+
+  // Celebrate earning tokens
+  const celebrateTokenEarned = useCallback((amount: number = 1) => {
+    if (mojoMood.canTriggerEmote) {
+      mojoMood.triggerEmote('excited', true);
+    }
+    
+    if (amount >= 3) {
+      showPhrase(`+${amount} tokens! 💰 Nice haul!`);
+    } else {
+      showPhrase(getRandomItem(MOJO_PHRASES.tokenEarned));
+    }
+  }, [mojoMood, showPhrase]);
+
+  // Celebrate game win
+  const celebrateGameWin = useCallback((gameName?: string) => {
+    if (mojoMood.canTriggerEmote) {
+      const emote = getRandomItem(CELEBRATION_EMOTES);
+      mojoMood.triggerEmote(emote);
+    }
+    
+    if (gameName) {
+      showPhrase(`${gameName} mastered! 🎮`);
+    } else {
+      showPhrase(getRandomItem(MOJO_PHRASES.gameWon));
+    }
+  }, [mojoMood, showPhrase]);
+
+  // Celebrate daily login
+  const celebrateDailyLogin = useCallback((streak: number) => {
+    if (mojoMood.canTriggerEmote) {
+      mojoMood.triggerEmote('wave', true);
+    }
+    
+    if (streak > 1) {
+      showPhrase(`Day ${streak}! Keep it going! 🔥`);
+    } else {
+      showPhrase(getRandomItem(MOJO_PHRASES.dailyLogin));
+    }
+    
+    // Check for streak milestone
+    setTimeout(() => celebrateStreakMilestone(streak), 2000);
+  }, [mojoMood, showPhrase, celebrateStreakMilestone]);
+
+  // Celebrate learning progress
+  const celebrateLearnProgress = useCallback((cardsViewed: number) => {
+    if (mojoMood.canTriggerEmote && cardsViewed % 5 === 0) {
+      mojoMood.triggerEmote('love', true);
+    }
+    
+    if (cardsViewed >= 10) {
+      showPhrase(`${cardsViewed} cards! Knowledge master! 📚`);
+    } else if (cardsViewed % 5 === 0) {
+      showPhrase(getRandomItem(MOJO_PHRASES.learnProgress));
+    }
+  }, [mojoMood, showPhrase]);
+
+  // Celebrate trophy earned
+  const celebrateTrophyEarned = useCallback((trophyName: string) => {
+    if (mojoMood.canTriggerEmote) {
+      mojoMood.triggerEmote('celebrate');
+    }
+    
+    showPhrase(`🏆 ${trophyName} unlocked! 🏆`);
+    
+    // Do extra celebration after
+    setTimeout(() => {
+      if (mojoMood.canTriggerEmote) {
+        mojoMood.triggerEmote('dance', true);
+        showPhrase(getRandomItem(MOJO_PHRASES.trophyEarned));
+      }
+    }, 3000);
+  }, [mojoMood, showPhrase]);
+
+  // Celebrate comeback (after broken streak)
+  const celebrateComeback = useCallback(() => {
+    if (mojoMood.canTriggerEmote) {
+      mojoMood.triggerEmote('cheer');
+    }
+    showPhrase(getRandomItem(MOJO_PHRASES.comebackStreak));
+  }, [mojoMood, showPhrase]);
+
   return {
     // Phrase state
     currentPhrase: state.currentPhrase,
@@ -259,13 +422,22 @@ export function useMojoPersonality() {
     recordInteraction: mojoMood.recordInteraction,
     getMojoComment: mojoMood.getMojoComment,
     
-    // New personality actions
+    // Personality actions
     triggerHappyBurst,
     triggerEncouragement,
     triggerDanceParty,
     sayRandomPhrase,
+    
+    // Milestone celebrations
+    celebrateStreakMilestone,
+    celebrateTokenEarned,
+    celebrateGameWin,
+    celebrateDailyLogin,
+    celebrateLearnProgress,
+    celebrateTrophyEarned,
+    celebrateComeback,
   };
 }
 
 export type { MojoEmote };
-export { MOJO_PHRASES };
+export { MOJO_PHRASES, STREAK_MILESTONES };
