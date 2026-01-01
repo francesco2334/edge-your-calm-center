@@ -43,7 +43,7 @@ export function CalmDown({ onComplete, onCancel }: CalmDownProps) {
   const [relaxationLevel, setRelaxationLevel] = useState(5);
   const [collectedCount, setCollectedCount] = useState(0);
 
-  const LEAVES_TO_COLLECT = 5;
+  const LEAVES_TO_COLLECT = 8;
 
   // Spawn leaves continuously
   useEffect(() => {
