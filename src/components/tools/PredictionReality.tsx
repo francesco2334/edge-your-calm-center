@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { MojoOrb } from '../MojoOrb';
 import { MojoCompanion } from '../MojoCompanion';
@@ -16,11 +16,66 @@ const SCALE_OPTIONS = [
   { value: 5, label: 'Great' },
 ];
 
+const STORAGE_KEY = 'prediction-reality-session';
+
+interface SavedSession {
+  phase: 'predict' | 'activity' | 'reality' | 'result';
+  prediction: number | null;
+  reality: number | null;
+  timestamp: number;
+}
+
 export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityProps>(
   function PredictionReality({ onComplete, onCancel }, ref) {
-    const [phase, setPhase] = useState<'predict' | 'activity' | 'reality' | 'result'>('predict');
-    const [prediction, setPrediction] = useState<number | null>(null);
-    const [reality, setReality] = useState<number | null>(null);
+    // Load saved session from localStorage
+    const loadSavedSession = (): SavedSession | null => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const session = JSON.parse(saved) as SavedSession;
+          // Check if session is less than 24 hours old
+          const hoursSinceSession = (Date.now() - session.timestamp) / (1000 * 60 * 60);
+          if (hoursSinceSession < 24) {
+            return session;
+          }
+          // Clear expired session
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch (e) {
+        console.error('Failed to load prediction session:', e);
+      }
+      return null;
+    };
+
+    const savedSession = loadSavedSession();
+    
+    const [phase, setPhase] = useState<'predict' | 'activity' | 'reality' | 'result'>(
+      savedSession?.phase || 'predict'
+    );
+    const [prediction, setPrediction] = useState<number | null>(
+      savedSession?.prediction ?? null
+    );
+    const [reality, setReality] = useState<number | null>(
+      savedSession?.reality ?? null
+    );
+
+    // Save session whenever phase, prediction, or reality changes
+    useEffect(() => {
+      if (phase !== 'predict' || prediction !== null) {
+        const session: SavedSession = {
+          phase,
+          prediction,
+          reality,
+          timestamp: Date.now(),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+      }
+    }, [phase, prediction, reality]);
+
+    // Clear session when complete
+    const clearSession = () => {
+      localStorage.removeItem(STORAGE_KEY);
+    };
 
     const handlePrediction = (value: number) => {
       setPrediction(value);
@@ -38,8 +93,14 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
 
     const handleComplete = () => {
       if (prediction !== null && reality !== null) {
+        clearSession();
         onComplete(prediction, reality);
       }
+    };
+
+    const handleCancel = () => {
+      clearSession();
+      onCancel();
     };
 
     if (phase === 'predict') {
@@ -51,7 +112,7 @@ export const PredictionReality = forwardRef<HTMLDivElement, PredictionRealityPro
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              onClick={onCancel}
+              onClick={handleCancel}
               className="mb-6 text-muted-foreground text-sm"
             >
               ← Back
