@@ -218,20 +218,26 @@ export function NoiseDissolver({ onComplete, onCancel }: NoiseDissolverProps) {
 
   const erase = useCallback((x: number, y: number) => {
     const ctx = contextRef.current;
-    if (!ctx) return;
+    const canvas = canvasRef.current;
+    if (!ctx || !canvas) return;
+    
+    // Don't erase in the bottom progress bar area (last 120px)
+    if (y > canvas.height - 120) return;
     
     // Use destination-out to erase
     ctx.globalCompositeOperation = 'destination-out';
     
-    // Create soft circular eraser brush
-    const gradient = ctx.createRadialGradient(x, y, 0, x, y, 40);
+    // Create larger soft circular eraser brush for easier gameplay
+    const brushSize = 70;
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, brushSize);
     gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.8)');
+    gradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.9)');
+    gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.5)');
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
     
     ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.arc(x, y, 40, 0, Math.PI * 2);
+    ctx.arc(x, y, brushSize, 0, Math.PI * 2);
     ctx.fill();
     
     // Reset composite operation
@@ -284,8 +290,8 @@ export function NoiseDissolver({ onComplete, onCancel }: NoiseDissolverProps) {
     const cleared = calculatePercentCleared();
     setPercentCleared(cleared);
     
-    // Complete when 70% is cleared
-    if (cleared >= 70 && !isComplete) {
+    // Complete when 50% is cleared (easier threshold)
+    if (cleared >= 50 && !isComplete) {
       setIsComplete(true);
     }
   }, [calculatePercentCleared, isComplete]);
