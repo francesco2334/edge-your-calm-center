@@ -96,7 +96,7 @@ export const MojoOrb = forwardRef<HTMLDivElement, MojoOrbProps>(
     return (
       <motion.div
         ref={ref}
-        className={`${sizeClasses[size]} relative`}
+        className={`${sizeClasses[size]} relative isolate`}
         animate={disableInternalAnimation ? undefined : {
           scale: justBecameHappy ? [stateStyle.scale, stateStyle.scale * 1.15, stateStyle.scale * 0.95, stateStyle.scale * 1.05, stateStyle.scale] : stateStyle.scale,
           y: justBecameHappy ? [0, -8, 2, -4, 0] : 0,
