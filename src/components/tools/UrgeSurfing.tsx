@@ -1,14 +1,16 @@
-import { useState, useEffect, forwardRef, useCallback, useRef } from 'react';
+import { useState, useEffect, forwardRef, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Waves, Star, AlertTriangle } from 'lucide-react';
 import { haptics } from '@/hooks/useHaptics';
 import { MojoCompanion } from '../MojoCompanion';
 import { MojoOrb } from '../MojoOrb';
 import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
+import { GameDifficulty, getDifficultyMultipliers } from '@/lib/game-difficulty';
 
 interface UrgeSurfingProps {
   onComplete: (wavesRidden: number) => void;
   onCancel: () => void;
+  difficulty?: GameDifficulty;
 }
 
 const CHALLENGES = [
@@ -33,13 +35,14 @@ const QUOTES = [
   "Trust the process",
 ];
 
-const GAME_DURATION = 60;
-const WAVE_INTERVAL = 10;
-const WAVE_ZONE_SIZE = 18; // Generous zone for relaxed gameplay
-
 export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
-  function UrgeSurfing({ onComplete, onCancel }, ref) {
+  function UrgeSurfing({ onComplete, onCancel, difficulty = 'medium' }, ref) {
     const cosmeticsContext = useMojoCosmeticsOptional();
+    const multipliers = useMemo(() => getDifficultyMultipliers(difficulty), [difficulty]);
+    
+    const GAME_DURATION = Math.round(60 * multipliers.duration);
+    const WAVE_INTERVAL = 10;
+    const WAVE_ZONE_SIZE = Math.round(18 * multipliers.tolerance);
     const [phase, setPhase] = useState<'intro' | 'active' | 'complete' | 'lost'>('intro');
     const [timeElapsed, setTimeElapsed] = useState(0);
     const [surferY, setSurferY] = useState(50);

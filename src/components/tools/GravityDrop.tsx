@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, useMotionValue } from 'framer-motion';
 import { X } from 'lucide-react';
 import { MojoOrb } from '../MojoOrb';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
+import { GameDifficulty, getDifficultyMultipliers } from '@/lib/game-difficulty';
 
-interface GravityDropProps {
+export interface GravityDropProps {
   onComplete: () => void;
   onCancel: () => void;
+  difficulty?: GameDifficulty;
 }
 
 interface Position {
@@ -29,16 +31,23 @@ const MOTIVATIONAL_QUOTES = [
   "Chase the vision, not the comfort.",
 ];
 
-// Difficulty settings per round - HARDER but with proper catch detection
-const getDifficultySettings = (round: number) => {
-  const settings = [
-    { size: 70, moves: false, evades: false, catchRadius: 45, moveSpeed: 0 },      // Round 1: Easy start
-    { size: 60, moves: true, evades: false, catchRadius: 40, moveSpeed: 600 },     // Round 2: Moving
-    { size: 50, moves: true, evades: true, catchRadius: 35, moveSpeed: 450 },      // Round 3: Evading
-    { size: 45, moves: true, evades: true, catchRadius: 32, moveSpeed: 350 },      // Round 4: Faster
-    { size: 40, moves: true, evades: true, catchRadius: 28, moveSpeed: 250 },      // Round 5: Hard
+// Difficulty settings per round - scales with game difficulty
+const getDifficultySettings = (round: number, gameMultipliers: ReturnType<typeof getDifficultyMultipliers>) => {
+  const baseSettings = [
+    { size: 70, moves: false, evades: false, catchRadius: 45, moveSpeed: 0 },
+    { size: 60, moves: true, evades: false, catchRadius: 40, moveSpeed: 600 },
+    { size: 50, moves: true, evades: true, catchRadius: 35, moveSpeed: 450 },
+    { size: 45, moves: true, evades: true, catchRadius: 32, moveSpeed: 350 },
+    { size: 40, moves: true, evades: true, catchRadius: 28, moveSpeed: 250 },
   ];
-  return settings[Math.min(round, settings.length - 1)];
+  const base = baseSettings[Math.min(round, baseSettings.length - 1)];
+  return {
+    size: Math.round(base.size * gameMultipliers.targetSize),
+    moves: base.moves,
+    evades: base.evades,
+    catchRadius: Math.round(base.catchRadius * gameMultipliers.tolerance),
+    moveSpeed: Math.round(base.moveSpeed / gameMultipliers.speed),
+  };
 };
 
 const generateRandomPosition = (containerWidth: number, containerHeight: number, size: number): Position => {
@@ -48,9 +57,10 @@ const generateRandomPosition = (containerWidth: number, containerHeight: number,
   return { x, y };
 };
 
-export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
+export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: GravityDropProps) {
   const { notifySuccess, selectionChanged } = useHaptics();
   const cosmeticsContext = useMojoCosmeticsOptional();
+  const multipliers = useMemo(() => getDifficultyMultipliers(difficulty), [difficulty]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -75,7 +85,7 @@ export function GravityDrop({ onComplete, onCancel }: GravityDropProps) {
   const dragY = useMotionValue(0);
   const [initialPos, setInitialPos] = useState<Position>({ x: 0, y: 0 });
   
-  const difficulty = getDifficultySettings(round);
+  const roundSettings = getDifficultySettings(round, multipliers);
 
   // Initialize container size and positions
   useEffect(() => {

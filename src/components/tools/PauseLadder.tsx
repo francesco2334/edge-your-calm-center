@@ -4,6 +4,7 @@ import { Brain, Zap, Target, Timer, TrendingUp, Sparkles, Star } from 'lucide-re
 import { MojoOrb } from '../MojoOrb';
 import { haptics } from '@/hooks/useHaptics';
 import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
+import { GameDifficulty, getDifficultyMultipliers } from '@/lib/game-difficulty';
 
 const NEURO_FACTS = [
   { icon: Brain, fact: "Urges peak quickly, then drop.", detail: "Most cravings fade naturally if you wait. You're training delay tolerance right now." },
@@ -19,6 +20,7 @@ const NEURO_FACTS = [
 interface PauseLadderProps {
   onComplete: (durationSeconds: number) => void;
   onCancel: () => void;
+  difficulty?: GameDifficulty;
 }
 
 interface AntiCheatTap {
@@ -29,8 +31,9 @@ interface AntiCheatTap {
 }
 
 export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
-  function PauseLadder({ onComplete, onCancel }, ref) {
+  function PauseLadder({ onComplete, onCancel, difficulty = 'medium' }, ref) {
     const cosmeticsContext = useMojoCosmeticsOptional();
+    const multipliers = getDifficultyMultipliers(difficulty);
     const [phase, setPhase] = useState<'active' | 'complete' | 'failed'>('active');
     const [timeHeld, setTimeHeld] = useState(0);
     const [factIndex, setFactIndex] = useState(0);

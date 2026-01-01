@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
+import { GameDifficulty, getDifficultyMultipliers } from '@/lib/game-difficulty';
 
-interface NoiseDissolverProps {
+export interface NoiseDissolverProps {
   onComplete: () => void;
   onCancel: () => void;
+  difficulty?: GameDifficulty;
 }
 
 // Pool of positive affirmations
@@ -119,7 +121,11 @@ const MESSAGE_CONFIGS = [
   { top: '80%', left: '25%', right: undefined, size: 'text-lg', color: 'text-teal-300/50', rotate: 2 },
 ];
 
-export function NoiseDissolver({ onComplete, onCancel }: NoiseDissolverProps) {
+export function NoiseDissolver({ onComplete, onCancel, difficulty = 'medium' }: NoiseDissolverProps) {
+  const multipliers = useMemo(() => getDifficultyMultipliers(difficulty), [difficulty]);
+  const COMPLETION_THRESHOLD = difficulty === 'easy' ? 35 : difficulty === 'hard' ? 70 : 50;
+  const BRUSH_SIZE = Math.round(70 * multipliers.targetSize);
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);

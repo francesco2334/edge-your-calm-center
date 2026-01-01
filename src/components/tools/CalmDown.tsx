@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Leaf, Sparkles } from 'lucide-react';
+import { GameDifficulty, getDifficultyMultipliers } from '@/lib/game-difficulty';
 
-interface CalmDownProps {
+export interface CalmDownProps {
   onComplete: (relaxationLevel: number) => void;
   onCancel: () => void;
+  difficulty?: GameDifficulty;
 }
 
 const CALMING_TIPS = [
@@ -35,15 +37,18 @@ interface FallingLeaf {
   size: number;
 }
 
-export function CalmDown({ onComplete, onCancel }: CalmDownProps) {
+export function CalmDown({ onComplete, onCancel, difficulty = 'medium' }: CalmDownProps) {
+  const multipliers = useMemo(() => getDifficultyMultipliers(difficulty), [difficulty]);
+  
+  // Adjust leaves needed based on difficulty
+  const LEAVES_TO_COLLECT = difficulty === 'easy' ? 5 : difficulty === 'hard' ? 12 : 8;
+  
   const [leaves, setLeaves] = useState<FallingLeaf[]>([]);
   const [clickedLeaves, setClickedLeaves] = useState<Set<number>>(new Set());
   const [revealedTip, setRevealedTip] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [relaxationLevel, setRelaxationLevel] = useState(5);
   const [collectedCount, setCollectedCount] = useState(0);
-
-  const LEAVES_TO_COLLECT = 8;
 
   // Spawn leaves continuously
   useEffect(() => {
