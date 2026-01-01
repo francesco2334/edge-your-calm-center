@@ -1,14 +1,16 @@
-import { useState, useRef, useCallback, forwardRef } from 'react';
+import { useState, useRef, useCallback, forwardRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MojoOrb } from '../MojoOrb';
 import { MojoCompanion } from '../MojoCompanion';
 import { REAL_WORLD_COMPARISONS, getReactionTier, getPercentile, type ReactionLeaderboard } from '@/lib/reaction-data';
 import { haptics } from '@/hooks/useHaptics';
+import { GameDifficulty, getDifficultyMultipliers } from '@/lib/game-difficulty';
 
-interface ReactionTrackerProps {
+export interface ReactionTrackerProps {
   onComplete: (reactionTimeMs: number) => void;
   onCancel: () => void;
   leaderboard: ReactionLeaderboard;
+  difficulty?: GameDifficulty;
 }
 
 interface Particle {
@@ -26,7 +28,11 @@ interface FlickerTarget {
 }
 
 export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
-  function ReactionTracker({ onComplete, onCancel, leaderboard }, ref) {
+  function ReactionTracker({ onComplete, onCancel, leaderboard, difficulty = 'medium' }, ref) {
+    const multipliers = useMemo(() => getDifficultyMultipliers(difficulty), [difficulty]);
+    
+    const FLICKERS_PER_ROUND = difficulty === 'easy' ? 4 : difficulty === 'hard' ? 7 : 5;
+    const FLICKER_SIZE = Math.round(80 * multipliers.targetSize);
     const [phase, setPhase] = useState<'intro' | 'waiting' | 'react' | 'result'>('intro');
     const [reactionTime, setReactionTime] = useState<number | null>(null);
     const [tapsInRound, setTapsInRound] = useState(0);
@@ -41,8 +47,7 @@ export const ReactionTracker = forwardRef<HTMLDivElement, ReactionTrackerProps>(
     const roundTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const FLICKERS_PER_ROUND = 5;
-    const FLICKER_SIZE = 80; // Size of tappable target
+    // Constants now defined at component level above
 
     const spawnExplosion = useCallback((x: number, y: number) => {
       const newParticles: Particle[] = Array.from({ length: 12 }, (_, i) => ({

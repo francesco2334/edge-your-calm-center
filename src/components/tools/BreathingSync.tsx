@@ -1,22 +1,16 @@
-import { useState, useEffect, forwardRef, useRef } from 'react';
+import { useState, useEffect, forwardRef, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Zap, Target, Timer, TrendingUp, Sparkles } from 'lucide-react';
 import { MojoOrb } from '../MojoOrb';
 import { haptics } from '@/hooks/useHaptics';
 import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
+import { GameDifficulty, getDifficultyMultipliers } from '@/lib/game-difficulty';
 
-interface BreathingSyncProps {
+export interface BreathingSyncProps {
   onComplete: () => void;
   onCancel: () => void;
+  difficulty?: GameDifficulty;
 }
-
-const BREATH_CYCLE = {
-  inhale: 4,
-  hold: 2,
-  exhale: 6,
-};
-
-const TOTAL_DURATION = 90; // seconds
 
 const NEURO_FACTS = [
   { icon: Brain, fact: "Slow breathing calms you.", detail: "Deep breaths activate your vagus nerve and reduce stress hormones." },
@@ -28,8 +22,18 @@ const NEURO_FACTS = [
 ];
 
 export const BreathingSync = forwardRef<HTMLDivElement, BreathingSyncProps>(
-  function BreathingSync({ onComplete, onCancel }, ref) {
+  function BreathingSync({ onComplete, onCancel, difficulty = 'medium' }, ref) {
     const cosmeticsContext = useMojoCosmeticsOptional();
+    const multipliers = useMemo(() => getDifficultyMultipliers(difficulty), [difficulty]);
+    
+    // Adjust duration based on difficulty
+    const TOTAL_DURATION = Math.round(90 * multipliers.duration);
+    
+    const BREATH_CYCLE = useMemo(() => ({
+      inhale: Math.round(4 / multipliers.speed),
+      hold: Math.round(2 / multipliers.speed),
+      exhale: Math.round(6 / multipliers.speed),
+    }), [multipliers.speed]);
     const [phase, setPhase] = useState<'intro' | 'active' | 'complete'>('intro');
     const [breathPhase, setBreathPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
     const [phaseProgress, setPhaseProgress] = useState(0); // 0-1 progress within current phase

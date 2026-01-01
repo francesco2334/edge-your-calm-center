@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { PauseLadder, NameThePull, PredictionReality, BreathingSync, ReactionTracker, UrgeSurfing, BodyScan, CalmDown, GravityDrop, NoiseDissolver } from './tools';
 import { GameStartScreen } from './GameStartScreen';
 import { DailyPullGate } from './DailyPullGate';
+import { GameDifficulty, getStoredDifficulty } from '@/lib/game-difficulty';
 
 interface GamesScreenProps {
   onGameComplete: (gameId: string, details: string) => void;
@@ -12,7 +13,7 @@ interface GamesScreenProps {
 }
 
 type GameId = 'standoff' | 'nameIt' | 'bluff' | 'sync' | 'reaction' | 'surfing' | 'bodyscan' | 'calmdown' | 'gravitydrop' | 'noisedissolver';
-type ActiveGame = { id: GameId; started: boolean } | null;
+type ActiveGame = { id: GameId; started: boolean; difficulty: GameDifficulty } | null;
 
 const GAMES: {
   id: GameId;
@@ -157,12 +158,12 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
     };
 
     const handleStartGame = (gameId: GameId) => {
-      setActiveGame({ id: gameId, started: false });
+      setActiveGame({ id: gameId, started: false, difficulty: getStoredDifficulty() });
     };
 
-    const handleConfirmStart = () => {
+    const handleConfirmStart = (difficulty: GameDifficulty) => {
       if (activeGame) {
-        setActiveGame({ ...activeGame, started: true });
+        setActiveGame({ ...activeGame, started: true, difficulty });
       }
     };
 
@@ -185,12 +186,15 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
       );
     }
 
+    const currentDifficulty = activeGame?.difficulty || 'medium';
+
     // Render active game
     if (activeGame?.started) {
       switch (activeGame.id) {
         case 'standoff':
           return (
             <PauseLadder 
+              difficulty={currentDifficulty}
               onComplete={(seconds) => handleGameComplete('standoff', `${seconds}s hold`)}
               onCancel={() => handleGameFail('standoff', 'Early exit')}
             />
@@ -212,6 +216,7 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
         case 'sync':
           return (
             <BreathingSync 
+              difficulty={currentDifficulty}
               onComplete={() => handleGameComplete('sync', 'Completed')}
               onCancel={() => handleGameFail('sync', 'Early exit')}
             />
@@ -219,6 +224,7 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
         case 'reaction':
           return (
             <ReactionTracker 
+              difficulty={currentDifficulty}
               onComplete={(ms) => handleGameComplete('reaction', `${ms}ms`)}
               onCancel={() => handleGameFail('reaction', 'Early exit')}
               leaderboard={{ personalBest: 999, averageTime: 0, totalAttempts: 0, history: [], percentile: 50 }}
@@ -227,6 +233,7 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
         case 'surfing':
           return (
             <UrgeSurfing 
+              difficulty={currentDifficulty}
               onComplete={(peak) => handleGameComplete('surfing', `Peak: ${peak}/10`)}
               onCancel={() => handleGameFail('surfing', 'Early exit')}
             />
@@ -241,6 +248,7 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
         case 'calmdown':
           return (
             <CalmDown 
+              difficulty={currentDifficulty}
               onComplete={(level) => handleGameComplete('calmdown', `Relaxation: ${level}/10`)}
               onCancel={() => handleGameFail('calmdown', 'Early exit')}
             />
@@ -248,6 +256,7 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
         case 'gravitydrop':
           return (
             <GravityDrop 
+              difficulty={currentDifficulty}
               onComplete={() => handleGameComplete('gravitydrop', 'Settled')}
               onCancel={() => handleGameFail('gravitydrop', 'Early exit')}
             />
@@ -255,6 +264,7 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
         case 'noisedissolver':
           return (
             <NoiseDissolver 
+              difficulty={currentDifficulty}
               onComplete={() => handleGameComplete('noisedissolver', 'Dissolved')}
               onCancel={() => handleGameFail('noisedissolver', 'Early exit')}
             />
