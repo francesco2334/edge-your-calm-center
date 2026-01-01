@@ -98,7 +98,8 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
         setContainerSize({ width, height });
         
         // Set initial target position
-        const target = generateRandomPosition(width, height, difficulty.size);
+        const initSettings = getDifficultySettings(0, multipliers);
+        const target = generateRandomPosition(width, height, initSettings.size);
         setTargetPos(target);
         
         // Center the ball initially
@@ -118,7 +119,7 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
 
   // Target movement for later rounds
   useEffect(() => {
-    if (!isReady || isSettled || !difficulty.moves) {
+    if (!isReady || isSettled || !roundSettings.moves) {
       if (moveIntervalRef.current) {
         clearInterval(moveIntervalRef.current);
         moveIntervalRef.current = null;
@@ -129,33 +130,33 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
     moveIntervalRef.current = setInterval(() => {
       if (!isSettled) {
         setTargetPos(prev => {
-          const moveAmount = 25 + round * 10; // More aggressive movement
+          const moveAmount = 25 + round * 10;
           const newX = Math.max(80, Math.min(
-            containerSize.width - 80 - difficulty.size,
+            containerSize.width - 80 - roundSettings.size,
             prev.x + (Math.random() - 0.5) * moveAmount * 2
           ));
           const newY = Math.max(80, Math.min(
-            containerSize.height - 80 - difficulty.size,
+            containerSize.height - 80 - roundSettings.size,
             prev.y + (Math.random() - 0.5) * moveAmount * 2
           ));
           return { x: newX, y: newY };
         });
       }
-    }, difficulty.moveSpeed || 600); // Use difficulty-based speed
+    }, roundSettings.moveSpeed || 600);
     
     return () => {
       if (moveIntervalRef.current) {
         clearInterval(moveIntervalRef.current);
       }
     };
-  }, [isReady, isSettled, difficulty.moves, containerSize, round]);
+  }, [isReady, isSettled, roundSettings.moves, containerSize, round]);
 
   // Evade behavior - run away from Mojo when close
   const evadeFromMojo = useCallback((mojoX: number, mojoY: number) => {
-    if (!difficulty.evades || isSettled) return;
+    if (!roundSettings.evades || isSettled) return;
     
-    const targetCenterX = targetPos.x + difficulty.size / 2;
-    const targetCenterY = targetPos.y + difficulty.size / 2;
+    const targetCenterX = targetPos.x + roundSettings.size / 2;
+    const targetCenterY = targetPos.y + roundSettings.size / 2;
     const mojoCenterX = mojoX + 40;
     const mojoCenterY = mojoY + 40;
     
@@ -163,31 +164,26 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
     const dy = targetCenterY - mojoCenterY;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // Evade when Mojo gets within 150px (larger detection radius)
     if (distance < 150 && distance > 0) {
-      if (evadeTimeoutRef.current) return; // Already evading
+      if (evadeTimeoutRef.current) return;
       
       evadeTimeoutRef.current = setTimeout(() => {
-        // Move away from Mojo - more aggressive evasion
         const evadeDistance = 80 + round * 25;
         const angle = Math.atan2(dy, dx);
-        
-        // Add some randomness to make it less predictable
         const randomOffset = (Math.random() - 0.5) * 0.5;
         const finalAngle = angle + randomOffset;
         
         let newX = targetPos.x + Math.cos(finalAngle) * evadeDistance;
         let newY = targetPos.y + Math.sin(finalAngle) * evadeDistance;
         
-        // Keep within bounds
-        newX = Math.max(60, Math.min(containerSize.width - 60 - difficulty.size, newX));
-        newY = Math.max(100, Math.min(containerSize.height - 100 - difficulty.size, newY));
+        newX = Math.max(60, Math.min(containerSize.width - 60 - roundSettings.size, newX));
+        newY = Math.max(100, Math.min(containerSize.height - 100 - roundSettings.size, newY));
         
         setTargetPos({ x: newX, y: newY });
         evadeTimeoutRef.current = null;
-      }, 80 - round * 10); // Faster reaction time in later rounds
+      }, 80 - round * 10);
     }
-  }, [difficulty.evades, difficulty.size, isSettled, targetPos, containerSize, round]);
+  }, [roundSettings.evades, roundSettings.size, isSettled, targetPos, containerSize, round]);
 
   // Check proximity on drag
   useEffect(() => {
@@ -196,15 +192,14 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
     const checkProximity = () => {
       const ballCenterX = initialPos.x + dragX.get() + 40;
       const ballCenterY = initialPos.y + dragY.get() + 40;
-      const targetCenterX = targetPos.x + difficulty.size / 2;
-      const targetCenterY = targetPos.y + difficulty.size / 2;
+      const targetCenterX = targetPos.x + roundSettings.size / 2;
+      const targetCenterY = targetPos.y + roundSettings.size / 2;
       
       const distance = Math.sqrt(
         Math.pow(ballCenterX - targetCenterX, 2) + 
         Math.pow(ballCenterY - targetCenterY, 2)
       );
       
-      // Trigger evasion
       evadeFromMojo(initialPos.x + dragX.get(), initialPos.y + dragY.get());
       
       const newProximity = Math.max(0, 1 - distance / 150);
@@ -225,7 +220,7 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
         setMojoState('calm');
       }
       
-      if (distance < difficulty.catchRadius && !isSettled) {
+      if (distance < roundSettings.catchRadius && !isSettled) {
         handleSuccess();
       }
     };
@@ -237,7 +232,7 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
       unsubX();
       unsubY();
     };
-  }, [initialPos, targetPos, isReady, isSettled, selectionChanged, dragX, dragY, difficulty, evadeFromMojo]);
+  }, [initialPos, targetPos, isReady, isSettled, selectionChanged, dragX, dragY, roundSettings, evadeFromMojo]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -283,14 +278,14 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
             setTimeout(() => setShowComplete(true), 300);
           } else {
             const nextRound = round + 1;
-            const nextDifficulty = getDifficultySettings(nextRound);
+            const nextSettings = getDifficultySettings(nextRound, multipliers);
             
             setRound(nextRound);
             setIsSettled(false);
             setMojoState('calm');
             setProximity(0);
             
-            const newTarget = generateRandomPosition(containerSize.width, containerSize.height, nextDifficulty.size);
+            const newTarget = generateRandomPosition(containerSize.width, containerSize.height, nextSettings.size);
             setTargetPos(newTarget);
             
             const centerX = containerSize.width / 2 - 40;
@@ -366,7 +361,7 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
         animate={{ opacity: 0.7 }}
         transition={{ delay: 0.5 }}
       >
-        {difficulty.evades ? "Catch the ring!" : difficulty.moves ? "Follow the ring" : "Drag Mojo into the ring"}
+        {roundSettings.evades ? "Catch the ring!" : roundSettings.moves ? "Follow the ring" : "Drag Mojo into the ring"}
       </motion.p>
 
       {/* Target ring */}
@@ -376,8 +371,8 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
           style={{ 
             left: targetPos.x, 
             top: targetPos.y,
-            width: difficulty.size,
-            height: difficulty.size,
+            width: roundSettings.size,
+            height: roundSettings.size,
           }}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ 
@@ -439,8 +434,8 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
         <motion.div
           className="absolute z-25 pointer-events-none"
           style={{ 
-            left: targetPos.x + difficulty.size / 2, 
-            top: targetPos.y + difficulty.size / 2,
+            left: targetPos.x + roundSettings.size / 2, 
+            top: targetPos.y + roundSettings.size / 2,
           }}
           initial={{ scale: 0.5, opacity: 1 }}
           animate={{ scale: 2.5, opacity: 0 }}
@@ -456,8 +451,8 @@ export function GravityDrop({ onComplete, onCancel, difficulty = 'medium' }: Gra
           key={i}
           className="absolute z-25 w-2 h-2 rounded-full bg-emerald-400 pointer-events-none"
           style={{
-            left: targetPos.x + difficulty.size / 2,
-            top: targetPos.y + difficulty.size / 2,
+            left: targetPos.x + roundSettings.size / 2,
+            top: targetPos.y + roundSettings.size / 2,
           }}
           initial={{ 
             x: 0, 
