@@ -27,20 +27,9 @@ export const GameStartScreen = forwardRef<HTMLDivElement, GameStartScreenProps>(
     onCancel,
   }, ref) {
     const [selectedDifficulty, setSelectedDifficulty] = useState<GameDifficulty>(getStoredDifficulty);
-    const [autoStartPaused, setAutoStartPaused] = useState(false);
-
-    useEffect(() => {
-      if (autoStartPaused) return;
-      
-      const timer = setTimeout(() => {
-        setStoredDifficulty(selectedDifficulty);
-        onStart(selectedDifficulty);
-      }, 4000);
-
-      return () => clearTimeout(timer);
-    }, [onStart, selectedDifficulty, autoStartPaused]);
 
     const handleDifficultyChange = (difficulty: GameDifficulty) => {
+      setSelectedDifficulty(difficulty);
       setStoredDifficulty(difficulty);
       onStart(difficulty);
     };
