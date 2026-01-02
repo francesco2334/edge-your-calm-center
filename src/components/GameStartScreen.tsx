@@ -41,9 +41,8 @@ export const GameStartScreen = forwardRef<HTMLDivElement, GameStartScreenProps>(
     }, [onStart, selectedDifficulty, autoStartPaused]);
 
     const handleDifficultyChange = (difficulty: GameDifficulty) => {
-      setAutoStartPaused(true);
-      setSelectedDifficulty(difficulty);
       setStoredDifficulty(difficulty);
+      onStart(difficulty);
     };
 
     const handleStart = () => {
