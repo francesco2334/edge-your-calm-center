@@ -157,8 +157,16 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
       setActiveGame(null);
     };
 
+    // Games that skip difficulty selection
+    const SKIP_DIFFICULTY_GAMES: GameId[] = ['bluff', 'sync', 'nameIt'];
+
     const handleStartGame = (gameId: GameId) => {
-      setActiveGame({ id: gameId, started: false, difficulty: getStoredDifficulty() });
+      if (SKIP_DIFFICULTY_GAMES.includes(gameId)) {
+        // Start immediately with medium difficulty
+        setActiveGame({ id: gameId, started: true, difficulty: 'medium' });
+      } else {
+        setActiveGame({ id: gameId, started: false, difficulty: getStoredDifficulty() });
+      }
     };
 
     const handleConfirmStart = (difficulty: GameDifficulty) => {
