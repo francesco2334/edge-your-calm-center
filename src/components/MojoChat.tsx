@@ -785,11 +785,11 @@ export function MojoChat({ isOpen, onClose, onTriggerTool, userId }: MojoChatPro
                 <div className="flex items-center justify-center w-full">
                   <EmotingMojo emote={currentEmote} />
                 </div>
-                <p className="text-muted-foreground mt-6 text-sm text-center">
-                  Hey, I'm Mojo. What's pulling at you today?
+                <p className="text-foreground/80 mt-6 text-sm font-medium text-center">
+                  Reflection, not answers.
                 </p>
-                <p className="text-muted-foreground/60 mt-2 text-xs max-w-xs mx-auto text-center">
-                  I help with everyday attention habits — not medical or mental health advice.
+                <p className="text-muted-foreground/70 mt-2 text-xs max-w-xs mx-auto leading-relaxed text-center">
+                  Mojo helps you slow down, notice patterns, and think clearly — not tell you what to do.
                 </p>
                 
                 {/* Emote buttons - disabled when animating */}

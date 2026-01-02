@@ -8,3 +8,4 @@ export { BreathingSync } from './BreathingSync';
 export { ReactionTracker } from './ReactionTracker';
 export { UrgeSurfing } from './UrgeSurfing';
 export { BodyScan } from './BodyScan';
+export { FirstTimeTooltip } from './FirstTimeTooltip';

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { InsightsGraph } from './InsightsGraph';
 import { ChargeCounter } from './ChargeCounter';
-import { ProgressGraph, WeeklyReflection, MonthlySummary, MonthlyNotes, TrophyCase, JourneyTimeline, DailyActivityGraph } from './insights';
+import { ProgressGraph, WeeklyReflection, MonthlySummary, MonthlyNotes, TrophyCase, JourneyTimeline, DailyActivityGraph, UrgeControlIndex, PredictionInsight, ProductivityNudge } from './insights';
 import { SmartEdgeProfile } from './insights/SmartEdgeProfile';
 import { WeeklyNarrativeSummary } from './insights/WeeklyNarrativeSummary';
 import { ExitPhilosophy } from './ExitPhilosophy';
@@ -139,7 +139,20 @@ export function InsightsScreen({
           <WeeklyNarrativeSummary />
         </motion.div>
 
-        {/* Economy Stats - Tokens & Points */}
+        {/* Urge Control Index - Key metric */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.14 }}
+          className="mb-6"
+        >
+          <UrgeControlIndex
+            predictionAccuracy={100 - (behaviorPatterns.intensity_seeking || 50)}
+            averageHoldTime={stats.gamesCompleted * 15}
+            tokensEarned={stats.totalTokensEarned || 0}
+            tokensSpent={stats.totalTokensSpent || 0}
+          />
+        </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

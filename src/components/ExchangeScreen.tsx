@@ -68,8 +68,11 @@ export const ExchangeScreen = forwardRef<HTMLDivElement, ExchangeScreenProps>(({
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-foreground mb-2">The Exchange</h1>
-          <p className="text-muted-foreground">
-            1 token = {minutesPerToken} minutes. You choose when.
+          <p className="text-primary font-semibold mb-1">
+            Delay → Earn → Choose
+          </p>
+          <p className="text-muted-foreground text-sm">
+            You earn choice by delaying urges.
           </p>
         </motion.div>
 
@@ -85,7 +88,7 @@ export const ExchangeScreen = forwardRef<HTMLDivElement, ExchangeScreenProps>(({
               <Coins className="w-8 h-8 text-amber-500" />
               <span className="text-5xl font-bold text-foreground">{tokens}</span>
             </div>
-            <span className="text-sm text-muted-foreground">tokens available</span>
+            <span className="text-sm text-muted-foreground">earned choices available</span>
           </div>
         </motion.div>
 
@@ -108,9 +111,12 @@ export const ExchangeScreen = forwardRef<HTMLDivElement, ExchangeScreenProps>(({
           transition={{ delay: 0.3 }}
           className="space-y-3"
         >
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Spend tokens on time
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            Choose intentionally
           </h2>
+          <p className="text-xs text-muted-foreground/60 mb-3">
+            You're choosing intentionally — not reacting.
+          </p>
           
           {SPEND_OPTIONS.map((option, i) => {
             const canAfford = tokens >= option.tokenCost;
@@ -158,7 +164,7 @@ export const ExchangeScreen = forwardRef<HTMLDivElement, ExchangeScreenProps>(({
             transition={{ delay: 0.5 }}
             className="text-center text-sm text-muted-foreground mt-6 italic"
           >
-            Exit early → get a partial refund. Agency, not abstinence.
+            Exit early → partial refund. This is earned freedom, not restriction.
           </motion.p>
         </motion.div>
       </div>

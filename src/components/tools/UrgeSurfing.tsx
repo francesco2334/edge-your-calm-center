@@ -6,6 +6,7 @@ import { MojoCompanion } from '../MojoCompanion';
 import { MojoOrb } from '../MojoOrb';
 import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
 import { GameDifficulty, getDifficultyMultipliers } from '@/lib/game-difficulty';
+import { FirstTimeTooltip } from './FirstTimeTooltip';
 
 interface UrgeSurfingProps {
   onComplete: (wavesRidden: number) => void;
@@ -285,6 +286,13 @@ export const UrgeSurfing = forwardRef<HTMLDivElement, UrgeSurfingProps>(
               Start Surfing 🌊
             </motion.button>
           </div>
+          
+          {/* First-time tooltip */}
+          <FirstTimeTooltip
+            storageKey="urge-surfing-tooltip-seen"
+            message="This trains your nervous system to ride urges instead of reacting to them."
+            delay={1500}
+          />
         </div>
       );
     }

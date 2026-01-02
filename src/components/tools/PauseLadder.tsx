@@ -295,11 +295,26 @@ export const PauseLadder = forwardRef<HTMLDivElement, PauseLadderProps>(
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-[12px] text-muted-foreground/60 mb-6"
+              className="text-[12px] text-muted-foreground/60 mb-2"
             >
               Personal best: {formatTime(personalBest)}
             </motion.p>
           )}
+
+          {/* Brain training message */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-center mb-6"
+          >
+            <p className="text-[13px] text-primary/80 font-medium">
+              Every 10 seconds strengthens impulse control.
+            </p>
+            <p className="text-[11px] text-muted-foreground/50 mt-1">
+              You're training delay tolerance — the skill behind focus and self-control.
+            </p>
+          </motion.div>
 
           {/* Mojo orb - Centered */}
           <div className="w-full flex justify-center mb-8">
