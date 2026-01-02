@@ -48,10 +48,10 @@ export function ExitPhilosophy({ transactions, streak }: ExitPhilosophyProps) {
         <Heart className="w-5 h-5 text-primary/60 mt-0.5 flex-shrink-0" />
         <div>
           <p className="text-[15px] text-foreground/80 font-medium leading-relaxed">
-            The goal is to need this app less.
+            Train independence. Track progress while it lasts.
           </p>
           <p className="text-[13px] text-muted-foreground/60 mt-1">
-            We're a tool, not a crutch.
+            Dopamine helps you weaken compulsive urges over time — not rely on tools forever.
           </p>
         </div>
       </div>

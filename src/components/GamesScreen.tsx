@@ -295,8 +295,11 @@ export const GamesScreen = forwardRef<HTMLDivElement, GamesScreenProps>(
             className="mb-8"
           >
             <h1 className="text-[32px] font-bold text-foreground tracking-tight">Arcade</h1>
-            <p className="text-[16px] text-muted-foreground/70 mt-1 font-medium">
-              Complete games to earn tokens. Exit early = points lost only.
+            <p className="text-[14px] text-primary/80 font-semibold mt-1">
+              Impulse training exercises
+            </p>
+            <p className="text-[14px] text-muted-foreground/70 mt-1 font-medium">
+              Train delay tolerance • Practice urge control • Rewire reward expectations
             </p>
           </motion.div>
 

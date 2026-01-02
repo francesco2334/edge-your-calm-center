@@ -6,3 +6,6 @@ export { TrophyCase } from './TrophyCase';
 export { JourneyTimeline } from './JourneyTimeline';
 export { DailyActivityGraph } from './DailyActivityGraph';
 export { SmartEdgeProfile } from './SmartEdgeProfile';
+export { UrgeControlIndex } from './UrgeControlIndex';
+export { PredictionInsight } from './PredictionInsight';
+export { ProductivityNudge } from './ProductivityNudge';
