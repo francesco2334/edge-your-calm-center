@@ -7,7 +7,7 @@ import { MojoWithPersonality, MojoPersonalityHandle } from './MojoWithPersonalit
 import { StreakRing } from './StreakRing';
 import { PullSheet } from './PullSheet';
 import { SwipeFeed } from './SwipeFeed';
-import { TrialBadge } from './TrialBadge';
+
 import { generateFeedCards } from '@/lib/feed-data';
 import { useAuth } from '@/hooks/useAuth';
 import { useMojoCosmeticsOptional } from '@/contexts/MojoCosmeticsContext';
@@ -18,7 +18,7 @@ interface HomeScreenProps {
   points: number;
   streak: number;
   hasLoggedToday: boolean;
-  trialDaysRemaining?: number;
+  
   currentTrigger?: string | null;
   onOpenExchange: () => void;
   onOpenMojoChat?: () => void;
@@ -46,7 +46,7 @@ export const HomeScreen = forwardRef<HomeScreenHandle, HomeScreenProps>(function
   points,
   streak,
   hasLoggedToday,
-  trialDaysRemaining,
+  
   currentTrigger,
   onOpenExchange,
   onOpenMojoChat,
@@ -129,11 +129,8 @@ export const HomeScreen = forwardRef<HomeScreenHandle, HomeScreenProps>(function
             DopaMINE
           </span>
           
-          {/* Right: Trial badge + Token pill + Settings */}
+          {/* Right: Token pill + Settings */}
           <div className="flex items-center gap-2 justify-end">
-            {trialDaysRemaining !== undefined && trialDaysRemaining > 0 && (
-              <TrialBadge daysRemaining={trialDaysRemaining} />
-            )}
             
             {/* Token counter - primary currency display */}
             <button 
