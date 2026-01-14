@@ -1,8 +1,8 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff, Download, RotateCcw } from 'lucide-react';
+import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff, Download, RotateCcw, Crown, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-
+import { useInAppPurchases } from '@/hooks/useInAppPurchases';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +16,24 @@ export default function Settings() {
   const { user, isAuthenticated, signOut } = useAuth();
   
   const { isSupported: pushSupported, permission, requestPermission } = usePushNotifications();
+  const { purchaseState, isRestoring, restorePurchases, isNative } = useInAppPurchases();
   const [isExporting, setIsExporting] = useState(false);
+
+  const handleRestorePurchases = async () => {
+    const restored = await restorePurchases();
+    if (restored) {
+      toast({
+        title: 'Purchases restored',
+        description: 'Your subscription has been restored successfully.'
+      });
+    } else {
+      toast({
+        title: 'No purchases found',
+        description: 'No previous purchases were found for this account.',
+        variant: 'destructive'
+      });
+    }
+  };
 
   const handleExportData = () => {
     setIsExporting(true);
@@ -243,6 +260,48 @@ export default function Settings() {
           </motion.div>
         )}
 
+        {/* Subscription Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="mb-6"
+        >
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1">
+            Subscription
+          </h2>
+          <div className="bg-muted/30 rounded-2xl border border-border/30 overflow-hidden">
+            <div className="flex items-center gap-4 p-4 border-b border-border/20">
+              <Crown className={`w-5 h-5 ${purchaseState.isSubscribed ? 'text-amber-500' : 'text-muted-foreground'}`} />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">
+                  {purchaseState.isSubscribed ? 'Premium Active' : 'Free'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {purchaseState.isSubscribed 
+                    ? purchaseState.expirationDate 
+                      ? `Renews ${purchaseState.expirationDate.toLocaleDateString()}`
+                      : 'Lifetime access'
+                    : 'Upgrade for full access'}
+                </p>
+              </div>
+            </div>
+            {isNative && (
+              <button
+                onClick={handleRestorePurchases}
+                disabled={isRestoring}
+                className="flex items-center gap-4 p-4 w-full hover:bg-muted/50 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`w-5 h-5 text-primary ${isRestoring ? 'animate-spin' : ''}`} />
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-medium text-foreground">Restore Purchases</p>
+                  <p className="text-xs text-muted-foreground">Recover previous subscriptions</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+        </motion.div>
 
         {/* Data Export Section */}
         <motion.div
