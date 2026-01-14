@@ -6,21 +6,31 @@ import { PaywallScreen } from '@/components/PaywallScreen';
 export default function Paywall() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isRestoring, restorePurchases, isNative } = useInAppPurchases();
+  const { 
+    isRestoring, 
+    isPurchasing,
+    restorePurchases, 
+    subscribeMonthly,
+    isNative,
+    monthlyProduct,
+  } = useInAppPurchases();
 
-  const handleSubscribe = () => {
-    if (isNative) {
-      // Native StoreKit purchase will be triggered here
-      // Implement in Xcode with Product.products(for:) and product.purchase()
-      toast({
-        title: 'Opening App Store...',
-        description: 'Complete your purchase in the App Store.',
-      });
-    } else {
+  const handleSubscribe = async () => {
+    if (!isNative) {
       toast({
         title: 'Subscriptions available on iOS',
         description: 'Download the app to subscribe.',
       });
+      return;
+    }
+
+    const success = await subscribeMonthly();
+    if (success) {
+      toast({
+        title: 'Welcome to Premium!',
+        description: 'You now have full access to all features.',
+      });
+      navigate('/');
     }
   };
 
@@ -47,6 +57,8 @@ export default function Paywall() {
       onSubscribe={handleSubscribe}
       onRestore={handleRestore}
       isRestoring={isRestoring}
+      isPurchasing={isPurchasing}
+      price={monthlyProduct?.displayPrice}
     />
   );
 }

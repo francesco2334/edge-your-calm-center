@@ -8,7 +8,9 @@ interface PaywallScreenProps {
   onSubscribe: () => void;
   onRestore: () => void;
   isRestoring?: boolean;
+  isPurchasing?: boolean;
   isTrialGate?: boolean; // When true, this is the initial trial gate (no close button)
+  price?: string; // Dynamic price from StoreKit
 }
 
 const PREMIUM_FEATURES = [
@@ -23,7 +25,9 @@ export function PaywallScreen({
   onSubscribe, 
   onRestore,
   isRestoring = false,
-  isTrialGate = false 
+  isPurchasing = false,
+  isTrialGate = false,
+  price = '£7.99',
 }: PaywallScreenProps) {
   return (
     <motion.div
@@ -118,7 +122,7 @@ export function PaywallScreen({
             <div className="text-center pt-2">
               <p className="text-sm text-muted-foreground mb-1">Premium Monthly</p>
               <div className="flex items-baseline justify-center gap-1 mb-2">
-                <span className="text-4xl font-bold text-foreground">£7.99</span>
+                <span className="text-4xl font-bold text-foreground">{price}</span>
                 <span className="text-muted-foreground">/month</span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -145,9 +149,10 @@ export function PaywallScreen({
         >
           <button
             onClick={onSubscribe}
-            className="w-full py-4 bg-primary text-primary-foreground font-semibold rounded-2xl hover:bg-primary/90 transition-colors"
+            disabled={isPurchasing}
+            className="w-full py-4 bg-primary text-primary-foreground font-semibold rounded-2xl hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            Start Free Trial
+            {isPurchasing ? 'Processing...' : 'Start Free Trial'}
           </button>
         </motion.div>
 
