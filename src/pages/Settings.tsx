@@ -2,7 +2,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff, Download, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useTrial } from '@/hooks/useTrial';
+
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
@@ -14,7 +14,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, isAuthenticated, signOut } = useAuth();
-  const { daysRemaining, isActive: trialActive, hasAccepted: trialAccepted } = useTrial(user?.id);
+  
   const { isSupported: pushSupported, permission, requestPermission } = usePushNotifications();
   const [isExporting, setIsExporting] = useState(false);
 
@@ -243,39 +243,6 @@ export default function Settings() {
           </motion.div>
         )}
 
-        {/* Trial Status */}
-        {trialAccepted && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.17 }}
-            className="mb-6"
-          >
-            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1">
-              Subscription
-            </h2>
-            <div className="bg-muted/30 rounded-2xl border border-border/30 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {trialActive ? 'Free Trial' : 'Trial Expired'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {trialActive ? `${daysRemaining} days remaining` : 'Upgrade to continue'}
-                  </p>
-                </div>
-                {!trialActive && (
-                  <button
-                    onClick={() => toast({ title: 'Coming soon', description: 'Premium subscriptions launching soon!' })}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium"
-                  >
-                    Upgrade
-                  </button>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {/* Data Export Section */}
         <motion.div

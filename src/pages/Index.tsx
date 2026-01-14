@@ -5,8 +5,6 @@ import { AssessmentScreen } from '@/components/AssessmentScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
 import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
 import { AuthGateScreen } from '@/components/AuthGateScreen';
-import { SubscriptionScreen } from '@/components/SubscriptionScreen';
-import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { HomeScreen, HomeScreenHandle } from '@/components/HomeScreen';
 import { GamesScreen } from '@/components/GamesScreen';
 import { ExchangeScreen } from '@/components/ExchangeScreen';
@@ -25,7 +23,7 @@ import { MojoCustomizeScreen } from '@/components/MojoCustomizeScreen';
 import { useTokenEconomy } from '@/hooks/useTokenEconomy';
 import { useProgress } from '@/hooks/useProgress';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import { useSubscription } from '@/hooks/useSubscription';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useDailyQuestion } from '@/hooks/useDailyQuestion';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
@@ -34,7 +32,7 @@ import { useWellness } from '@/hooks/useWellness';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
-type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'authgate' | 'subscription' | 'atlas' | 'main';
+type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'authgate' | 'atlas' | 'main';
 type MainTab = 'home' | 'learn' | 'games' | 'productivity' | 'insights' | 'exchange' | 'customize';
 type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
 type FailureContext = 'game-loss' | 'streak-break' | 'relapse' | null;
@@ -119,14 +117,6 @@ const Index = () => {
     completeAuthGate 
   } = useOnboarding(user?.id);
 
-  // Subscription system
-  const { 
-    status: subscriptionStatus, 
-    trialDaysRemaining, 
-    isLoaded: subscriptionLoaded,
-    startTrial,
-    resetTrial,
-  } = useSubscription(user?.id);
 
   // Push notifications - real local notifications on native
   const { 
@@ -174,10 +164,10 @@ const Index = () => {
     }
   }, [totalDaysActive, notificationPermission, scheduleTrophyProgressNotification]);
 
-  // Determine initial screen based on onboarding, auth, and subscription status
+  // Determine initial screen based on onboarding and auth status
   // SINGLE SOURCE OF TRUTH for routing
   useEffect(() => {
-    if (authLoading || !economyLoaded || !onboardingLoaded || !subscriptionLoaded || !wellnessLoaded) return;
+    if (authLoading || !economyLoaded || !onboardingLoaded || !wellnessLoaded) return;
     
     // Priority 1: Not completed onboarding yet → show onboarding flow
     if (!onboardingCompleted) {
@@ -193,10 +183,10 @@ const Index = () => {
 
     // Priority 3: User is authenticated or guest, go to main app
     setCurrentScreen('main');
-  }, [user, authLoading, economyLoaded, onboardingLoaded, subscriptionLoaded, wellnessLoaded, onboardingCompleted, authGateSeen]);
+  }, [user, authLoading, economyLoaded, onboardingLoaded, wellnessLoaded, onboardingCompleted, authGateSeen]);
 
   // Show loading state while data loads
-  if (authLoading || !economyLoaded || !onboardingLoaded || !subscriptionLoaded || !wellnessLoaded || currentScreen === null) {
+  if (authLoading || !economyLoaded || !onboardingLoaded || !wellnessLoaded || currentScreen === null) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center safe-area-inset">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -394,23 +384,6 @@ const Index = () => {
     );
   }
 
-  // Subscription expired - show subscription screen
-  if (subscriptionStatus === 'expired') {
-    return (
-      <TrialExpiredScreen 
-        onSubscribe={() => {
-          toast({
-            title: "Coming soon",
-            description: "Premium subscriptions launching soon!",
-          });
-        }}
-        onResetTrial={() => {
-          resetTrial();
-          startTrial();
-        }}
-      />
-    );
-  }
 
   // Onboarding screens
   if (currentScreen !== 'main') {
@@ -440,23 +413,11 @@ const Index = () => {
             onContinue={() => {
               // Continue as guest
               completeAuthGate();
-              setCurrentScreen('subscription');
+              setCurrentScreen('atlas');
             }}
             onSignedIn={() => {
               // Signed in with Apple
               completeAuthGate();
-              setCurrentScreen('subscription');
-            }}
-          />
-        )}
-        {currentScreen === 'subscription' && (
-          <SubscriptionScreen 
-            onSubscribed={() => {
-              startTrial();
-              setCurrentScreen('atlas');
-            }}
-            onSkip={() => {
-              // Skip trial, continue to app
               setCurrentScreen('atlas');
             }}
           />
@@ -507,7 +468,6 @@ const Index = () => {
           points={points}
           streak={streak}
           hasLoggedToday={hasLoggedToday}
-          trialDaysRemaining={subscriptionStatus === 'trial' ? trialDaysRemaining : undefined}
           currentTrigger={currentTrigger}
           onOpenExchange={() => setActiveTab('exchange')}
           onOpenMojoChat={() => setShowMojoChat(true)}
