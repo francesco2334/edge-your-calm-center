@@ -213,7 +213,8 @@ const Index = () => {
   // Show loading state while data loads
   if (authLoading || !economyLoaded || !onboardingLoaded || !wellnessLoaded || !trialLoaded || currentScreen === null) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center safe-area-inset">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center safe-area-inset">
+        <h1 style={{ color: 'red', fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>VERSION TEST 123</h1>
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
