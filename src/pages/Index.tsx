@@ -87,13 +87,6 @@ const Index = () => {
     grantPoints,
   } = useTokenEconomy(user?.id ?? null);
 
-  // DEV: Grant 1,000,000 points on first load (remove after testing)
-  useEffect(() => {
-    if (economyLoaded && points < 100000) {
-      grantPoints(1000000);
-      toast({ title: "Dev: +1,000,000 points granted!" });
-    }
-  }, [economyLoaded]);
 
   // Progress Engine (for reflections, trophies - separate from economy)
   const {
