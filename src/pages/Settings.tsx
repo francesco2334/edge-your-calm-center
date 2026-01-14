@@ -1,8 +1,9 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff, Download, RotateCcw, Crown, RefreshCw } from 'lucide-react';
+import { ArrowLeft, User, LogOut, Shield, FileText, ChevronRight, Mail, Bell, BellOff, Download, RotateCcw, Crown, RefreshCw, Clock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useInAppPurchases } from '@/hooks/useInAppPurchases';
+import { useTrial } from '@/hooks/useTrial';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +18,7 @@ export default function Settings() {
   
   const { isSupported: pushSupported, permission, requestPermission } = usePushNotifications();
   const { purchaseState, isRestoring, restorePurchases, isNative } = useInAppPurchases();
+  const { isTrialActive, daysRemaining } = useTrial();
   const [isExporting, setIsExporting] = useState(false);
 
   const handleRestorePurchases = async () => {
@@ -272,17 +274,27 @@ export default function Settings() {
           </h2>
           <div className="bg-muted/30 rounded-2xl border border-border/30 overflow-hidden">
             <div className="flex items-center gap-4 p-4 border-b border-border/20">
-              <Crown className={`w-5 h-5 ${purchaseState.isSubscribed ? 'text-amber-500' : 'text-muted-foreground'}`} />
+              {isTrialActive ? (
+                <Clock className="w-5 h-5 text-primary" />
+              ) : (
+                <Crown className={`w-5 h-5 ${purchaseState.isSubscribed ? 'text-amber-500' : 'text-muted-foreground'}`} />
+              )}
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">
-                  {purchaseState.isSubscribed ? 'Premium Active' : 'Free'}
+                  {purchaseState.isSubscribed 
+                    ? 'Premium Active' 
+                    : isTrialActive 
+                      ? 'Free Trial' 
+                      : 'Free'}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {purchaseState.isSubscribed 
                     ? purchaseState.expirationDate 
                       ? `Renews ${purchaseState.expirationDate.toLocaleDateString()}`
                       : 'Lifetime access'
-                    : 'Upgrade for full access'}
+                    : isTrialActive
+                      ? `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining`
+                      : 'Upgrade for full access'}
                 </p>
               </div>
               {!purchaseState.isSubscribed && (

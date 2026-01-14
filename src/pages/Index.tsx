@@ -5,6 +5,8 @@ import { AssessmentScreen } from '@/components/AssessmentScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
 import { AtlasIntroScreen } from '@/components/AtlasIntroScreen';
 import { AuthGateScreen } from '@/components/AuthGateScreen';
+import { PaywallScreen } from '@/components/PaywallScreen';
+import { TrialExpiredScreen } from '@/components/TrialExpiredScreen';
 import { HomeScreen, HomeScreenHandle } from '@/components/HomeScreen';
 import { GamesScreen } from '@/components/GamesScreen';
 import { ExchangeScreen } from '@/components/ExchangeScreen';
@@ -23,6 +25,8 @@ import { MojoCustomizeScreen } from '@/components/MojoCustomizeScreen';
 import { useTokenEconomy } from '@/hooks/useTokenEconomy';
 import { useProgress } from '@/hooks/useProgress';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useTrial } from '@/hooks/useTrial';
+import { useInAppPurchases } from '@/hooks/useInAppPurchases';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useDailyQuestion } from '@/hooks/useDailyQuestion';
@@ -32,7 +36,7 @@ import { useWellness } from '@/hooks/useWellness';
 import { useToast } from '@/hooks/use-toast';
 import type { AssessmentAnswer } from '@/lib/edge-data';
 
-type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'authgate' | 'atlas' | 'main';
+type AppScreen = 'welcome' | 'permission' | 'assessment' | 'results' | 'authgate' | 'atlas' | 'trial' | 'expired' | 'main';
 type MainTab = 'home' | 'learn' | 'games' | 'productivity' | 'insights' | 'exchange' | 'customize';
 type QuickTool = 'pause' | 'name' | 'prediction' | 'breathing' | null;
 type FailureContext = 'game-loss' | 'streak-break' | 'relapse' | null;
@@ -117,6 +121,19 @@ const Index = () => {
     completeAuthGate 
   } = useOnboarding(user?.id);
 
+  // Trial system - 7-day free trial required to access app
+  const {
+    isLoaded: trialLoaded,
+    hasTrialStarted,
+    isTrialActive,
+    isTrialExpired,
+    daysRemaining,
+    startTrial,
+  } = useTrial();
+
+  // In-app purchases for subscription
+  const { isRestoring, restorePurchases, purchaseState, isNative } = useInAppPurchases();
+
 
   // Push notifications - real local notifications on native
   const { 
@@ -164,10 +181,10 @@ const Index = () => {
     }
   }, [totalDaysActive, notificationPermission, scheduleTrophyProgressNotification]);
 
-  // Determine initial screen based on onboarding and auth status
+  // Determine initial screen based on onboarding, trial, and auth status
   // SINGLE SOURCE OF TRUTH for routing
   useEffect(() => {
-    if (authLoading || !economyLoaded || !onboardingLoaded || !wellnessLoaded) return;
+    if (authLoading || !economyLoaded || !onboardingLoaded || !wellnessLoaded || !trialLoaded) return;
     
     // Priority 1: Not completed onboarding yet → show onboarding flow
     if (!onboardingCompleted) {
@@ -181,12 +198,27 @@ const Index = () => {
       return;
     }
 
-    // Priority 3: User is authenticated or guest, go to main app
+    // Priority 3: Check trial status (skip if subscribed)
+    if (!purchaseState.isSubscribed) {
+      // No trial started yet → show trial paywall
+      if (!hasTrialStarted) {
+        setCurrentScreen('trial');
+        return;
+      }
+      
+      // Trial expired → show expired screen
+      if (isTrialExpired) {
+        setCurrentScreen('expired');
+        return;
+      }
+    }
+
+    // Priority 4: User has active trial or subscription → main app
     setCurrentScreen('main');
-  }, [user, authLoading, economyLoaded, onboardingLoaded, wellnessLoaded, onboardingCompleted, authGateSeen]);
+  }, [user, authLoading, economyLoaded, onboardingLoaded, wellnessLoaded, trialLoaded, onboardingCompleted, authGateSeen, hasTrialStarted, isTrialActive, isTrialExpired, purchaseState.isSubscribed]);
 
   // Show loading state while data loads
-  if (authLoading || !economyLoaded || !onboardingLoaded || !wellnessLoaded || currentScreen === null) {
+  if (authLoading || !economyLoaded || !onboardingLoaded || !wellnessLoaded || !trialLoaded || currentScreen === null) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center safe-area-inset">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -413,17 +445,73 @@ const Index = () => {
             onContinue={() => {
               // Continue as guest
               completeAuthGate();
-              setCurrentScreen('atlas');
+              setCurrentScreen('trial');
             }}
             onSignedIn={() => {
               // Signed in with Apple
               completeAuthGate();
-              setCurrentScreen('atlas');
+              setCurrentScreen('trial');
             }}
           />
         )}
         {currentScreen === 'atlas' && (
           <AtlasIntroScreen onContinue={() => setCurrentScreen('main')} />
+        )}
+        {currentScreen === 'trial' && (
+          <PaywallScreen
+            isTrialGate
+            onSubscribe={() => {
+              startTrial();
+              setCurrentScreen('atlas');
+              toast({
+                title: 'Trial started!',
+                description: '7-day free trial activated. Enjoy full access!',
+              });
+            }}
+            onRestore={async () => {
+              const restored = await restorePurchases();
+              if (restored) {
+                toast({ title: 'Subscription restored!' });
+                setCurrentScreen('atlas');
+              } else {
+                toast({ 
+                  title: 'No purchases found', 
+                  variant: 'destructive' 
+                });
+              }
+            }}
+            isRestoring={isRestoring}
+          />
+        )}
+        {currentScreen === 'expired' && (
+          <TrialExpiredScreen
+            onSubscribe={() => {
+              if (isNative) {
+                toast({
+                  title: 'Opening App Store...',
+                  description: 'Complete your purchase in the App Store.',
+                });
+              } else {
+                toast({
+                  title: 'Subscriptions available on iOS',
+                  description: 'Download the app to subscribe.',
+                });
+              }
+            }}
+            onRestore={async () => {
+              const restored = await restorePurchases();
+              if (restored) {
+                toast({ title: 'Subscription restored!' });
+                setCurrentScreen('main');
+              } else {
+                toast({ 
+                  title: 'No purchases found', 
+                  variant: 'destructive' 
+                });
+              }
+            }}
+            isRestoring={isRestoring}
+          />
         )}
       </div>
     );
