@@ -285,6 +285,14 @@ export default function Settings() {
                     : 'Upgrade for full access'}
                 </p>
               </div>
+              {!purchaseState.isSubscribed && (
+                <Link
+                  to="/subscribe"
+                  className="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-medium rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Upgrade
+                </Link>
+              )}
             </div>
             {isNative && (
               <button
