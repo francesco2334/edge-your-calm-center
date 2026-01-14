@@ -15,20 +15,34 @@ export function useTrial() {
   });
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load trial state from storage
+  // Load and refresh trial state from storage
   useEffect(() => {
-    const stored = localStorage.getItem(TRIAL_STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        const startedAt = parsed.startedAt;
-        const isActive = checkTrialActive(startedAt);
-        setTrialState({ startedAt, isActive });
-      } catch {
-        setTrialState({ startedAt: null, isActive: false });
+    const loadTrialState = () => {
+      const stored = localStorage.getItem(TRIAL_STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          const startedAt = parsed.startedAt;
+          const isActive = checkTrialActive(startedAt);
+          setTrialState({ startedAt, isActive });
+        } catch {
+          setTrialState({ startedAt: null, isActive: false });
+        }
       }
-    }
-    setIsLoaded(true);
+      setIsLoaded(true);
+    };
+
+    loadTrialState();
+
+    // Re-check when app returns to foreground
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadTrialState();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   // Check if trial is still active
