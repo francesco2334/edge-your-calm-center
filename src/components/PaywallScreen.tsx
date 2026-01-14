@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion';
 import { X, Check, Sparkles, Brain, Target, TrendingUp } from 'lucide-react';
 import { MojoOrb } from './MojoOrb';
+import { Link } from 'react-router-dom';
 
 interface PaywallScreenProps {
-  onClose: () => void;
+  onClose?: () => void;
   onSubscribe: () => void;
   onRestore: () => void;
   isRestoring?: boolean;
+  isTrialGate?: boolean; // When true, this is the initial trial gate (no close button)
 }
 
 const PREMIUM_FEATURES = [
@@ -20,7 +22,8 @@ export function PaywallScreen({
   onClose, 
   onSubscribe, 
   onRestore,
-  isRestoring = false 
+  isRestoring = false,
+  isTrialGate = false 
 }: PaywallScreenProps) {
   return (
     <motion.div
@@ -31,12 +34,16 @@ export function PaywallScreen({
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-safe-top">
-        <button
-          onClick={onClose}
-          className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
-        >
-          <X className="w-5 h-5 text-muted-foreground" />
-        </button>
+        {isTrialGate ? (
+          <div className="w-10" /> // Spacer when no close button
+        ) : (
+          <button
+            onClick={onClose}
+            className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
+          >
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
+        )}
         <button
           onClick={onRestore}
           disabled={isRestoring}
@@ -174,13 +181,13 @@ export function PaywallScreen({
 
           {/* Links */}
           <div className="flex justify-center gap-4 pt-2">
-            <a href="/terms" className="text-xs text-primary hover:underline">
+            <Link to="/terms" className="text-xs text-primary hover:underline">
               Terms of Service
-            </a>
+            </Link>
             <span className="text-muted-foreground">•</span>
-            <a href="/privacy" className="text-xs text-primary hover:underline">
+            <Link to="/privacy" className="text-xs text-primary hover:underline">
               Privacy Policy
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>
