@@ -23,7 +23,7 @@ export default function Terms() {
         className="max-w-2xl mx-auto"
       >
         <h1 className="text-2xl font-bold text-foreground mb-6">Terms of Service</h1>
-        <p className="text-sm text-muted-foreground mb-8">Last updated: December 2024</p>
+        <p className="text-sm text-muted-foreground mb-8">Last updated: January 2025</p>
 
         <div className="space-y-8 text-foreground/80 text-sm leading-relaxed">
           <section>

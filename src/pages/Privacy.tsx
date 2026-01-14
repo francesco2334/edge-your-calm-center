@@ -23,7 +23,7 @@ export default function Privacy() {
         className="max-w-2xl mx-auto"
       >
         <h1 className="text-2xl font-bold text-foreground mb-2">Privacy Policy</h1>
-        <p className="text-sm text-muted-foreground mb-8">Last updated: December 2024</p>
+        <p className="text-sm text-muted-foreground mb-8">Last updated: January 2025</p>
 
         {/* Data Inventory Summary Cards */}
         <div className="mb-10">
